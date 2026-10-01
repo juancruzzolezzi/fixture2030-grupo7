@@ -1,0 +1,48 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- inicializacion.redis : verificacion del servidor y politica de memoria
+-- -----------------------------------------------------------------------------
+-- Ejecutar bloque por bloque dentro de redis-cli, igual que la demo de clase:
+--     docker exec -it fixture2030-redis redis-cli
+--
+-- Cubre RF1 (ambiente disponible) y RF10 (comportamiento ante limite de
+-- memoria). La justificacion de la politica elegida esta en
+-- docs/memoria_y_escalabilidad.md.
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. El servidor responde (RF1)
+-- -----------------------------------------------------------------------------
+PING
+-- Resultado esperado: PONG
+
+-- -----------------------------------------------------------------------------
+-- 2. Version y estado del servidor (RNF10: queda registrado en la evidencia)
+-- -----------------------------------------------------------------------------
+INFO server
+-- Anotar redis_version y uptime_in_seconds en docs/evidencia/
+
+INFO persistence
+-- El Compose de este modulo usa snapshot RDB (--save 60 1). Un reinicio
+-- normal del contenedor no borra el trabajo porque los datos se montan en
+-- ~/docker/data/redis.
+
+-- -----------------------------------------------------------------------------
+-- 3. Limite de memoria y politica de evicción (RF10)
+-- -----------------------------------------------------------------------------
+-- 256mb es un limite deliberadamente chico para que el laboratorio pueda
+-- llegar a tocarlo. La politica elegida es volatile-lru: solo son candidatas
+-- a ser evictadas las claves que YA tienen expiracion.
+--
+-- Esto obliga a una disciplina que este modulo cumple: TODA clave que se crea
+-- lleva TTL. Si existieran claves sin TTL, volatile-lru se comportaria como
+-- noeviction para ellas. Ver docs/memoria_y_escalabilidad.md.
+CONFIG SET maxmemory 256mb
+CONFIG SET maxmemory-policy volatile-lru
+
+-- -----------------------------------------------------------------------------
+-- 4. Comprobar el estado de memoria despues de configurar
+-- -----------------------------------------------------------------------------
+INFO memory
+-- Buscar en la salida: used_memory, used_memory_human, maxmemory,
+-- maxmemory_human y maxmemory_policy.

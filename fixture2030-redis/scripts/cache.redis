@@ -1,0 +1,80 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- cache.redis : patron Cache-Aside sobre la ficha de partido (RF6, RF7)
+-- -----------------------------------------------------------------------------
+-- Dato acelerado: la ficha de un partido (equipos, fecha, estado, marcador).
+-- Fuente de verdad: los modulos de los hitos anteriores, NO Redis. La copia
+-- que vive aca es descartable y se puede reconstruir.
+-- El analisis completo esta en docs/ciclo_de_vida_e_invalidacion.md.
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. CACHE MISS: la clave todavia no esta (RF7)
+-- -----------------------------------------------------------------------------
+DEL fixture2030:cache:partido:F2030-003
+GET fixture2030:cache:partido:F2030-003
+-- Resultado esperado: vacio (nil)
+--
+-- Camino de la aplicacion ante este resultado:
+--   1. GET devolvio vacio  -> es un miss
+--   2. la aplicacion consulta la FUENTE DE VERDAD del partido F2030-003
+--   3. responde al usuario con ese dato
+--   4. deja una copia en Redis con TTL (bloque 2)
+-- Un miss nunca es un error: es el camino normal la primera vez.
+
+-- -----------------------------------------------------------------------------
+-- 2. La aplicacion deja la copia con su tiempo maximo de vida
+-- SETEX fija valor y TTL en un solo comando. 60 segundos es el tiempo maximo
+-- que aceptamos servir una ficha sin volver a la fuente de verdad.
+-- -----------------------------------------------------------------------------
+SETEX fixture2030:cache:partido:F2030-003 60 "{\"partido_id\":\"F2030-003\",\"local\":\"MAR\",\"visitante\":\"FRA\",\"fecha\":\"2030-06-14\",\"estado\":\"jugando\",\"marcador\":\"1-0\"}"
+
+TTL fixture2030:cache:partido:F2030-003
+-- ~60: a partir de aca la copia tiene fecha de vencimiento.
+
+-- -----------------------------------------------------------------------------
+-- 3. CACHE HIT: la siguiente lectura ya no toca la fuente de verdad
+-- -----------------------------------------------------------------------------
+GET fixture2030:cache:partido:F2030-003
+-- Devuelve el JSON: la aplicacion responde desde memoria y corta aca.
+
+-- Cada visita ademas suma al contador del partido (operacion atomica)
+INCR fixture2030:contador:partido:F2030-003:visitas
+EXPIRE fixture2030:contador:partido:F2030-003:visitas 86400
+
+-- -----------------------------------------------------------------------------
+-- 4. INVALIDACION: cambia la fuente de verdad (RF7)
+-- Escenario: MAR convierte el 2-0. La aplicacion actualiza la fuente de
+-- verdad y, como parte del MISMO flujo, borra la copia de Redis.
+--
+-- Por que DEL y no reescribir la clave: el borrado no puede dejar un valor
+-- viejo por accidente. Si la escritura de la caché fallara, el peor caso es
+-- un miss (que se resuelve solo leyendo la fuente), no servir un marcador
+-- incorrecto. Es el camino mas seguro de los dos.
+-- -----------------------------------------------------------------------------
+DEL fixture2030:cache:partido:F2030-003
+
+GET fixture2030:cache:partido:F2030-003
+-- Vacio otra vez: la proxima lectura va a la fuente de verdad y trae el 2-0.
+
+-- -----------------------------------------------------------------------------
+-- 5. Por que el TTL solo no alcanza
+-- Si el gol se hubiera registrado SIN ejecutar el DEL del bloque 4, los
+-- usuarios habrian seguido viendo "1-0" hasta que venciera el TTL. Con 60 s
+-- eso es hasta un minuto de marcador equivocado durante un partido en vivo.
+-- El TTL es el limite maximo de vida de la copia; la invalidacion explicita
+-- es la que mantiene la coherencia cuando el dato cambia.
+-- -----------------------------------------------------------------------------
+
+-- Se recarga la ficha ya corregida para dejar el estado consistente
+SETEX fixture2030:cache:partido:F2030-003 60 "{\"partido_id\":\"F2030-003\",\"local\":\"MAR\",\"visitante\":\"FRA\",\"fecha\":\"2030-06-14\",\"estado\":\"jugando\",\"marcador\":\"2-0\"}"
+GET fixture2030:cache:partido:F2030-003
+
+-- -----------------------------------------------------------------------------
+-- 6. Si Redis no tiene la clave o no esta disponible
+-- Todo lo que vive bajo fixture2030:cache: es reconstruible. Ante una clave
+-- ausente la aplicacion hace exactamente lo del bloque 1: va a la fuente de
+-- verdad. Si Redis entero no responde, la plataforma sigue funcionando con
+-- mas latencia y mas carga sobre la fuente, pero no pierde ningun dato de
+-- negocio, porque ninguna ficha nace en Redis.
+-- -----------------------------------------------------------------------------

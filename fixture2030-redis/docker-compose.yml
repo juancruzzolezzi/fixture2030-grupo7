@@ -1,0 +1,15 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: fixture2030-redis
+    restart: unless-stopped
+    # Desarrollo local: snapshot RDB. Evita el directorio appendonlydir
+    # que puede fallar en algunos bind mounts de Docker Desktop.
+    command: redis-server --save 60 1 --loglevel notice
+    ports:
+      - "6379:6379"
+    volumes:
+      # Datos persistentes en la notebook, convención obligatoria
+      - ${HOME}/docker/data/redis:/data
+      # Scripts de práctica expuestos para ejecución sin copia interactiva
+      - ./scripts:/scripts:ro

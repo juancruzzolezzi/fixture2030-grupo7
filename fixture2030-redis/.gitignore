@@ -1,0 +1,3 @@
+# Variables locales de cada notebook (ruta de persistencia). Se versiona
+# .env.example, no el .env real.
+.env

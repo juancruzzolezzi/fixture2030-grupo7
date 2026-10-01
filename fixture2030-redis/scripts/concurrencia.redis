@@ -1,0 +1,118 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- concurrencia.redis : operaciones simultaneas sin perder actualizaciones
+-- (RF8, RF9)
+-- -----------------------------------------------------------------------------
+-- Escenario: durante ARG vs ESP (F2030-006) miles de usuarios votan la figura
+-- del partido y abren la ficha al mismo tiempo. Todas esas operaciones caen
+-- sobre las mismas claves.
+-- El analisis esta en docs/modelo_clave_valor.md, seccion Concurrencia.
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. EL ANTIPATRON QUE SE EVITA
+-- Si la aplicacion hiciera:
+--       valor = GET contador        (dos clientes leen 4500)
+--       valor = valor + 1           (los dos calculan 4501)
+--       SET contador valor          (el segundo pisa al primero)
+-- se pierde un incremento. El problema no es Redis: es que leer, calcular y
+-- escribir son tres operaciones separadas y otro cliente puede meterse en el
+-- medio.
+--
+-- La solucion es no sacar el dato del servidor para modificarlo.
+-- -----------------------------------------------------------------------------
+
+-- -----------------------------------------------------------------------------
+-- 2. CONTADOR DE VISITAS: incremento atomico sobre un String (RF8)
+-- INCR es un unico comando: se ejecuta completo, sin intercalarse con otro.
+-- Dos visitas simultaneas dan +2, nunca +1.
+-- -----------------------------------------------------------------------------
+SET fixture2030:contador:partido:F2030-006:visitas 4500
+EXPIRE fixture2030:contador:partido:F2030-006:visitas 86400
+
+INCR fixture2030:contador:partido:F2030-006:visitas
+INCR fixture2030:contador:partido:F2030-006:visitas
+INCRBY fixture2030:contador:partido:F2030-006:visitas 50
+
+GET fixture2030:contador:partido:F2030-006:visitas
+-- Resultado esperado: 4552
+
+-- -----------------------------------------------------------------------------
+-- 3. ACTIVIDAD DE LA SESION: incremento atomico sobre un campo de Hash
+-- HINCRBY opera el campo dentro del servidor, sin traer el Hash entero.
+-- -----------------------------------------------------------------------------
+HSET fixture2030:sesion:user-00020 usuario_id "user-00020" rol "fan" estado "activa" ultimo_acceso "2030-06-18T18:05:00Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00020 1800
+
+HINCRBY fixture2030:sesion:user-00020 paginas_vistas 1
+HINCRBY fixture2030:sesion:user-00020 paginas_vistas 1
+HGET fixture2030:sesion:user-00020 paginas_vistas
+-- Resultado esperado: 2
+
+-- -----------------------------------------------------------------------------
+-- 4. VOTACION DE LA FIGURA: ranking temporal concurrente (RF8, RF9)
+-- ZINCRBY suma un voto al jugador dentro del servidor y reordena el conjunto
+-- en la misma operacion. Miles de votos simultaneos no se pisan entre si y
+-- el ranking nunca queda a medio ordenar.
+-- -----------------------------------------------------------------------------
+ZADD fixture2030:encuesta:F2030-006:figura 0 "ARG-10"
+ZADD fixture2030:encuesta:F2030-006:figura 0 "ESP-09"
+ZADD fixture2030:encuesta:F2030-006:figura 0 "ARG-07"
+ZADD fixture2030:encuesta:F2030-006:figura 0 "ESP-06"
+EXPIRE fixture2030:encuesta:F2030-006:figura 86400
+
+-- Llegan los votos (cada linea es un voto de un usuario distinto)
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ARG-10"
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ESP-09"
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ARG-10"
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ARG-07"
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ARG-10"
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ESP-09"
+
+-- -----------------------------------------------------------------------------
+-- 5. RECUPERAR EL TOP 3 (RF9)
+-- El Sorted Set ya esta ordenado por score: no hay que traer todos los
+-- votos al cliente ni ordenar en la aplicacion.
+-- -----------------------------------------------------------------------------
+ZREVRANGE fixture2030:encuesta:F2030-006:figura 0 2 WITHSCORES
+-- Resultado esperado: ARG-10 (3), ESP-09 (2), ARG-07 (1)
+
+-- -----------------------------------------------------------------------------
+-- 6. SECUENCIA QUE DEBE EJECUTARSE COMPLETA: MULTI / EXEC (RF8)
+-- Un voto real no es solo el ZINCRBY: tambien cuenta como actividad del
+-- usuario y tiene que renovar su sesion. Son cuatro comandos que no pueden
+-- quedar a medio aplicar ni intercalarse con otra peticion del mismo usuario.
+--
+-- MULTI encola y EXEC ejecuta el bloque sin que se meta otro cliente en el
+-- medio. No es una transaccion con rollback: si un comando esta mal formado
+-- el diseno tiene que preverlo, Redis no deshace lo ya aplicado.
+-- -----------------------------------------------------------------------------
+MULTI
+ZINCRBY fixture2030:encuesta:F2030-006:figura 1 "ESP-06"
+HINCRBY fixture2030:sesion:user-00020 paginas_vistas 1
+HSET fixture2030:sesion:user-00020 ultimo_acceso "2030-06-18T18:07:00Z"
+EXPIRE fixture2030:sesion:user-00020 1800
+EXEC
+-- Las respuestas de los cuatro comandos llegan juntas al ejecutar EXEC.
+
+ZREVRANGE fixture2030:encuesta:F2030-006:figura 0 3 WITHSCORES
+HGET fixture2030:sesion:user-00020 paginas_vistas
+TTL fixture2030:sesion:user-00020
+
+-- -----------------------------------------------------------------------------
+-- 7. USUARIOS CONECTADOS: alta concurrente sin duplicados (RF8)
+-- SADD sobre un miembro que ya esta no lo agrega dos veces. Si el mismo
+-- usuario abre la transmision en dos pestañas, sigue contando como uno.
+-- -----------------------------------------------------------------------------
+SADD fixture2030:conectados:partido:F2030-006 "user-00020"
+SADD fixture2030:conectados:partido:F2030-006 "user-00021"
+SADD fixture2030:conectados:partido:F2030-006 "user-00020"
+EXPIRE fixture2030:conectados:partido:F2030-006 3600
+
+SMEMBERS fixture2030:conectados:partido:F2030-006
+-- Resultado esperado: user-00020 y user-00021, una sola vez cada uno.
+
+SISMEMBER fixture2030:conectados:partido:F2030-006 "user-00020"
+-- 1: esta conectado
+SISMEMBER fixture2030:conectados:partido:F2030-006 "user-99999"
+-- 0: no esta

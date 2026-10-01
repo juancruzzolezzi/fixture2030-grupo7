@@ -1,0 +1,102 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- carga_muestra.redis : conjunto de datos reproducible (RF11)
+-- -----------------------------------------------------------------------------
+-- Todos los identificadores son fijos y coinciden con los de los hitos
+-- anteriores del Grupo 7: los partidos son F2030-001 .. F2030-012 (los mismos
+-- del modulo de grafos del Hito 5 y de los comentarios del Hito 6) y los
+-- usuarios siguen el formato user-00001 del Hito 6.
+--
+-- Reproducible: no hay valores al azar. Volver a ejecutar este archivo deja
+-- exactamente el mismo estado, porque HSET/SET/ZADD/SADD sobre la misma clave
+-- y el mismo miembro reescriben en vez de acumular. La unica excepcion
+-- deliberada son las listas de actividad, que se recortan con LTRIM (ver
+-- bloque 6).
+--
+-- TODAS las claves llevan TTL. Es la condicion que exige la politica
+-- volatile-lru configurada en inicializacion.redis.
+-- Nomenclatura de claves: ver docs/modelo_clave_valor.md
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. SESIONES ACTIVAS (Hash) - patron P1
+-- fixture2030:sesion:<usuario_id>
+-- TTL 1800 s = 30 minutos de inactividad permitida.
+-- -----------------------------------------------------------------------------
+HSET fixture2030:sesion:user-00001 usuario_id "user-00001" rol "fan" estado "activa" ultimo_acceso "2030-06-13T20:15:00Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00001 1800
+
+HSET fixture2030:sesion:user-00002 usuario_id "user-00002" rol "fan" estado "activa" ultimo_acceso "2030-06-13T20:15:30Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00002 1800
+
+HSET fixture2030:sesion:user-00003 usuario_id "user-00003" rol "moderador" estado "activa" ultimo_acceso "2030-06-13T20:16:00Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00003 1800
+
+-- -----------------------------------------------------------------------------
+-- 2. CACHE DE FICHA DE PARTIDO (String) - patron P3
+-- fixture2030:cache:partido:<partido_id>
+-- TTL 60 s: es el tiempo maximo que aceptamos servir una copia sin revalidar.
+-- La fuente de verdad NO es Redis (ver docs/ciclo_de_vida_e_invalidacion.md).
+-- -----------------------------------------------------------------------------
+SETEX fixture2030:cache:partido:F2030-001 60 "{\"partido_id\":\"F2030-001\",\"local\":\"ARG\",\"visitante\":\"URU\",\"fecha\":\"2030-06-13\",\"estado\":\"jugando\",\"marcador\":\"0-0\"}"
+
+SETEX fixture2030:cache:partido:F2030-006 60 "{\"partido_id\":\"F2030-006\",\"local\":\"ARG\",\"visitante\":\"ESP\",\"fecha\":\"2030-06-18\",\"estado\":\"programado\",\"marcador\":\"-\"}"
+
+-- -----------------------------------------------------------------------------
+-- 3. CONTADOR DE VISITAS (String entero) - patron P5
+-- fixture2030:contador:partido:<partido_id>:visitas
+-- TTL 86400 s = 24 h: el contador es de la jornada, no historico.
+-- -----------------------------------------------------------------------------
+SET fixture2030:contador:partido:F2030-001:visitas 1000
+EXPIRE fixture2030:contador:partido:F2030-001:visitas 86400
+
+SET fixture2030:contador:partido:F2030-006:visitas 4500
+EXPIRE fixture2030:contador:partido:F2030-006:visitas 86400
+
+-- -----------------------------------------------------------------------------
+-- 4. ENCUESTA "FIGURA DEL PARTIDO" (Sorted Set) - patron P6
+-- fixture2030:encuesta:<partido_id>:figura
+-- El score es la cantidad de votos. TTL 86400 s: la votacion es del partido.
+-- -----------------------------------------------------------------------------
+ZADD fixture2030:encuesta:F2030-001:figura 12 "ARG-10"
+ZADD fixture2030:encuesta:F2030-001:figura 9 "URU-09"
+ZADD fixture2030:encuesta:F2030-001:figura 7 "ARG-07"
+ZADD fixture2030:encuesta:F2030-001:figura 4 "URU-11"
+ZADD fixture2030:encuesta:F2030-001:figura 2 "ARG-01"
+EXPIRE fixture2030:encuesta:F2030-001:figura 86400
+
+-- -----------------------------------------------------------------------------
+-- 5. USUARIOS CONECTADOS A UN PARTIDO (Set) - patron P7
+-- fixture2030:conectados:partido:<partido_id>
+-- Set porque solo interesa la pertenencia, sin orden y sin repetidos.
+-- TTL 3600 s: la transmision del partido.
+-- -----------------------------------------------------------------------------
+SADD fixture2030:conectados:partido:F2030-001 "user-00001" "user-00002" "user-00003"
+EXPIRE fixture2030:conectados:partido:F2030-001 3600
+
+-- -----------------------------------------------------------------------------
+-- 6. ACTIVIDAD RECIENTE DEL USUARIO (List) - patron P8
+-- fixture2030:actividad:<usuario_id>
+-- LPUSH deja lo mas nuevo al principio; LTRIM acota la lista a 10 elementos
+-- para que no crezca sin limite. TTL 1800 s, igual que la sesion.
+-- -----------------------------------------------------------------------------
+LPUSH fixture2030:actividad:user-00001 "abrio ficha F2030-001" "voto figura ARG-10" "abrio ficha F2030-006"
+LTRIM fixture2030:actividad:user-00001 0 9
+EXPIRE fixture2030:actividad:user-00001 1800
+
+-- -----------------------------------------------------------------------------
+-- 7. VERIFICACION DE LA CARGA (evidencia RF13)
+-- -----------------------------------------------------------------------------
+HGETALL fixture2030:sesion:user-00001
+TTL fixture2030:sesion:user-00001
+
+GET fixture2030:cache:partido:F2030-001
+TTL fixture2030:cache:partido:F2030-001
+
+GET fixture2030:contador:partido:F2030-006:visitas
+
+ZREVRANGE fixture2030:encuesta:F2030-001:figura 0 4 WITHSCORES
+
+SMEMBERS fixture2030:conectados:partido:F2030-001
+
+LRANGE fixture2030:actividad:user-00001 0 9

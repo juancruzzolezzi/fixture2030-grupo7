@@ -1,0 +1,134 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- sesiones.redis : ciclo de vida de una sesion (RF3, RF4, RF5)
+-- -----------------------------------------------------------------------------
+-- Cubre crear, recuperar, renovar, expirar por inactividad y finalizar, mas
+-- el comportamiento esperado cuando la sesion no existe.
+-- La regla temporal y su justificacion estan en
+-- docs/ciclo_de_vida_e_invalidacion.md.
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. CREAR una sesion (RF3, RF5)
+-- Atributos: quien es, que puede hacer, cuando fue su ultima actividad y
+-- cuanta actividad acumulo. El token NO se usa como nombre de clave.
+-- -----------------------------------------------------------------------------
+HSET fixture2030:sesion:user-00009 usuario_id "user-00009" rol "fan" estado "activa" ultimo_acceso "2030-06-13T20:20:00Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00009 1800
+
+-- -----------------------------------------------------------------------------
+-- 2. RECUPERAR: la validacion de cada request lee un solo campo
+-- -----------------------------------------------------------------------------
+HGET fixture2030:sesion:user-00009 estado
+-- Resultado esperado: "activa"
+
+-- El perfil completo de la sesion, cuando hace falta todo
+HGETALL fixture2030:sesion:user-00009
+
+-- Cuanto le queda de vida
+TTL fixture2030:sesion:user-00009
+-- 0 o positivo: segundos restantes
+-- -1: la clave existe pero no tiene expiracion
+-- -2: la clave ya no existe
+
+-- -----------------------------------------------------------------------------
+-- 3. Modificar un campo NO renueva la sesion
+-- Este bloque demuestra el error que hay que evitar: se escribe actividad
+-- del usuario pero la sesion sigue venciendo en el mismo instante que antes.
+--
+-- Se usa una ventana de 60 s para que la cuenta regresiva se vea a simple
+-- vista. Hay que ESPERAR entre los pasos: si se pegan los comandos de
+-- corrido, los tres TTL devuelven el mismo numero y no se demuestra nada.
+-- -----------------------------------------------------------------------------
+EXPIRE fixture2030:sesion:user-00009 60
+TTL fixture2030:sesion:user-00009
+-- ~60
+
+-- ESPERAR UNOS 10 SEGUNDOS
+
+TTL fixture2030:sesion:user-00009
+-- ~50: el reloj corre solo
+
+HSET fixture2030:sesion:user-00009 ultimo_acceso "2030-06-13T20:21:00Z"
+TTL fixture2030:sesion:user-00009
+-- Sigue en ~50, NO volvio a 60: escribir un campo no reinicia la ventana.
+-- Si esto fuera todo lo que hace la aplicacion ante una peticion valida, la
+-- sesion de un usuario activo se cerraria igual a los 30 minutos de haberse
+-- creado. La renovacion tiene que ser explicita (bloque 4).
+
+-- Se restituye la ventana normal antes de seguir
+EXPIRE fixture2030:sesion:user-00009 1800
+
+-- -----------------------------------------------------------------------------
+-- 4. RENOVAR correctamente ante actividad valida (RF4)
+-- Registrar la actividad y renovar la ventana son dos decisiones distintas,
+-- y tienen que ocurrir juntas: por eso van en MULTI/EXEC, para que ninguna
+-- otra peticion se intercale y deje la sesion a medio actualizar.
+-- -----------------------------------------------------------------------------
+MULTI
+HSET fixture2030:sesion:user-00009 ultimo_acceso "2030-06-13T20:22:00Z"
+HINCRBY fixture2030:sesion:user-00009 paginas_vistas 1
+EXPIRE fixture2030:sesion:user-00009 1800
+EXEC
+
+TTL fixture2030:sesion:user-00009
+-- Vuelve a ~1800: la ventana de inactividad arranca de nuevo.
+
+HGET fixture2030:sesion:user-00009 paginas_vistas
+
+-- -----------------------------------------------------------------------------
+-- 5. EXPIRACION POR INACTIVIDAD (RF4)
+-- Se usa una ventana corta de 5 segundos solo para poder observarla en clase.
+-- El mecanismo es el nativo de Redis: no hay ningun proceso de la aplicacion
+-- recorriendo sesiones para ver cuales borrar.
+-- -----------------------------------------------------------------------------
+EXPIRE fixture2030:sesion:user-00009 5
+TTL fixture2030:sesion:user-00009
+
+-- ESPERAR MAS DE 5 SEGUNDOS antes de ejecutar las dos lineas siguientes.
+
+TTL fixture2030:sesion:user-00009
+-- Resultado esperado: -2 (la clave ya no existe)
+
+HGETALL fixture2030:sesion:user-00009
+-- Resultado esperado: vacio
+
+-- -----------------------------------------------------------------------------
+-- 6. SESION INEXISTENTE: que ve la aplicacion (RF4)
+-- No hay error ni excepcion: Redis responde vacio. La aplicacion interpreta
+-- esa respuesta como "no hay sesion" y manda al usuario a autenticarse de
+-- nuevo. Es el mismo resultado para una sesion vencida, una cerrada y una
+-- que nunca existio.
+-- -----------------------------------------------------------------------------
+HGET fixture2030:sesion:user-99999 estado
+TTL fixture2030:sesion:user-99999
+-- -2 en los dos casos
+
+-- -----------------------------------------------------------------------------
+-- 7. CIERRE EXPLICITO (logout)
+-- No se espera al TTL: el cierre de sesion borra la clave en el momento.
+-- -----------------------------------------------------------------------------
+HSET fixture2030:sesion:user-00010 usuario_id "user-00010" rol "fan" estado "activa" ultimo_acceso "2030-06-13T20:25:00Z" paginas_vistas 3
+EXPIRE fixture2030:sesion:user-00010 1800
+TTL fixture2030:sesion:user-00010
+
+DEL fixture2030:sesion:user-00010
+TTL fixture2030:sesion:user-00010
+-- -2: cerrada
+
+-- -----------------------------------------------------------------------------
+-- 8. Por que NO usamos PERSIST en sesiones
+-- PERSIST saca el TTL y deja la clave para siempre. Aplicado a una sesion
+-- significaria una sesion que nunca vence por inactividad, y ademas la
+-- sacaria del conjunto de claves candidatas de volatile-lru. Se muestra el
+-- comando y se revierte para dejar el estado consistente.
+-- -----------------------------------------------------------------------------
+HSET fixture2030:sesion:user-00011 usuario_id "user-00011" rol "fan" estado "activa" ultimo_acceso "2030-06-13T20:26:00Z" paginas_vistas 0
+EXPIRE fixture2030:sesion:user-00011 1800
+TTL fixture2030:sesion:user-00011
+
+PERSIST fixture2030:sesion:user-00011
+TTL fixture2030:sesion:user-00011
+-- -1: existe pero ya no vence. No es lo que queremos para una sesion.
+
+DEL fixture2030:sesion:user-00011

@@ -1,0 +1,109 @@
+-- =============================================================================
+-- Hito 7 - Grupo 7 - Fixture 2030
+-- metricas.redis : medicion e inspeccion (RF12, RF13)
+-- -----------------------------------------------------------------------------
+-- Metodo de medicion del modulo: ejecutar una secuencia CONOCIDA de lecturas
+-- (una parte con la clave presente, otra con la clave ausente) y comparar los
+-- contadores de INFO stats antes y despues. Todos los numeros que se
+-- registran en docs/evidencia/ salen de esta comparacion, no de una
+-- estimacion.
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 1. MEDICION INICIAL: anotar los valores ANTES de la prueba
+-- -----------------------------------------------------------------------------
+INFO stats
+-- Anotar de la salida:
+--   keyspace_hits    : lecturas que encontraron la clave
+--   keyspace_misses  : lecturas que no la encontraron
+--   expired_keys     : claves eliminadas por vencimiento de TTL
+--   evicted_keys     : claves eliminadas por presion de memoria
+
+INFO memory
+-- Anotar: used_memory_human, maxmemory_human, maxmemory_policy
+
+-- -----------------------------------------------------------------------------
+-- 2. SECUENCIA CONTROLADA: 8 hits y 4 misses
+-- Se preparan primero las dos claves que SI van a existir.
+-- -----------------------------------------------------------------------------
+SETEX fixture2030:cache:partido:F2030-001 300 "{\"partido_id\":\"F2030-001\",\"estado\":\"jugando\"}"
+SETEX fixture2030:cache:partido:F2030-006 300 "{\"partido_id\":\"F2030-006\",\"estado\":\"programado\"}"
+
+-- 8 lecturas que deben ser HIT
+GET fixture2030:cache:partido:F2030-001
+GET fixture2030:cache:partido:F2030-001
+GET fixture2030:cache:partido:F2030-001
+GET fixture2030:cache:partido:F2030-001
+GET fixture2030:cache:partido:F2030-006
+GET fixture2030:cache:partido:F2030-006
+GET fixture2030:cache:partido:F2030-006
+GET fixture2030:cache:partido:F2030-006
+
+-- 4 lecturas que deben ser MISS (partidos sin copia en cache)
+GET fixture2030:cache:partido:F2030-008
+GET fixture2030:cache:partido:F2030-009
+GET fixture2030:cache:partido:F2030-010
+GET fixture2030:cache:partido:F2030-011
+
+-- -----------------------------------------------------------------------------
+-- 3. MEDICION FINAL: volver a leer los contadores
+-- -----------------------------------------------------------------------------
+INFO stats
+
+-- Calculo, con los valores anotados:
+--   hits_de_la_prueba   = keyspace_hits_final   - keyspace_hits_inicial
+--   misses_de_la_prueba = keyspace_misses_final - keyspace_misses_inicial
+--   tasa_de_hit = hits / (hits + misses) x 100
+--
+-- Con la secuencia de arriba el resultado esperado es 8 y 4, o sea 66,67 %.
+-- Si el numero no da exacto es porque hubo otras lecturas en la misma
+-- sesion: hay que anotar el valor observado, no el esperado.
+
+INFO memory
+-- Comparar used_memory contra la medicion inicial.
+
+-- -----------------------------------------------------------------------------
+-- 4. INSPECCION SEGURA DEL KEYSPACE (RNF8)
+-- SCAN devuelve un cursor y un lote parcial, asi que cada llamada hace poco
+-- trabajo. Se repite pasando el cursor que devolvio la llamada anterior,
+-- hasta que el cursor vuelve a ser 0.
+-- -----------------------------------------------------------------------------
+SCAN 0 MATCH fixture2030:sesion:* COUNT 10
+-- Si la respuesta trae un cursor distinto de 0, repetir con ese numero:
+--     SCAN <cursor> MATCH fixture2030:sesion:* COUNT 10
+
+SCAN 0 MATCH fixture2030:cache:* COUNT 10
+
+-- KEYS * recorre TODO el keyspace antes de responder y bloquea el servidor
+-- mientras lo hace. No se usa en este modulo como forma de inspeccion.
+
+-- -----------------------------------------------------------------------------
+-- 5. EVIDENCIA DEL CICLO DE VIDA: expiracion contada por el servidor
+-- expired_keys sube cuando el servidor elimina claves vencidas. Es la prueba
+-- de que la expiracion la maneja Redis y no un proceso de la aplicacion.
+-- -----------------------------------------------------------------------------
+SETEX fixture2030:cache:partido:F2030-012 5 "{\"partido_id\":\"F2030-012\",\"estado\":\"prueba de expiracion\"}"
+TTL fixture2030:cache:partido:F2030-012
+
+-- ESPERAR MAS DE 5 SEGUNDOS
+
+TTL fixture2030:cache:partido:F2030-012
+-- -2: vencio
+
+GET fixture2030:cache:partido:F2030-012
+-- vacio, y ademas suma 1 a keyspace_misses
+
+INFO stats
+-- expired_keys deberia haber subido respecto del bloque 3.
+
+-- -----------------------------------------------------------------------------
+-- 6. LIMPIEZA OPCIONAL
+-- Borra solo las claves de demostracion, por nombre. No se usa ningun
+-- comando de borrado masivo: en un servidor compartido eso se llevaria
+-- puesto datos que no son de este modulo.
+-- -----------------------------------------------------------------------------
+DEL fixture2030:sesion:user-00020
+DEL fixture2030:conectados:partido:F2030-006
+DEL fixture2030:encuesta:F2030-006:figura
+DEL fixture2030:contador:partido:F2030-003:visitas
+DEL fixture2030:cache:partido:F2030-003
