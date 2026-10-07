@@ -1,0 +1,11 @@
+   # Token de administración local de InfluxDB 3 Core: nunca versionar
+   .influxdb3-token
+   *.token
+
+   # Configuración local con secretos
+   .env
+   *.local
+
+   # Datos generados (se reproducen con scripts/generacion_puntos.sh)
+   data/
+   *.lp
