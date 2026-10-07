@@ -1,0 +1,21 @@
+services:
+  influxdb:
+    # Imagen oficial indicada en la Clase 9: `latest` apunta a InfluxDB 2.x y no trae
+    # el binario influxdb3. `3-core` + pull_policy: always mantiene la última versión
+    # de la línea InfluxDB 3 Core en cada `docker compose up -d` (ver README, sección RNF1).
+    image: influxdb:3-core
+    pull_policy: always
+    container_name: fixture2030-influxdb
+    restart: unless-stopped
+    command:
+      - influxdb3
+      - serve
+      - --node-id=fixture2030-local
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --http-bind=0.0.0.0:8181
+    ports:
+      - "127.0.0.1:8181:8181"
+    volumes:
+      - ${HOME}/docker/data/influxdb:/var/lib/influxdb3/data
+      - ./scripts:/scripts:ro

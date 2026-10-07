@@ -1,0 +1,33 @@
+============================================================
+HITO 8 — GENERACIÓN DE PUNTOS EN LINE PROTOCOL
+Fecha de ejecución: 2026-10-07 16:58:10 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+Parámetros: PARTIDOS=8 DURACION_SEG=6300 INTERVALO_SEG=1
+Muestras por serie: 6300
+Generando data/puntos.lp ...
+  M001  ARG vs POR  sede=Buenos_Aires  inicio_epoch=1907586000  eventos=71
+  M002  MAR vs ESP  sede=Rabat         inicio_epoch=1907596800  eventos=61
+  M003  URU vs PAR  sede=Montevideo    inicio_epoch=1907607600  eventos=70
+  M004  BRA vs FRA  sede=Asuncion      inicio_epoch=1907618400  eventos=66
+  M005  GER vs ENG  sede=Madrid        inicio_epoch=1907672400  eventos=65
+  M006  ITA vs NED  sede=Lisboa        inicio_epoch=1907683200  eventos=72
+  M007  BEL vs CRO  sede=Buenos_Aires  inicio_epoch=1907694000  eventos=69
+  M008  SUI vs DEN  sede=Rabat         inicio_epoch=1907704800  eventos=77
+
+Resumen de la generación:
+  estadisticas : 100800 puntos
+  audiencia    : 604800 puntos
+  eventos      : 551 puntos (205 tiros, 20 goles)
+  TOTAL        : 706151 líneas de line protocol
+  Tamaño       : 60M
+  Tiempo de generación: 19 s
+
+Primeras líneas del archivo:
+estadisticas,partido_id=M001,equipo_id=ARG,sede=Buenos_Aires posesion_pct=50.0,pases_completados=0i,tiros=0i 1907586000
+estadisticas,partido_id=M001,equipo_id=POR,sede=Buenos_Aires posesion_pct=50.0,pases_completados=1i,tiros=0i 1907586000
+audiencia,partido_id=M001,region=AMERICA_SUR usuarios_conectados=42947i 1907586000
+audiencia,partido_id=M001,region=AMERICA_CENTRAL usuarios_conectados=23227i 1907586000
+audiencia,partido_id=M001,region=AMERICA_NORTE usuarios_conectados=20615i 1907586000
+
+Generación finalizada. Siguiente paso: ./scripts/carga_lotes.sh

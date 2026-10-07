@@ -1,0 +1,126 @@
+============================================================
+HITO 8 — AGREGACIONES Y RESÚMENES TEMPORALES
+Fecha de ejecución: 2026-10-07 17:07:54 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+
+--- AG1. Resumen por equipo en M001 (incluye SUM(tiros) para mostrar por qué es incorrecto) ---
+SQL:
+    SELECT equipo_id,
+           AVG(posesion_pct) AS posesion_promedio,
+           MAX(pases_completados) AS pases_totales,
+           MAX(tiros) AS tiros_totales,
+           SUM(tiros) AS suma_incorrecta_de_tiros
+    FROM estadisticas
+    WHERE partido_id = 'M001'
+      AND time >= '2030-06-13T13:00:00Z' AND time < '2030-06-13T14:45:00Z'
+    GROUP BY equipo_id
+    ORDER BY equipo_id
+Resultado:
++-----------+-------------------+---------------+---------------+--------------------------+
+| equipo_id | posesion_promedio | pases_totales | tiros_totales | suma_incorrecta_de_tiros |
++-----------+-------------------+---------------+---------------+--------------------------+
+| ARG       | 64.58587301587293 | 753           | 11            | 35278                    |
+| POR       | 35.41412698412693 | 383           | 14            | 49508                    |
++-----------+-------------------+---------------+---------------+--------------------------+
+
+--- AG2. Downsampling: ventanas de 5 minutos para ARG en M001 (6.300 puntos -> 21 filas) ---
+Cada ventana es la misma consulta acotada a un rango de 5 minutos:
+    SELECT AVG(posesion_pct) AS posesion_promedio,
+           MAX(pases_completados) AS pases_acumulados,
+           MAX(tiros) AS tiros_acumulados,
+           COUNT(*) AS puntos_resumidos
+    FROM estadisticas
+    WHERE partido_id = 'M001' AND equipo_id = 'ARG'
+      AND time >= '<inicio de ventana>' AND time < '<fin de ventana>'
+Resultado:
+ventana_inicio         minutos  posesion_promedio,pases_acumulados,tiros_acumulados,puntos_resumidos
+2030-06-13T13:00:00Z   1-5      51.61566666666666,30,1,300
+2030-06-13T13:05:00Z   6-10     56.706999999999994,58,2,300
+2030-06-13T13:10:00Z   11-15    65.48833333333333,93,2,300
+2030-06-13T13:15:00Z   16-20    68.72433333333335,126,2,300
+2030-06-13T13:20:00Z   21-25    66.15899999999999,158,4,300
+2030-06-13T13:25:00Z   26-30    63.718,191,4,300
+2030-06-13T13:30:00Z   31-35    65.38933333333333,230,5,300
+2030-06-13T13:35:00Z   36-40    64.25466666666667,264,5,300
+2030-06-13T13:40:00Z   41-45    62.011666666666656,304,5,300
+2030-06-13T13:45:00Z   46-50    66.595,336,5,300
+2030-06-13T13:50:00Z   51-55    67.84133333333334,374,5,300
+2030-06-13T13:55:00Z   56-60    67.29666666666667,408,6,300
+2030-06-13T14:00:00Z   61-65    68.47233333333334,441,6,300
+2030-06-13T14:05:00Z   66-70    68.60966666666666,472,8,300
+2030-06-13T14:10:00Z   71-75    66.492,516,8,300
+2030-06-13T14:15:00Z   76-80    59.61466666666667,548,9,300
+2030-06-13T14:20:00Z   81-85    60.24466666666666,586,9,300
+2030-06-13T14:25:00Z   86-90    65.33233333333334,621,9,300
+2030-06-13T14:30:00Z   91-95    68.22966666666666,667,9,300
+2030-06-13T14:35:00Z   96-100   65.86466666666666,710,9,300
+2030-06-13T14:40:00Z   101-105  67.64233333333335,753,11,300
+Total de puntos resumidos en las 21 ventanas: 6300
+
+--- AG3. Conteo de eventos por tipo y equipo en M001 ---
+SQL:
+    SELECT equipo_id, tipo_evento, COUNT(*) AS cantidad
+    FROM eventos
+    WHERE partido_id = 'M001'
+      AND time >= '2030-06-13T13:00:00Z' AND time < '2030-06-13T14:45:00Z'
+    GROUP BY equipo_id, tipo_evento
+    ORDER BY equipo_id, tipo_evento
+Resultado:
++-----------+-------------+----------+
+| equipo_id | tipo_evento | cantidad |
++-----------+-------------+----------+
+| ARG       | CORNER      | 7        |
+| ARG       | FALTA       | 12       |
+| ARG       | GOL         | 2        |
+| ARG       | TIRO        | 11       |
+| POR       | CORNER      | 9        |
+| POR       | FALTA       | 16       |
+| POR       | TIRO        | 14       |
++-----------+-------------+----------+
+
+--- AG4. Torneo: los 5 partidos con más tiros (eventos TIRO) ---
+SQL:
+    SELECT partido_id, COUNT(*) AS tiros
+    FROM eventos
+    WHERE tipo_evento = 'TIRO'
+      AND time >= '2030-06-13T00:00:00Z' AND time < '2030-07-16T00:00:00Z'
+    GROUP BY partido_id
+    ORDER BY tiros DESC, partido_id
+    LIMIT 5
+Resultado:
++------------+-------+
+| partido_id | tiros |
++------------+-------+
+| M006       | 34    |
+| M008       | 28    |
+| M003       | 27    |
+| M004       | 26    |
+| M001       | 25    |
++------------+-------+
+
+--- AG5. Torneo: pico, mínimo y promedio de usuarios conectados por partido (todas las regiones) ---
+SQL:
+    SELECT partido_id,
+           MAX(usuarios_conectados) AS pico_regional,
+           MIN(usuarios_conectados) AS minimo_regional,
+           AVG(usuarios_conectados) AS promedio_regional
+    FROM audiencia
+    WHERE time >= '2030-06-13T00:00:00Z' AND time < '2030-07-16T00:00:00Z'
+    GROUP BY partido_id
+    ORDER BY pico_regional DESC
+Resultado:
++------------+---------------+-----------------+--------------------+
+| partido_id | pico_regional | minimo_regional | promedio_regional  |
++------------+---------------+-----------------+--------------------+
+| M006       | 67799         | 21042           | 39756.34212962963  |
+| M008       | 67232         | 20775           | 38581.92126984127  |
+| M007       | 59920         | 23788           | 43394.93041005291  |
+| M002       | 59913         | 18555           | 41971.71747354497  |
+| M005       | 57970         | 21704           | 39682.69492063492  |
+| M004       | 57109         | 20598           | 39806.99183862434  |
+| M001       | 56362         | 19485           | 38894.109298941796 |
+| M003       | 49930         | 18504           | 37838.140648148146 |
++------------+---------------+-----------------+--------------------+
+
+Agregaciones finalizadas.

@@ -1,0 +1,35 @@
+============================================================
+HITO 8 — CARGA EN LOTES MEDIANTE LINE PROTOCOL
+Fecha de ejecución: 2026-10-07 16:59:14 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+Archivo:            data/puntos.lp
+Puntos a cargar:    706151
+Tamaño de lote:     10000 líneas
+Cantidad de lotes:  71
+Concurrencia:       1 (secuencial)
+Reintentos máximos: 3 por lote
+
+  Progreso: 10 / 71 lotes (10 s)
+  Progreso: 20 / 71 lotes (20 s)
+  Progreso: 30 / 71 lotes (30 s)
+  Progreso: 40 / 71 lotes (40 s)
+  Progreso: 50 / 71 lotes (50 s)
+  Progreso: 60 / 71 lotes (60 s)
+  Progreso: 70 / 71 lotes (70 s)
+  Progreso: 71 / 71 lotes (71 s)
+
+=== RESULTADO DE LA CARGA ===
+Lotes escritos correctamente: 71 de 71
+Lotes fallidos:               0 (listados en data/lotes_fallidos.txt)
+Reintentos realizados:        0
+Puntos enviados:              706151
+Tiempo total:                 71 s
+Rendimiento observado:        9945 puntos/s (incluye el costo de docker exec por lote)
+
+Ambiente de la medición:
+  Versión InfluxDB: influxdb3 InfluxDB 3 Core, 3.12.0, revision 3ba97c65f1ee4e1f127a8266517d4d2083b7ea39
+  Recursos Docker:  16 CPU, 16441307136 bytes de RAM
+  Sistema:          Linux x86_64
+
+Carga finalizada. Siguiente paso: ./scripts/validacion.sh

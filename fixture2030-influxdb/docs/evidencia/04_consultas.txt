@@ -1,0 +1,148 @@
+============================================================
+HITO 8 — CONSULTAS TEMPORALES
+Fecha de ejecución: 2026-10-07 17:06:05 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+
+--- PA1. Ventana temporal: evolución de ARG en M001 entre el minuto 60 y el 75 (primeros 10 puntos) ---
+SQL:
+    SELECT time, equipo_id, posesion_pct, pases_completados, tiros
+    FROM estadisticas
+    WHERE partido_id = 'M001' AND equipo_id = 'ARG'
+      AND time >= '2030-06-13T14:00:00Z' AND time < '2030-06-13T14:15:00Z'
+    ORDER BY time
+    LIMIT 10
+Resultado:
++---------------------+-----------+--------------+-------------------+-------+
+| time                | equipo_id | posesion_pct | pases_completados | tiros |
++---------------------+-----------+--------------+-------------------+-------+
+| 2030-06-13T14:00:00 | ARG       | 66.4         | 408               | 6     |
+| 2030-06-13T14:00:01 | ARG       | 66.2         | 408               | 6     |
+| 2030-06-13T14:00:02 | ARG       | 65.8         | 408               | 6     |
+| 2030-06-13T14:00:03 | ARG       | 65.7         | 408               | 6     |
+| 2030-06-13T14:00:04 | ARG       | 65.4         | 408               | 6     |
+| 2030-06-13T14:00:05 | ARG       | 65.2         | 408               | 6     |
+| 2030-06-13T14:00:06 | ARG       | 65.6         | 408               | 6     |
+| 2030-06-13T14:00:07 | ARG       | 65.7         | 408               | 6     |
+| 2030-06-13T14:00:08 | ARG       | 65.5         | 409               | 6     |
+| 2030-06-13T14:00:09 | ARG       | 65.4         | 409               | 6     |
++---------------------+-----------+--------------+-------------------+-------+
+
+--- PA1. Evolución entre el minuto 60 y el 75: cantidad de puntos y valores de la ventana (900 puntos esperados) ---
+SQL:
+    SELECT equipo_id,
+           COUNT(*) AS puntos_en_ventana,
+           MIN(posesion_pct) AS posesion_minima,
+           MAX(posesion_pct) AS posesion_maxima,
+           MIN(tiros) AS tiros_al_minuto_60,
+           MAX(tiros) AS tiros_al_minuto_75
+    FROM estadisticas
+    WHERE partido_id = 'M001' AND equipo_id = 'ARG'
+      AND time >= '2030-06-13T14:00:00Z' AND time < '2030-06-13T14:15:00Z'
+    GROUP BY equipo_id
+Resultado:
++-----------+-------------------+-----------------+-----------------+--------------------+--------------------+
+| equipo_id | puntos_en_ventana | posesion_minima | posesion_maxima | tiros_al_minuto_60 | tiros_al_minuto_75 |
++-----------+-------------------+-----------------+-----------------+--------------------+--------------------+
+| ARG       | 900               | 60.9            | 70.0            | 6                  | 8                  |
++-----------+-------------------+-----------------+-----------------+--------------------+--------------------+
+
+--- PA2. Pantalla en vivo: último estado de cada equipo en M001 (último minuto) ---
+SQL:
+    SELECT time, equipo_id, posesion_pct, pases_completados, tiros
+    FROM estadisticas
+    WHERE partido_id = 'M001'
+      AND time >= '2030-06-13T14:44:00Z' AND time < '2030-06-13T14:45:00Z'
+    ORDER BY time DESC, equipo_id
+    LIMIT 2
+Resultado:
++---------------------+-----------+--------------+-------------------+-------+
+| time                | equipo_id | posesion_pct | pases_completados | tiros |
++---------------------+-----------+--------------+-------------------+-------+
+| 2030-06-13T14:44:59 | ARG       | 64.4         | 753               | 11    |
+| 2030-06-13T14:44:59 | POR       | 35.6         | 383               | 14    |
++---------------------+-----------+--------------+-------------------+-------+
+
+--- PA3. Comparación entre equipos: posesión promedio en los últimos 5 minutos de M001 ---
+SQL:
+    SELECT equipo_id,
+           AVG(posesion_pct) AS posesion_promedio,
+           MIN(posesion_pct) AS posesion_minima,
+           MAX(posesion_pct) AS posesion_maxima
+    FROM estadisticas
+    WHERE partido_id = 'M001'
+      AND time >= '2030-06-13T14:40:00Z' AND time < '2030-06-13T14:45:00Z'
+    GROUP BY equipo_id
+    ORDER BY equipo_id
+Resultado:
++-----------+-------------------+-----------------+-----------------+
+| equipo_id | posesion_promedio | posesion_minima | posesion_maxima |
++-----------+-------------------+-----------------+-----------------+
+| ARG       | 67.6423333333334  | 64.3            | 70.0            |
+| POR       | 32.35766666666668 | 30.0            | 35.7            |
++-----------+-------------------+-----------------+-----------------+
+
+--- PA4. Filtro por sede: partidos jugados en Buenos_Aires durante el torneo ---
+SQL:
+    SELECT partido_id, equipo_id,
+           MIN(time) AS inicio, MAX(time) AS fin, COUNT(*) AS puntos
+    FROM estadisticas
+    WHERE sede = 'Buenos_Aires'
+      AND time >= '2030-06-13T00:00:00Z' AND time < '2030-07-16T00:00:00Z'
+    GROUP BY partido_id, equipo_id
+    ORDER BY partido_id, equipo_id
+Resultado:
++------------+-----------+---------------------+---------------------+--------+
+| partido_id | equipo_id | inicio              | fin                 | puntos |
++------------+-----------+---------------------+---------------------+--------+
+| M001       | ARG       | 2030-06-13T13:00:00 | 2030-06-13T14:44:59 | 6300   |
+| M001       | POR       | 2030-06-13T13:00:00 | 2030-06-13T14:44:59 | 6300   |
+| M007       | BEL       | 2030-06-14T19:00:00 | 2030-06-14T20:44:59 | 6300   |
+| M007       | CRO       | 2030-06-14T19:00:00 | 2030-06-14T20:44:59 | 6300   |
++------------+-----------+---------------------+---------------------+--------+
+
+--- PA5. Comparación entre fuentes: pico de usuarios conectados por región en M001 ---
+SQL:
+    SELECT region,
+           MAX(usuarios_conectados) AS pico_usuarios,
+           MIN(usuarios_conectados) AS minimo_usuarios,
+           AVG(usuarios_conectados) AS promedio_usuarios
+    FROM audiencia
+    WHERE partido_id = 'M001'
+      AND time >= '2030-06-13T13:00:00Z' AND time < '2030-06-13T14:45:00Z'
+    GROUP BY region
+    ORDER BY pico_usuarios DESC
+Resultado:
++---------------------+---------------+-----------------+--------------------+
+| region              | pico_usuarios | minimo_usuarios | promedio_usuarios  |
++---------------------+---------------+-----------------+--------------------+
+| OCEANIA             | 56362         | 43118           | 51494.275555555556 |
+| EUROPA_ESTE         | 55459         | 44575           | 51437.25174603175  |
+| ASIA                | 51688         | 39623           | 44858.694126984126 |
+| CARIBE              | 51488         | 37842           | 45418.87682539682  |
+| AMERICA_SUR         | 47993         | 39599           | 43896.54111111111  |
+| EUROPA_OESTE        | 47351         | 43168           | 45140.43555555555  |
+| AFRICA_SUBSAHARIANA | 40214         | 30536           | 37792.18698412699  |
+| AFRICA_NORTE        | 39353         | 27895           | 33226.775555555556 |
+| MEDIO_ORIENTE       | 34726         | 21310           | 29046.446031746033 |
+| AMERICA_NORTE       | 33370         | 20027           | 28676.51523809524  |
+| EUROPA_NORTE        | 31994         | 19485           | 27486.809206349208 |
+| AMERICA_CENTRAL     | 31113         | 23197           | 28254.50365079365  |
++---------------------+---------------+-----------------+--------------------+
+
+--- PA6. Eventos individuales de M001 (goles), ordenados por tiempo ---
+SQL:
+    SELECT time, equipo_id, tipo_evento, minuto, dorsal
+    FROM eventos
+    WHERE partido_id = 'M001' AND tipo_evento = 'GOL'
+      AND time >= '2030-06-13T13:00:00Z' AND time < '2030-06-13T14:45:00Z'
+    ORDER BY time
+Resultado:
++---------------------+-----------+-------------+--------+--------+
+| time                | equipo_id | tipo_evento | minuto | dorsal |
++---------------------+-----------+-------------+--------+--------+
+| 2030-06-13T13:03:26 | ARG       | GOL         | 4      | 22     |
+| 2030-06-13T13:34:41 | ARG       | GOL         | 35     | 3      |
++---------------------+-----------+-------------+--------+--------+
+
+Consultas finalizadas. Siguiente paso: ./scripts/agregaciones.sh

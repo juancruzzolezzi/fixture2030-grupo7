@@ -1,0 +1,85 @@
+============================================================
+HITO 8 — VALIDACIÓN DE LA CARGA
+Fecha de ejecución: 2026-10-07 17:19:15 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+Esperando a que InfluxDB termine de iniciar...
+Estrategia declarada: PARTIDOS=8 DURACION_SEG=6300 INTERVALO_SEG=1
+Rango consultado: 2030-06-13T00:00:00Z a 2030-07-16T00:00:00Z
+
+=== 1. CANTIDAD DE PUNTOS POR TABLA ===
+[OK]         Puntos en estadisticas                                  esperado=100800     observado=100800
+[OK]         Puntos en audiencia                                     esperado=604800     observado=604800
+[OK]         Puntos en eventos                                       esperado=551        observado=551
+
+=== 2. CANTIDAD DE SERIES (combinaciones distintas de tags) ===
+[OK]         Series en estadisticas (partido x equipo x sede)        esperado=16         observado=16
+[OK]         Series en audiencia (partido x region)                  esperado=96         observado=96
+Series en eventos (partido x equipo x tipo_evento), máximo teórico 64: 58
+
+=== 3. CONSISTENCIA ENTRE FUENTES ===
+[OK]         Tiros según estadisticas (MAX por equipo, sumado)      esperado=205        observado=205
+[OK]         Tiros según eventos (COUNT de TIRO)                    esperado=205        observado=205
+[OK]         Goles según eventos (COUNT de GOL)                     esperado=20         observado=20
+
+--- 4. Distribución de puntos por partido (estadisticas) ---
+SQL:
+    SELECT partido_id, COUNT(*) AS puntos, MIN(time) AS primer_punto, MAX(time) AS ultimo_punto
+    FROM estadisticas
+    WHERE time >= '2030-06-13T00:00:00Z' AND time < '2030-07-16T00:00:00Z'
+    GROUP BY partido_id
+    ORDER BY partido_id
+Resultado:
++------------+--------+---------------------+---------------------+
+| partido_id | puntos | primer_punto        | ultimo_punto        |
++------------+--------+---------------------+---------------------+
+| M001       | 12600  | 2030-06-13T13:00:00 | 2030-06-13T14:44:59 |
+| M002       | 12600  | 2030-06-13T16:00:00 | 2030-06-13T17:44:59 |
+| M003       | 12600  | 2030-06-13T19:00:00 | 2030-06-13T20:44:59 |
+| M004       | 12600  | 2030-06-13T22:00:00 | 2030-06-13T23:44:59 |
+| M005       | 12600  | 2030-06-14T13:00:00 | 2030-06-14T14:44:59 |
+| M006       | 12600  | 2030-06-14T16:00:00 | 2030-06-14T17:44:59 |
+| M007       | 12600  | 2030-06-14T19:00:00 | 2030-06-14T20:44:59 |
+| M008       | 12600  | 2030-06-14T22:00:00 | 2030-06-14T23:44:59 |
++------------+--------+---------------------+---------------------+
+
+--- 5. Tipos de los fields: primer segundo de M001 en estadisticas (float con decimal, enteros sin decimal) ---
+SQL:
+    SELECT time, equipo_id, posesion_pct, pases_completados, tiros
+    FROM estadisticas
+    WHERE partido_id = 'M001' AND time = '2030-06-13T13:00:00Z'
+    ORDER BY equipo_id
+Resultado:
++---------------------+-----------+--------------+-------------------+-------+
+| time                | equipo_id | posesion_pct | pases_completados | tiros |
++---------------------+-----------+--------------+-------------------+-------+
+| 2030-06-13T13:00:00 | ARG       | 50.0         | 0                 | 0     |
+| 2030-06-13T13:00:00 | POR       | 50.0         | 1                 | 0     |
++---------------------+-----------+--------------+-------------------+-------+
+
+--- 5. Tipos de los fields: primer segundo de M001 en audiencia (entero) ---
+SQL:
+    SELECT time, region, usuarios_conectados
+    FROM audiencia
+    WHERE partido_id = 'M001' AND time = '2030-06-13T13:00:00Z'
+    ORDER BY region
+Resultado:
++---------------------+---------------------+---------------------+
+| time                | region              | usuarios_conectados |
++---------------------+---------------------+---------------------+
+| 2030-06-13T13:00:00 | AFRICA_NORTE        | 30319               |
+| 2030-06-13T13:00:00 | AFRICA_SUBSAHARIANA | 30948               |
+| 2030-06-13T13:00:00 | AMERICA_CENTRAL     | 23227               |
+| 2030-06-13T13:00:00 | AMERICA_NORTE       | 20615               |
+| 2030-06-13T13:00:00 | AMERICA_SUR         | 42947               |
+| 2030-06-13T13:00:00 | ASIA                | 41134               |
+| 2030-06-13T13:00:00 | CARIBE              | 37997               |
+| 2030-06-13T13:00:00 | EUROPA_ESTE         | 44575               |
+| 2030-06-13T13:00:00 | EUROPA_NORTE        | 20601               |
+| 2030-06-13T13:00:00 | EUROPA_OESTE        | 45402               |
+| 2030-06-13T13:00:00 | MEDIO_ORIENTE       | 22092               |
+| 2030-06-13T13:00:00 | OCEANIA             | 44126               |
++---------------------+---------------------+---------------------+
+
+=== RESULTADO ===
+VALIDACIÓN CORRECTA: la cantidad y distribución de puntos coincide con la estrategia declarada.

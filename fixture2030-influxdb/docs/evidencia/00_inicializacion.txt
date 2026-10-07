@@ -1,0 +1,35 @@
+============================================================
+HITO 8 — INICIALIZACIÓN DEL AMBIENTE
+Fecha de ejecución: 2026-10-07 16:57:19 +0000
+Contenedor: fixture2030-influxdb | Base: fixture2030_series | Precisión: s
+============================================================
+
+=== 1. AMBIENTE OBSERVADO ===
+Imagen declarada: influxdb:3-core
+ID de imagen:     sha256:624d69bca6bf6fb174aca5a974e1d96e5c5486994e6ae35bc9b4fe02b9520076
+Versión InfluxDB: influxdb3 InfluxDB 3 Core, 3.12.0, revision 3ba97c65f1ee4e1f127a8266517d4d2083b7ea39
+Docker (motor):   29.7.2
+Recursos Docker:  16 CPU, 16441307136 bytes de RAM
+Sistema:          Linux x86_64
+Persistencia:     /home/juanc/docker/data/influxdb -> /var/lib/influxdb3/data
+
+NAME                   IMAGE             COMMAND                  SERVICE    CREATED              STATUS              PORTS
+fixture2030-influxdb   influxdb:3-core   "/usr/bin/entrypoint…"   influxdb   About a minute ago   Up About a minute   127.0.0.1:8181->8181/tcp
+
+=== 2. AUTORIZACIÓN LOCAL (TOKEN) ===
+Creando el primer token de administración local...
+Token guardado en .influxdb3-token (permiso 600, excluido por .gitignore, no se muestra).
+
+=== 3. BASE DE DATOS DEL MÓDULO ===
+Creando la base fixture2030_series...
+Database "fixture2030_series" created successfully
+
+=== 4. VERIFICACIÓN DEL SERVIDOR ===
++--------------------+
+| iox::database      |
++--------------------+
+| _internal          |
+| fixture2030_series |
++--------------------+
+
+Inicialización finalizada.
