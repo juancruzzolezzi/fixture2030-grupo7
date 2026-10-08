@@ -1,0 +1,44 @@
+
+Node: a01950bb3c52, Instance: IRIS
+
+USER>
+
+Load of directory started on 10/08/2026 15:19:29
+Loading file /scripts/Fixture/Tecnico.cls as cls
+Imported class: Fixture.Tecnico
+Loading file /scripts/Fixture/Demo.cls as cls
+Imported class: Fixture.Demo
+Loading file /scripts/Fixture/Jugador.cls as cls
+Imported class: Fixture.Jugador
+Loading file /scripts/Fixture/Arbitro.cls as cls
+Imported class: Fixture.Arbitro
+Loading file /scripts/Fixture/Persona.cls as cls
+Imported class: Fixture.Persona
+Loading file /scripts/Fixture/Evento.cls as cls
+Imported class: Fixture.Evento
+Loading file /scripts/Fixture/Partido.cls as cls
+Imported class: Fixture.Partido
+Compiling 7 classes
+Compiling class Fixture.Demo
+Compiling class Fixture.Persona
+Compiling class Fixture.Partido
+Compiling class Fixture.Tecnico
+Compiling class Fixture.Evento
+Compiling class Fixture.Arbitro
+Compiling class Fixture.Jugador
+Compiling table Fixture.Tecnico
+Compiling table Fixture.Arbitro
+Compiling table Fixture.Jugador
+Compiling table Fixture.Persona
+Compiling table Fixture.Evento
+Compiling table Fixture.Partido
+Compiling routine Fixture.Demo.1
+Compiling routine Fixture.Persona.1
+Compiling routine Fixture.Partido.1
+Compiling routine Fixture.Tecnico.1
+Compiling routine Fixture.Jugador.1
+Compiling routine Fixture.Arbitro.1
+Compiling routine Fixture.Evento.1
+Load finished successfully.
+
+USER>

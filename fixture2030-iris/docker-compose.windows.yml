@@ -1,0 +1,35 @@
+# Override para Docker Desktop en Windows.
+# En Windows, una carpeta del disco montada en el contenedor (bind mount) no
+# admite cambiar dueno/permisos (chown), y Durable %SYS lo necesita: IRIS no arranca
+# ("Error executing chown irisowner:irisowner /durable/"). Aca /durable pasa a ser
+# un volumen administrado por Docker, que se conserva entre reinicios y "down".
+# Un volumen nuevo nace con dueno root, asi que el servicio iris-init (la misma
+# imagen de IRIS, corriendo una sola vez como root) se lo pasa a irisowner antes
+# de que arranque IRIS.
+#
+# Ademas, Windows suele reservar el rango de puertos donde cae 52773 (ver
+# "netsh interface ipv4 show excludedportrange protocol=tcp"), asi que el Portal
+# de Administracion se publica en el puerto 9092 del host:
+#   http://localhost:9092/csp/sys/UtilHome.csp
+#
+# Uso: docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d
+services:
+  iris-init:
+    image: intersystems/iris-community:latest-cd
+    user: root
+    entrypoint: ["chown", "irisowner:irisowner", "/durable"]
+    volumes:
+      - iris-durable:/durable
+
+  iris:
+    depends_on:
+      iris-init:
+        condition: service_completed_successfully
+    ports: !override
+      - "127.0.0.1:1972:1972"
+      - "127.0.0.1:9092:52773"
+    volumes:
+      - iris-durable:/durable
+
+volumes:
+  iris-durable:

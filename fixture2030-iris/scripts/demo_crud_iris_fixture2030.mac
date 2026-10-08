@@ -1,0 +1,79 @@
+// demo_crud_iris_fixture2030.mac  -  Grupo 7, Hito 9
+// Secuencia de comandos para mostrar en vivo: copiar y pegar por bloques en el Terminal de IRIS
+// (docker exec -it fixture2030-iris iris session IRIS). No es una rutina para compilar.
+// Bloques 1-5: los del instructivo de la clase. Bloques 6-8: agregados para el Hito 9.
+
+// 1. CARGA Y COMPILACION (una clase por archivo .cls, en scripts/Fixture/)
+Do $system.OBJ.LoadDir("/scripts/Fixture","ck")
+
+// 1b. LIMPIEZA (para poder repetir la demo: el codigo de partido es unico)
+Do ##class(Fixture.Demo).Limpiar()
+
+// 2. CREACION DE JERARQUIA (Jugador hereda de Persona)
+Set j = ##class(Fixture.Jugador).%New()
+Set j.Nombre = "Lionel Messi"
+Set j.Nacionalidad = "ARG"
+Set j.Numero = 10
+Set j.Posicion = "Delantero"
+Set sc = j.%Save()
+Write "Jugador guardado con ID: ", j.%Id(), !
+
+// 3. CREACION DE RELACION PADRE-HIJO
+Set p = ##class(Fixture.Partido).%New()
+Set p.Codigo = "M001"
+Set p.Sede = "Buenos Aires"
+Set p.Estado = "Pendiente"
+Set e = ##class(Fixture.Evento).%New()
+Set e.Tipo = "Gol"
+Set e.Minuto = 15
+Set e.Jugador = j
+Do p.Eventos.Insert(e)
+// Un solo %Save atomico guarda todo el arbol (nunca se llama e.%Save())
+Set sc = p.%Save()
+Write "Partido guardado con ID: ", p.%Id(), " y Evento interno con ID: ", e.%Id(), !
+
+// 4. CONSULTA POR VISTA RELACIONAL MULTIMODELO
+Set rs = ##class(%ResultSet).%New()
+Do rs.Prepare("SELECT ID, Nombre, Nacionalidad FROM Fixture.Persona WHERE Nacionalidad = 'ARG'")
+Do rs.Execute()
+While (rs.Next()) { Write "Persona por SQL: ", rs.Data("Nombre"), ! }
+
+// 5. RECUPERACION VIA RELACION Y NAVEGACION
+Kill p, e, j
+Set recP = ##class(Fixture.Partido).CodigoIdxOpen("M001")
+Write "Partido recuperado: ", recP.Codigo, !
+Set evt = recP.Eventos.GetAt(1)
+Write "Evento navegado: ", evt.Tipo, " al minuto ", evt.Minuto, " de ", evt.Jugador.Nombre, !
+Kill recP, evt
+
+// 6. FALLA CONTROLADA: PROPIEDAD OBLIGATORIA OMITIDA (falta Numero)
+Set x = ##class(Fixture.Jugador).%New()
+Set x.Nombre = "Jugador sin dorsal"
+Set x.Nacionalidad = "ESP"
+Set x.Posicion = "Defensor"
+Set sc = x.%Save()
+Write "Guardado OK? ", $System.Status.IsOK(sc), !
+Do $System.Status.DisplayError(sc)
+Kill x
+
+// 7. MAQUINA DE ESTADOS: avanzar es valido, retroceder no
+Set p = ##class(Fixture.Partido).CodigoIdxOpen("M001")
+Set sc = p.CambiarEstado("EnJuego")  Write "Pendiente -> EnJuego OK? ", $System.Status.IsOK(sc), !
+Set sc = p.CambiarEstado("Finalizado")  Write "EnJuego -> Finalizado OK? ", $System.Status.IsOK(sc), !
+Set sc = p.CambiarEstado("EnJuego")  Write "Finalizado -> EnJuego OK? ", $System.Status.IsOK(sc), !
+Do $System.Status.DisplayError(sc)
+Kill p
+
+// 8. TRANSICION ILEGAL (RF9): evento en el minuto 0 a un partido Finalizado
+Set p = ##class(Fixture.Partido).CodigoIdxOpen("M001")
+Set e = ##class(Fixture.Evento).%New()
+Set e.Tipo = "Gol"
+Set e.Minuto = 0
+Do p.Eventos.Insert(e)
+Set sc = p.%Save()
+Write "Guardado OK? ", $System.Status.IsOK(sc), !
+Do $System.Status.DisplayError(sc)
+Kill p, e
+
+// DEMO COMPLETA (todas las pruebas, con resultado esperado vs obtenido):
+// Do ##class(Fixture.Demo).Ejecutar()

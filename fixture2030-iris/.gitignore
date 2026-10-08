@@ -1,0 +1,13 @@
+# Datos de IRIS (Durable %SYS): viven en ~/docker/data/iris, nunca en el repo
+durable/
+data/
+*.DAT
+*.log
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs crudos de PowerShell
+docs/evidencia/_crudo/

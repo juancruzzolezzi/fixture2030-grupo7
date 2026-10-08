@@ -1,0 +1,219 @@
+
+Node: 09e29cf82ef2, Instance: IRIS
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+Load of directory started on 10/08/2026 15:02:16
+Loading file /scripts/Fixture/Tecnico.cls as cls
+Imported class: Fixture.Tecnico
+Loading file /scripts/Fixture/Persona.cls as cls
+Imported class: Fixture.Persona
+Loading file /scripts/Fixture/Evento.cls as cls
+Imported class: Fixture.Evento
+Loading file /scripts/Fixture/Arbitro.cls as cls
+Imported class: Fixture.Arbitro
+Loading file /scripts/Fixture/Partido.cls as cls
+Imported class: Fixture.Partido
+Loading file /scripts/Fixture/Jugador.cls as cls
+Imported class: Fixture.Jugador
+Loading file /scripts/Fixture/Demo.cls as cls
+Imported class: Fixture.Demo
+Compiling 7 classes
+Compiling class Fixture.Demo
+Compiling class Fixture.Persona
+Compiling class Fixture.Partido
+Compiling class Fixture.Tecnico
+Compiling class Fixture.Arbitro
+Compiling class Fixture.Evento
+Compiling class Fixture.Jugador
+Compiling table Fixture.Persona
+Compiling table Fixture.Jugador
+Compiling table Fixture.Arbitro
+Compiling table Fixture.Tecnico
+Compiling table Fixture.Partido
+Compiling table Fixture.Evento
+Compiling routine Fixture.Demo.1
+Compiling routine Fixture.Persona.1
+Compiling routine Fixture.Partido.1
+Compiling routine Fixture.Tecnico.1
+Compiling routine Fixture.Arbitro.1
+Compiling routine Fixture.Jugador.1
+Compiling routine Fixture.Evento.1
+Load finished successfully.
+
+USER>
+
+USER>
+
+USER>
+Datos previos borrados.
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Jugador guardado con ID: 1
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Partido guardado con ID: 1 y Evento interno con ID: 1||1
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Persona por SQL: Lionel Messi
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Partido recuperado: M001
+
+USER>
+
+USER>
+Evento navegado: Gol al minuto 15 de Lionel Messi
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Guardado OK? 0
+
+USER>
+
+ERROR #5659: Property 'Fixture.Jugador::Numero(10@Fixture.Jugador,ID=)' required
+ERROR #7207: Datatype value '' is not a valid number
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Jugador:Numero', with value equal to ""
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Pendiente -> EnJuego OK? 1
+
+USER>
+EnJuego -> Finalizado OK? 1
+
+USER>
+Finalizado -> EnJuego OK? 0
+
+USER>
+
+ERROR #5001: Transicion ilegal de estado: Finalizado -> EnJuego
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+Guardado OK? 0
+
+USER>
+
+ERROR #7204: Datatype value '0' less than MINVAL allowed of 1
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Evento:Minuto', with value equal to "0"
+USER>
+
+USER>
+
+USER>
+
+USER>
+
+USER>
+<ENDOFFILE>
+<ERRTRAP>

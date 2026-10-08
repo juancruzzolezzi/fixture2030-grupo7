@@ -1,0 +1,150 @@
+
+Node: a01950bb3c52, Instance: IRIS
+
+USER>
+Datos previos borrados.
+
+==================================================================
+1. HERENCIA: Jugador, Arbitro y Tecnico extienden Persona (RF4)
+==================================================================
+   [OK]        Guardar Jugador Lionel Messi  (esperado)
+   [OK]        Guardar Jugador Julian Ferreyra  (esperado)
+   [OK]        Guardar Jugador Youssef Amrani  (esperado)
+   [OK]        Guardar Arbitro Marta Ruiz (Principal)  (esperado)
+   [OK]        Guardar Arbitro Pedro Alves (VAR)  (esperado)
+   [OK]        Guardar Tecnico Ramon Duarte  (esperado)
+
+   Todos comparten el extent de Persona (IDs correlativos):
+   Fixture.Jugador ID=1 | Fixture.Arbitro ID=4 | Fixture.Tecnico ID=6
+
+==================================================================
+2. ARBOL PADRE-HIJO CON UN SOLO %Save (RF3, RF6)
+==================================================================
+   Antes de guardar: ID partido='' ID evento='' (vacios: solo viven en memoria)
+   [OK]        p.%Save() -- nunca se llama a %Save() sobre los eventos  (esperado)
+   Despues: ID partido=1 | IDs eventos=1||1 y 1||2
+   [RECHAZADO] Asignar como arbitro del partido a un arbitro VAR (debe fallar)  (esperado)
+               -> ERROR #5001: El arbitro asignado al partido debe tener rol Principal (tiene VAR)
+
+==================================================================
+3. FALLA CONTROLADA: FALTA UNA PROPIEDAD OBLIGATORIA (RF5)
+==================================================================
+   [RECHAZADO] Guardar Jugador sin Numero [Required]  (esperado)
+               -> ERROR #5659: Property 'Fixture.Jugador::Numero(7@Fixture.Jugador,ID=)' required
+ERROR #7207: Datatype value '' is not a valid number
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Jugador:Numero', with value equal to ""
+   [RECHAZADO] Guardar Jugador con Numero=150 y Posicion='Lateral' (tipos estrictos)  (esperado)
+               -> ERROR #7203: Datatype value '150' greater than MAXVAL allowed of 99
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Jugador:Numero', with value equal to "150"
+ERROR #7205: Datatype value 'Lateral' not in VALUELIST ',Arquero,Defensor,Mediocampista,Delantero'
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Jugador:Posicion', with value equal to "Lateral"
+   [RECHAZADO] Guardar Jugador con Nacionalidad='Argentina' (patron 3 mayusculas)  (esperado)
+               -> ERROR #7201: Datatype value 'Argentina' length longer than MAXLEN allowed of 3
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Jugador:Nacionalidad', with value equal to "Argentina"
+
+==================================================================
+4. ATOMICIDAD: UN HIJO INVALIDO CANCELA TODO EL ARBOL
+==================================================================
+   [RECHAZADO] Guardar Partido M002 con un evento valido y uno de Tipo 'Penal'  (esperado)
+               -> ERROR #7205: Datatype value 'Penal' not in VALUELIST ',Gol,Amarilla,Roja,Sustitucion'
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Evento:Tipo', with value equal to "Penal"
+   Existe M002 en la base? 0  (0 = no se guardo ni el padre ni el evento valido)
+
+==================================================================
+5. MAQUINA DE ESTADOS DEL PARTIDO (RF9)
+==================================================================
+   [RECHAZADO] CambiarEstado Pendiente -> Finalizado (saltea EnJuego)  (esperado)
+               -> ERROR #5001: Transicion ilegal de estado: Pendiente -> Finalizado
+   [OK]        CambiarEstado Pendiente -> EnJuego  (esperado)
+   [OK]        Registrar Gol de Ferreyra al minuto 67 con el partido EnJuego  (esperado)
+   [OK]        CambiarEstado EnJuego -> Finalizado  (esperado)
+   [RECHAZADO] CambiarEstado Finalizado -> EnJuego (retroceso)  (esperado)
+               -> ERROR #5001: Transicion ilegal de estado: Finalizado -> EnJuego
+   [RECHAZADO] Set p.Estado="Pendiente" + %Save() directo (sin el metodo)  (esperado)
+               -> ERROR #5001: Transicion ilegal de estado: Finalizado -> Pendiente
+
+==================================================================
+6. EVENTOS ILEGALES (RF9)
+==================================================================
+   [RECHAZADO] Evento minuto 0 en M001 (Finalizado) -- caso de la consigna  (esperado)
+               -> ERROR #7204: Datatype value '0' less than MINVAL allowed of 1
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Evento:Minuto', with value equal to "0"
+   [RECHAZADO] Evento minuto 50 en M001 (Finalizado)  (esperado)
+               -> ERROR #5001: El partido M001 esta Finalizado: no admite eventos nuevos
+   [RECHAZADO] Evento minuto 0 en M003 (EnJuego)  (esperado)
+               -> ERROR #7204: Datatype value '0' less than MINVAL allowed of 1
+  > ERROR #5802: Datatype validation failed on property 'Fixture.Evento:Minuto', with value equal to "0"
+   [OK]        Evento minuto 30 en M003 (EnJuego)  (esperado)
+
+==================================================================
+7. EVENTOS INALTERABLES
+==================================================================
+   Evento 1||1: Gol al minuto 15
+   [RECHAZADO] Cambiar el minuto del evento ya guardado  (esperado)
+               -> ERROR #5001: Los eventos son inalterables: el evento 1||1 ya fue registrado
+
+==================================================================
+8. NAVEGACION POR REFERENCIAS, SIN SQL (RF7)
+==================================================================
+   Partido M001 en Buenos Aires: ARG vs MAR - Estado Finalizado
+   Arbitro: Marta Ruiz (ESP)
+   Eventos (3):
+     min 15 - Gol - Lionel Messi (#10)
+     min 38 - Amarilla - Youssef Amrani (#4)
+     min 67 - Gol - Julian Ferreyra (#9)
+   Primer evento con GetAt(1): Gol
+
+   Eventos de Lionel Messi:
+     Gol al minuto 15 en el partido M001 (Buenos Aires)
+
+==================================================================
+9. PROYECCION MULTIMODELO: LOS OBJETOS COMO TABLAS SQL (RF8)
+==================================================================
+
+   SQL> SELECT ID, Nombre, Nacionalidad FROM Fixture.Persona WHERE Nacionalidad = 'ARG'
+ID	Nombre	Nacionalidad
+1	Lionel Messi	ARG
+2	Julian Ferreyra	ARG
+
+2 Rows(s) Affected
+
+   SQL> SELECT ID, Nombre, Numero, Posicion FROM Fixture.Jugador ORDER BY Numero
+ID	Nombre	Numero	Posicion
+3	Youssef Amrani	4	Defensor
+2	Julian Ferreyra	9	Delantero
+1	Lionel Messi	10	Delantero
+
+3 Rows(s) Affected
+
+   SQL> SELECT ID, Codigo, Sede, Estado, Arbitro->Nombre AS Arbitro FROM Fixture.Partido
+ID	Codigo	Sede	Estado	Arbitro
+1	M001	Buenos Aires	Finalizado	Marta Ruiz
+3	M003	Montevideo	EnJuego	
+
+2 Rows(s) Affected
+
+   SQL> SELECT ID, Partido->Codigo AS Partido, Minuto, Tipo, Jugador->Nombre AS Jugador FROM Fixture.Evento ORDER BY Partido, Minuto
+ID	Partido	Minuto	Tipo	Jugador
+1||1	M001	15	Gol	Lionel Messi
+1||2	M001	38	Amarilla	Youssef Amrani
+1||4	M001	67	Gol	Julian Ferreyra
+3||5	M003	30	Gol	
+
+4 Rows(s) Affected
+
+==================================================================
+10. INTEGRIDAD REFERENCIAL AL BORRAR
+==================================================================
+   [RECHAZADO] Borrar a Messi (tiene eventos registrados)  (esperado)
+               -> ERROR #5823: Cannot delete object, referenced by 'Fixture.Evento.Jugador'
+   [RECHAZADO] Borrar a la arbitro Ruiz (dirige M001)  (esperado)
+               -> ERROR #5823: Cannot delete object, referenced by 'Fixture.Partido.Arbitro'
+   M004 creado con 2 eventos. Existe el evento 4||7? 1
+   [OK]        Borrar el partido M004  (esperado)
+   Existe el evento 4||7 despues de borrar su partido? 0  (0 = se borro en cascada)
+
+==================================================================
+FIN DE LA DEMOSTRACION
+==================================================================
+
+USER>

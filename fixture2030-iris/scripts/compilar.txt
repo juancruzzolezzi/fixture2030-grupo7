@@ -1,0 +1,2 @@
+Do $system.OBJ.LoadDir("/scripts/Fixture","ck")
+Halt
