@@ -1,0 +1,2 @@
+Do ##class(Fixture.Demo).Limpiar(),##class(Fixture.Demo).Herencia(.ids),##class(Fixture.Demo).ArbolPadreHijo(.ids)
+Halt

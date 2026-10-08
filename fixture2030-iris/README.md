@@ -26,7 +26,8 @@ scripts/
   demo_crud_iris_fixture2030.mac    Bloques para copiar/pegar en vivo en el Terminal
   cargar.sh / compilar.txt          Compilan las clases dentro del contenedor (Linux/macOS / cualquier SO)
   demo.sh / demo.txt                Corren la demo completa (Linux/macOS / cualquier SO)
-docs/evidencia/                     Salidas de la corrida real (compilación, demo, bloques del .mac)
+  capturas/                         Una parte de la demo por archivo (usados para las capturas)
+docs/evidencia/                     Salidas .txt y capturas .png de la corrida real
 ```
 
 ## 1. Diagrama de objetos
@@ -194,7 +195,7 @@ Completa (todas las pruebas, cada una marcada como `(esperado)` o `(INESPERADO!)
 Do ##class(Fixture.Demo).Ejecutar()
 ```
 
-o desde el host, guardando la salida: `./scripts/demo.sh` → `docs/evidencia/02_demo_completa.txt`.
+o desde el host, guardando la salida: `./scripts/demo.sh` → `docs/evidencia/salida_demo_completa.txt`.
 
 | Sección de la demo | Qué demuestra | Requisito |
 |---|---|---|
@@ -239,10 +240,13 @@ Para salir del Terminal: `Halt`. Para bajar el ambiente sin perder datos:
 
 Corrida real sobre IRIS Community en Docker Desktop (Windows), 08/10/2026:
 
-- `docs/evidencia/01_compilacion.txt`: las 7 clases y las 6 tablas SQL compilan sin errores.
-- `docs/evidencia/02_demo_completa.txt`: las 26 verificaciones de la demo dan `(esperado)`,
+- `docs/evidencia/salida_compilacion.txt`: las 7 clases y las 6 tablas SQL compilan sin errores.
+- `docs/evidencia/salida_demo_completa.txt`: las 26 verificaciones de la demo dan `(esperado)`,
   ninguna `(INESPERADO!)`.
-- `docs/evidencia/03_demo_bloques_mac.txt`: los bloques de `demo_crud_iris_fixture2030.mac`
+- `docs/evidencia/salida_bloques_mac.txt`: los bloques de `demo_crud_iris_fixture2030.mac`
   ejecutados en orden.
 
-Ver `docs/evidencia/LEEME.md` para regenerarla y qué capturas sumar.
+- 8 capturas del Terminal (`01_contenedor.png` a `08_integridad_al_borrar.png`), una por grupo de
+  requisitos.
+
+El detalle de cada archivo está en `docs/evidencia/LEEME.md`.

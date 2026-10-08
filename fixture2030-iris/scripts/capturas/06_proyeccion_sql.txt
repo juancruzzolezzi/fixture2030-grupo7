@@ -1,0 +1,2 @@
+Do ##class(Fixture.Demo).ProyeccionSQL()
+Halt

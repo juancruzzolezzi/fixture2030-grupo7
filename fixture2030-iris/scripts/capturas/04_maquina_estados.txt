@@ -1,0 +1,3 @@
+Set ids("messi")=1,ids("ferreyra")=2,ids("amrani")=3,ids("arbitro")=4,ids("var")=5,ids("partido")=1,ids("evento")="1||1"
+Do ##class(Fixture.Demo).MaquinaDeEstados(.ids),##class(Fixture.Demo).TransicionIlegalDeEvento()
+Halt

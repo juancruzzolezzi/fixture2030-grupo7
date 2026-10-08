@@ -1,19 +1,29 @@
 # Evidencia de ejecución
 
-Los archivos `01_compilacion.txt`, `02_demo_completa.txt` y `03_demo_bloques_mac.txt` salen
-de una corrida real (Docker Desktop en Windows, 08/10/2026). Para regenerarlos en
-Windows usar los comandos de la sección 3 del README; en Linux/macOS/WSL:
+Corrida real sobre InterSystems IRIS Community en Docker Desktop (Windows), 08/10/2026.
 
-1. `docker compose up -d` y esperar `healthy` en `docker compose ps`.
-2. `./scripts/cargar.sh` → captura de la compilación (la salida lista las clases
-   compiladas y termina sin errores).
-3. `./scripts/demo.sh` → genera `docs/evidencia/02_demo_completa.txt`. Revisar que todas las
-   líneas digan `(esperado)` y ninguna `(INESPERADO!)`.
-4. Capturas de pantalla del Terminal para la entrega:
-   - sección 2 (árbol guardado con un solo `%Save`, IDs `1||1`, `1||2`);
-   - sección 3 (rechazo por `[Required]`);
-   - secciones 5 y 6 (transiciones ilegales rechazadas);
-   - sección 9 (tablas SQL con los mismos datos).
-5. Opcional: en el Portal de Administración (http://localhost:52773/csp/sys/UtilHome.csp,
-   usuario `_SYSTEM` / `SYS`, pide cambiarla la primera vez) → System Explorer → SQL,
-   namespace USER, correr `SELECT * FROM Fixture.Evento` y capturar.
+## Salidas completas (texto)
+
+| Archivo | Generado por |
+|---|---|
+| `salida_compilacion.txt` | `scripts/compilar.txt` (`LoadDir` de las 7 clases) |
+| `salida_demo_completa.txt` | `scripts/demo.txt` (`Do ##class(Fixture.Demo).Ejecutar()`): 26 verificaciones, todas `(esperado)` |
+| `salida_bloques_mac.txt` | `scripts/demo_crud_iris_fixture2030.mac` ejecutado en orden |
+
+## Capturas del Terminal
+
+Cada captura corre un archivo de `scripts/capturas/` con
+`docker exec -i fixture2030-iris sh -c "iris session IRIS -U USER < /scripts/capturas/<archivo>.txt"`.
+
+| Captura | Qué muestra | Requisito |
+|---|---|---|
+| `01_contenedor.png` | Contenedor `healthy`, puertos y volumen Durable | RF1, RNF1 |
+| `02_compilacion.png` | Compilación de las 7 clases y las 6 tablas SQL | RNF2, RNF4 |
+| `03_herencia_arbol_padre_hijo.png` | Secciones 1 y 2: herencia y árbol guardado con un solo `%Save` | RF3, RF4, RF6 |
+| `04_falla_required_y_atomicidad.png` | Secciones 3 y 4: rechazo por `[Required]` y tipos; un hijo inválido cancela el árbol | RF5, RF6 |
+| `05_maquina_estados_y_eventos_ilegales.png` | Secciones 5 y 6: transiciones ilegales y evento en el minuto 0 | RF9 |
+| `06_inalterabilidad_y_navegacion.png` | Secciones 7 y 8: eventos inalterables y navegación sin SQL | RF7, RF9 |
+| `07_proyeccion_sql.png` | Sección 9: los mismos objetos como tablas SQL | RF8 |
+| `08_integridad_al_borrar.png` | Sección 10: borrado rechazado y borrado en cascada | Matriz de integridad |
+
+Para regenerar todo: comandos de la sección 3 del README.
