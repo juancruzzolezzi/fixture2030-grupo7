@@ -1,0 +1,120 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: h10-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fixture_admin
+      MONGO_INITDB_ROOT_PASSWORD: fixture2030
+      MONGO_INITDB_DATABASE: fixture2030
+    ports:
+      - "27017:27017"
+    volumes:
+      - h10_mongo_data:/data/db
+      - ./scripts/mongo/init:/docker-entrypoint-initdb.d:ro,z
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  neo4j:
+    image: neo4j:latest
+    container_name: h10-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: "neo4j/fixture2030_local"
+    volumes:
+      - h10_neo4j_data:/data
+      - h10_neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p fixture2030_local 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  cassandra:
+    image: cassandra:latest
+    container_name: h10-cassandra
+    restart: unless-stopped
+    ports:
+      - "9042:9042"
+    volumes:
+      - ${HOME}/docker/data/hito10/cassandra:/var/lib/cassandra:z
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  redis:
+    image: redis:latest
+    container_name: h10-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel notice
+    ports:
+      - "6379:6379"
+    volumes:
+      - ${HOME}/docker/data/hito10/redis:/data:z
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  influxdb:
+    image: influxdb:3-core
+    pull_policy: always
+    container_name: h10-influxdb
+    restart: unless-stopped
+    command:
+      - influxdb3
+      - serve
+      - --node-id=fixture2030-hito10
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --http-bind=0.0.0.0:8181
+    ports:
+      - "127.0.0.1:8181:8181"
+    volumes:
+      - ${HOME}/docker/data/hito10/influxdb:/var/lib/influxdb3/data:z
+
+  # Un bind mount no admite chown (lo necesita Durable %SYS) en este host: el
+  # mismo problema que el Hito 9 documenta para Windows. Se resuelve igual,
+  # con un volumen administrado por Docker y un servicio que lo prepara antes
+  # de que IRIS arranque (ver docker-compose.windows.yml del Hito 9).
+  iris-init:
+    image: intersystems/iris-community:latest-cd
+    user: root
+    entrypoint: ["chown", "irisowner:irisowner", "/durable"]
+    volumes:
+      - h10_iris_durable:/durable
+
+  iris:
+    image: intersystems/iris-community:latest-cd
+    container_name: h10-iris
+    restart: unless-stopped
+    depends_on:
+      iris-init:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:1972:1972"
+      - "127.0.0.1:52773:52773"
+    environment:
+      - ISC_DATA_DIRECTORY=/durable
+    volumes:
+      - h10_iris_durable:/durable
+      - ./scripts/iris:/scripts:ro,z
+
+volumes:
+  h10_mongo_data:
+  h10_neo4j_data:
+  h10_neo4j_logs:
+  h10_iris_durable:

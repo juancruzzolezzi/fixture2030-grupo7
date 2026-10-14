@@ -1,0 +1,1347 @@
+openapi: 3.1.0
+info:
+  title: Fixture 2030 - API REST Integrada
+  description: Capa de integracion sobre los seis modulos NoSQL del Fixture 2030 (MongoDB,
+    Neo4j, Cassandra, Redis, InfluxDB, IRIS). Cada endpoint resuelve un caso de uso
+    concreto; ver docs/casos_de_uso.md.
+  version: 1.0.0
+paths:
+  /equipos:
+    get:
+      tags:
+      - Equipos y jugadores (MongoDB)
+      summary: Listar equipos, con filtro por confederacion y paginado
+      operationId: listar_equipos_equipos_get
+      parameters:
+      - name: confederacion
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CONMEBOL, UEFA, CAF, AFC, CONCACAF u OFC
+          title: Confederacion
+        description: CONMEBOL, UEFA, CAF, AFC, CONCACAF u OFC
+      - name: pagina
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Pagina
+      - name: tamanio_pagina
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Tamanio Pagina
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaEquipos'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /equipos/{codigo}:
+    get:
+      tags:
+      - Equipos y jugadores (MongoDB)
+      summary: Recuperar un equipo por su codigo FIFA de 3 letras
+      operationId: obtener_equipo_equipos__codigo__get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipo'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /equipos/{codigo}/jugadores:
+    get:
+      tags:
+      - Equipos y jugadores (MongoDB)
+      summary: Listar el plantel de un equipo, con filtro por posicion y paginado
+      operationId: listar_jugadores_de_equipo_equipos__codigo__jugadores_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: posicion
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Arquero, Defensor, Mediocampista o Delantero
+          title: Posicion
+        description: Arquero, Defensor, Mediocampista o Delantero
+      - name: pagina
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Pagina
+      - name: tamanio_pagina
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Tamanio Pagina
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaJugadores'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /jugadores/{codigo}:
+    get:
+      tags:
+      - Equipos y jugadores (MongoDB)
+      summary: Recuperar un jugador por su codigo (equipo+dorsal)
+      operationId: obtener_jugador_jugadores__codigo__get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JugadorDetalle'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}:
+    get:
+      tags:
+      - Partidos y eventos (Neo4j)
+      summary: Recuperar un partido con sus dos equipos y la sede (Cypher parametrizado)
+      operationId: obtener_partido_partidos__codigo__get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partido'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/eventos:
+    get:
+      tags:
+      - Partidos y eventos (Neo4j)
+      summary: Eventos de un partido con el jugador que los protagonizo (recorrido
+        de 2 relaciones)
+      operationId: listar_eventos_partidos__codigo__eventos_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 30
+          title: Limite
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaEventos'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/entidad-compleja:
+    get:
+      tags:
+      - Entidad compleja de partido (IRIS)
+      summary: Detalle de objeto completo del partido (arbitro + eventos), navegado
+        dentro de IRIS
+      operationId: obtener_entidad_compleja_partidos__codigo__entidad_compleja_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartidoDetalleIris'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/estado:
+    patch:
+      tags:
+      - Entidad compleja de partido (IRIS)
+      summary: Avanzar el estado del partido (maquina de estados validada dentro de
+        IRIS)
+      operationId: cambiar_estado_partidos__codigo__estado_patch
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambioEstadoRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CambioEstadoResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/comentarios:
+    get:
+      tags:
+      - Comentarios (Cassandra)
+      summary: Comentarios de un partido en un bloque de 5 minutos (lectura por particion
+        completa)
+      operationId: listar_comentarios_partidos__codigo__comentarios_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: bloque_horario
+        in: query
+        required: true
+        schema:
+          type: string
+          description: AAAAMMDDHHmm, el mismo formato del Hito 6
+          title: Bloque Horario
+        description: AAAAMMDDHHmm, el mismo formato del Hito 6
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limite
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaComentarios'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Comentarios (Cassandra)
+      summary: Publicar un comentario, respetando la particion (partido_id, bloque_horario)
+      operationId: crear_comentario_partidos__codigo__comentarios_post
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: bloque_horario
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Bloque al que pertenece el comentario, AAAAMMDDHHmm
+          title: Bloque Horario
+        description: Bloque al que pertenece el comentario, AAAAMMDDHHmm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NuevoComentarioRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComentarioCreado'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sesiones/{usuario_id}:
+    get:
+      tags:
+      - Sesiones y cache (Redis)
+      summary: Estado de la sesion de un usuario (sin exponer el token)
+      operationId: obtener_sesion_sesiones__usuario_id__get
+      parameters:
+      - name: usuario_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Usuario Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sesion'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/cache:
+    get:
+      tags:
+      - Sesiones y cache (Redis)
+      summary: Contenido cacheado de un partido (404 = cache miss, no un error)
+      operationId: obtener_cache_partido_partidos__codigo__cache_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CachePartido'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Sesiones y cache (Redis)
+      summary: 'Invalidar la cache de un partido (idempotente: invalidar dos veces
+        no es un error)'
+      operationId: invalidar_cache_partido_partidos__codigo__cache_delete
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidacionCacheResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/estadisticas:
+    get:
+      tags:
+      - Estadisticas temporales (InfluxDB)
+      summary: Estadisticas de un equipo en una ventana de tiempo (sin agregar)
+      operationId: ventana_partidos__codigo__estadisticas_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: equipo_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Codigo de 3 letras, p.ej. ARG
+          title: Equipo Id
+        description: Codigo de 3 letras, p.ej. ARG
+      - name: desde
+        in: query
+        required: true
+        schema:
+          type: string
+          description: ISO 8601, p.ej. 2030-06-13T14:00:00Z
+          title: Desde
+        description: ISO 8601, p.ej. 2030-06-13T14:00:00Z
+      - name: hasta
+        in: query
+        required: true
+        schema:
+          type: string
+          description: ISO 8601, exclusivo
+          title: Hasta
+        description: ISO 8601, exclusivo
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limite
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentanaEstadisticas'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /partidos/{codigo}/estadisticas/agregacion:
+    get:
+      tags:
+      - Estadisticas temporales (InfluxDB)
+      summary: Agregacion correcta para el campo pedido (AVG para muestras, MAX para
+        contadores)
+      operationId: agregacion_partidos__codigo__estadisticas_agregacion_get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Codigo
+      - name: equipo_id
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Equipo Id
+      - name: desde
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Desde
+      - name: hasta
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Hasta
+      - name: campo
+        in: query
+        required: true
+        schema:
+          type: string
+          description: posesion_pct, pases_completados o tiros
+          title: Campo
+        description: posesion_pct, pases_completados o tiros
+      - name: funcion
+        in: query
+        required: true
+        schema:
+          type: string
+          description: avg o max, segun corresponda al campo
+          title: Funcion
+        description: avg o max, segun corresponda al campo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgregacionEstadistica'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /salud:
+    get:
+      tags:
+      - Operacion
+      summary: Conectividad real de cada fuente (RF17, RNF11)
+      description: 'No cachea ni asume nada: prueba la conexion de verdad en cada
+        llamada.
+
+        Pensado para `scripts/verificar_conectividad.*`, no para alta frecuencia.'
+      operationId: salud_salud_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    AgregacionEstadistica:
+      properties:
+        partido_id:
+          type: string
+          title: Partido Id
+        equipo_id:
+          type: string
+          title: Equipo Id
+        campo:
+          type: string
+          title: Campo
+        funcion:
+          type: string
+          title: Funcion
+        desde:
+          type: string
+          title: Desde
+        hasta:
+          type: string
+          title: Hasta
+        valor:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Valor
+      type: object
+      required:
+      - partido_id
+      - equipo_id
+      - campo
+      - funcion
+      - desde
+      - hasta
+      - valor
+      title: AgregacionEstadistica
+    CachePartido:
+      properties:
+        partido_id:
+          type: string
+          title: Partido Id
+        contenido:
+          type: string
+          title: Contenido
+      type: object
+      required:
+      - partido_id
+      - contenido
+      title: CachePartido
+    CambioEstadoRequest:
+      properties:
+        nuevo_estado:
+          type: string
+          title: Nuevo Estado
+      type: object
+      required:
+      - nuevo_estado
+      title: CambioEstadoRequest
+    CambioEstadoResponse:
+      properties:
+        codigo:
+          type: string
+          title: Codigo
+        estado_anterior:
+          type: string
+          title: Estado Anterior
+        estado_actual:
+          type: string
+          title: Estado Actual
+        sin_cambios:
+          type: boolean
+          title: Sin Cambios
+      type: object
+      required:
+      - codigo
+      - estado_anterior
+      - estado_actual
+      - sin_cambios
+      title: CambioEstadoResponse
+    Comentario:
+      properties:
+        creado_en:
+          type: string
+          format: date-time
+          title: Creado En
+        comentario_id:
+          type: string
+          title: Comentario Id
+        usuario_id:
+          type: string
+          title: Usuario Id
+        usuario_nombre:
+          type: string
+          title: Usuario Nombre
+        contenido:
+          type: string
+          title: Contenido
+        estado:
+          type: string
+          title: Estado
+        likes:
+          type: integer
+          title: Likes
+      type: object
+      required:
+      - creado_en
+      - comentario_id
+      - usuario_id
+      - usuario_nombre
+      - contenido
+      - estado
+      - likes
+      title: Comentario
+    ComentarioCreado:
+      properties:
+        comentario_id:
+          type: string
+          title: Comentario Id
+        partido_id:
+          type: string
+          title: Partido Id
+        bloque_horario:
+          type: string
+          title: Bloque Horario
+        creado_en:
+          type: string
+          format: date-time
+          title: Creado En
+        usuario_id:
+          type: string
+          title: Usuario Id
+        usuario_nombre:
+          type: string
+          title: Usuario Nombre
+        contenido:
+          type: string
+          title: Contenido
+        estado:
+          type: string
+          title: Estado
+        likes:
+          type: integer
+          title: Likes
+      type: object
+      required:
+      - comentario_id
+      - partido_id
+      - bloque_horario
+      - creado_en
+      - usuario_id
+      - usuario_nombre
+      - contenido
+      - estado
+      - likes
+      title: ComentarioCreado
+    DetalleError:
+      properties:
+        tipo:
+          type: string
+          title: Tipo
+          description: 'Categoria del error: validacion, no_encontrado, conflicto,
+            dependencia_no_disponible, error_interno'
+        mensaje:
+          type: string
+          title: Mensaje
+          description: Explicacion segura para el consumidor, sin detalles tecnicos
+        request_id:
+          type: string
+          title: Request Id
+          description: Identificador para correlacionar con los logs de la API y del
+            adaptador
+      type: object
+      required:
+      - tipo
+      - mensaje
+      - request_id
+      title: DetalleError
+    Equipo:
+      properties:
+        _id:
+          type: string
+          title: Id
+        nombre:
+          type: string
+          title: Nombre
+        confederacion:
+          type: string
+          title: Confederacion
+        sede_mundial:
+          type: boolean
+          title: Sede Mundial
+        ranking_fifa:
+          type: integer
+          title: Ranking Fifa
+        cantidad_jugadores:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cantidad Jugadores
+      type: object
+      required:
+      - _id
+      - nombre
+      - confederacion
+      - sede_mundial
+      - ranking_fifa
+      title: Equipo
+    Evento:
+      properties:
+        codigo:
+          type: string
+          title: Codigo
+        tipo:
+          type: string
+          title: Tipo
+        minuto:
+          type: integer
+          title: Minuto
+        jugador_codigo:
+          type: string
+          title: Jugador Codigo
+        jugador_nombre:
+          type: string
+          title: Jugador Nombre
+        jugador_apellido:
+          type: string
+          title: Jugador Apellido
+      type: object
+      required:
+      - codigo
+      - tipo
+      - minuto
+      - jugador_codigo
+      - jugador_nombre
+      - jugador_apellido
+      title: Evento
+    EventoDetalle:
+      properties:
+        tipo:
+          type: string
+          title: Tipo
+        minuto:
+          type: integer
+          title: Minuto
+        jugador:
+          type: string
+          title: Jugador
+      type: object
+      required:
+      - tipo
+      - minuto
+      - jugador
+      title: EventoDetalle
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    InvalidacionCacheResponse:
+      properties:
+        partido_id:
+          type: string
+          title: Partido Id
+        habia_valor:
+          type: boolean
+          title: Habia Valor
+      type: object
+      required:
+      - partido_id
+      - habia_valor
+      title: InvalidacionCacheResponse
+    JugadorDetalle:
+      properties:
+        _id:
+          type: string
+          title: Id
+        equipo_id:
+          type: string
+          title: Equipo Id
+        nombre:
+          type: string
+          title: Nombre
+        apellido:
+          type: string
+          title: Apellido
+        dorsal:
+          type: integer
+          title: Dorsal
+        posicion:
+          type: string
+          title: Posicion
+        altura_cm:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Altura Cm
+        pie_habil:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pie Habil
+        estadisticas:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Estadisticas
+      type: object
+      required:
+      - _id
+      - equipo_id
+      - nombre
+      - apellido
+      - dorsal
+      - posicion
+      title: JugadorDetalle
+    JugadorResumen:
+      properties:
+        _id:
+          type: string
+          title: Id
+        nombre:
+          type: string
+          title: Nombre
+        apellido:
+          type: string
+          title: Apellido
+        dorsal:
+          type: integer
+          title: Dorsal
+        posicion:
+          type: string
+          title: Posicion
+      type: object
+      required:
+      - _id
+      - nombre
+      - apellido
+      - dorsal
+      - posicion
+      title: JugadorResumen
+    ListaComentarios:
+      properties:
+        partido_id:
+          type: string
+          title: Partido Id
+        bloque_horario:
+          type: string
+          title: Bloque Horario
+        items:
+          items:
+            $ref: '#/components/schemas/Comentario'
+          type: array
+          title: Items
+      type: object
+      required:
+      - partido_id
+      - bloque_horario
+      - items
+      title: ListaComentarios
+    ListaEquipos:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Equipo'
+          type: array
+          title: Items
+        pagina:
+          type: integer
+          title: Pagina
+        tamanio_pagina:
+          type: integer
+          title: Tamanio Pagina
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - items
+      - pagina
+      - tamanio_pagina
+      - total
+      title: ListaEquipos
+    ListaEventos:
+      properties:
+        partido_codigo:
+          type: string
+          title: Partido Codigo
+        items:
+          items:
+            $ref: '#/components/schemas/Evento'
+          type: array
+          title: Items
+      type: object
+      required:
+      - partido_codigo
+      - items
+      title: ListaEventos
+    ListaJugadores:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/JugadorResumen'
+          type: array
+          title: Items
+        pagina:
+          type: integer
+          title: Pagina
+        tamanio_pagina:
+          type: integer
+          title: Tamanio Pagina
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - items
+      - pagina
+      - tamanio_pagina
+      - total
+      title: ListaJugadores
+    NuevoComentarioRequest:
+      properties:
+        usuario_id:
+          type: string
+          maxLength: 32
+          minLength: 1
+          title: Usuario Id
+        usuario_nombre:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Usuario Nombre
+        contenido:
+          type: string
+          maxLength: 280
+          minLength: 1
+          title: Contenido
+        clave_idempotencia:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Clave Idempotencia
+          description: Provista por el cliente (p.ej. un uuid generado en el dispositivo).
+            Reintentar la misma request con la misma clave no duplica el comentario
+            (RF19).
+      type: object
+      required:
+      - usuario_id
+      - usuario_nombre
+      - contenido
+      - clave_idempotencia
+      title: NuevoComentarioRequest
+    Partido:
+      properties:
+        codigo:
+          type: string
+          title: Codigo
+        fecha:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fecha
+        fase:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fase
+        equipo_a:
+          type: string
+          title: Equipo A
+        equipo_a_nombre:
+          type: string
+          title: Equipo A Nombre
+        equipo_b:
+          type: string
+          title: Equipo B
+        equipo_b_nombre:
+          type: string
+          title: Equipo B Nombre
+        sede:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sede
+        sede_ciudad:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sede Ciudad
+      type: object
+      required:
+      - codigo
+      - fecha
+      - equipo_a
+      - equipo_a_nombre
+      - equipo_b
+      - equipo_b_nombre
+      title: Partido
+    PartidoDetalleIris:
+      properties:
+        codigo:
+          type: string
+          title: Codigo
+        sede:
+          type: string
+          title: Sede
+        local:
+          type: string
+          title: Local
+        visitante:
+          type: string
+          title: Visitante
+        estado:
+          type: string
+          title: Estado
+        arbitro:
+          type: string
+          title: Arbitro
+        eventos:
+          items:
+            $ref: '#/components/schemas/EventoDetalle'
+          type: array
+          title: Eventos
+      type: object
+      required:
+      - codigo
+      - sede
+      - local
+      - visitante
+      - estado
+      - arbitro
+      - eventos
+      title: PartidoDetalleIris
+    PuntoEstadistica:
+      properties:
+        time:
+          type: string
+          title: Time
+        equipo_id:
+          type: string
+          title: Equipo Id
+        posesion_pct:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Posesion Pct
+        pases_completados:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pases Completados
+        tiros:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tiros
+      type: object
+      required:
+      - time
+      - equipo_id
+      title: PuntoEstadistica
+    RespuestaError:
+      properties:
+        error:
+          $ref: '#/components/schemas/DetalleError'
+      type: object
+      required:
+      - error
+      title: RespuestaError
+    Sesion:
+      properties:
+        usuario_id:
+          type: string
+          title: Usuario Id
+        rol:
+          type: string
+          title: Rol
+        estado:
+          type: string
+          title: Estado
+        ultimo_acceso:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ultimo Acceso
+        paginas_vistas:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Paginas Vistas
+        segundos_restantes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Segundos Restantes
+      type: object
+      required:
+      - usuario_id
+      - rol
+      - estado
+      title: Sesion
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VentanaEstadisticas:
+      properties:
+        partido_id:
+          type: string
+          title: Partido Id
+        equipo_id:
+          type: string
+          title: Equipo Id
+        desde:
+          type: string
+          title: Desde
+        hasta:
+          type: string
+          title: Hasta
+        items:
+          items:
+            $ref: '#/components/schemas/PuntoEstadistica'
+          type: array
+          title: Items
+      type: object
+      required:
+      - partido_id
+      - equipo_id
+      - desde
+      - hasta
+      - items
+      title: VentanaEstadisticas

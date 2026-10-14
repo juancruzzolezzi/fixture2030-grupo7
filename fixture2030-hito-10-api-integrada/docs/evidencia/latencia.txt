@@ -1,0 +1,24 @@
+Medicion de latencia basica (RNF18)
+Fecha: 2026-10-14 19:38:26 -0300
+Entorno: API en notebook (uvicorn, sin --workers), 6 bases en Docker en el mismo host.
+
+--- GET /equipos/{codigo} (MongoDB, find_one por _id), 5 corridas ---
+0.006032s
+0.004722s
+0.005236s
+0.005659s
+0.004821s
+
+--- GET /partidos/{codigo}/estadisticas (InfluxDB, HTTP+SQL), 5 corridas ---
+0.025723s
+0.025104s
+0.026201s
+0.025721s
+0.026931s
+
+--- GET /partidos/{codigo}/entidad-compleja (IRIS, Native SDK), 5 corridas ---
+0.004749s
+0.005234s
+0.006063s
+0.005386s
+0.005907s

@@ -1,0 +1,95 @@
+{
+  "info": {
+    "name": "Fixture 2030 - API REST Integrada (Hito 10)",
+    "description": "Casos exitosos y de error de cada fuente. Variable {{base_url}} = http://localhost:8000.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "base_url", "value": "http://localhost:8000" }],
+  "item": [
+    {
+      "name": "Salud",
+      "request": { "method": "GET", "url": "{{base_url}}/salud" }
+    },
+    {
+      "name": "Equipos (MongoDB)",
+      "item": [
+        { "name": "Listar equipos CONMEBOL", "request": { "method": "GET", "url": "{{base_url}}/equipos?confederacion=CONMEBOL&pagina=1&tamanio_pagina=10" } },
+        { "name": "Equipo existente", "request": { "method": "GET", "url": "{{base_url}}/equipos/ARG" } },
+        { "name": "Equipo inexistente (404)", "request": { "method": "GET", "url": "{{base_url}}/equipos/ZZZ" } },
+        { "name": "Confederacion invalida (400)", "request": { "method": "GET", "url": "{{base_url}}/equipos?confederacion=NO_EXISTE" } },
+        { "name": "Jugador existente", "request": { "method": "GET", "url": "{{base_url}}/jugadores/ARG-10" } },
+        { "name": "Plantel de un equipo filtrado por posicion", "request": { "method": "GET", "url": "{{base_url}}/equipos/ARG/jugadores?posicion=Delantero" } }
+      ]
+    },
+    {
+      "name": "Partidos y eventos (Neo4j)",
+      "item": [
+        { "name": "Partido existente", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006" } },
+        { "name": "Partido inexistente (404)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-999" } },
+        { "name": "Eventos de un partido", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/eventos?limite=10" } }
+      ]
+    },
+    {
+      "name": "Comentarios (Cassandra)",
+      "item": [
+        { "name": "Listar comentarios de un bloque", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/comentarios?bloque_horario=203006181800&limite=20" } },
+        { "name": "bloque_horario invalido (400)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/comentarios?bloque_horario=no-valido" } },
+        {
+          "name": "Crear comentario (idempotente)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/partidos/F2030-006/comentarios?bloque_horario=203006181800",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario_id\": \"user-postman\",\n  \"usuario_nombre\": \"postman\",\n  \"contenido\": \"probando desde Postman\",\n  \"clave_idempotencia\": \"postman-demo-1\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sesiones y cache (Redis)",
+      "item": [
+        { "name": "Sesion existente", "request": { "method": "GET", "url": "{{base_url}}/sesiones/user-00001" } },
+        { "name": "Sesion ausente/expirada (404)", "request": { "method": "GET", "url": "{{base_url}}/sesiones/no-existe" } },
+        { "name": "Cache de partido (hit)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/cache" } },
+        { "name": "Invalidar cache", "request": { "method": "DELETE", "url": "{{base_url}}/partidos/F2030-006/cache" } }
+      ]
+    },
+    {
+      "name": "Estadisticas (InfluxDB)",
+      "item": [
+        { "name": "Ventana temporal", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:02:00Z" } },
+        { "name": "Agregacion correcta (AVG posesion)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/estadisticas/agregacion?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:02:00Z&campo=posesion_pct&funcion=avg" } },
+        { "name": "Agregacion incorrecta para el campo (400)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/estadisticas/agregacion?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:02:00Z&campo=tiros&funcion=avg" } },
+        { "name": "desde >= hasta (400)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:02:00Z&hasta=2030-06-18T18:00:00Z" } }
+      ]
+    },
+    {
+      "name": "Entidad compleja (IRIS)",
+      "item": [
+        { "name": "Detalle de partido IRIS (M001)", "request": { "method": "GET", "url": "{{base_url}}/partidos/M001/entidad-compleja" } },
+        { "name": "Partido IRIS inexistente (404)", "request": { "method": "GET", "url": "{{base_url}}/partidos/M999/entidad-compleja" } },
+        {
+          "name": "Transicion invalida (409)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/partidos/M001/estado",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nuevo_estado\": \"EnJuego\"\n}" }
+          }
+        },
+        {
+          "name": "Transicion idempotente (mismo estado)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/partidos/M001/estado",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nuevo_estado\": \"Finalizado\"\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}

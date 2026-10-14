@@ -1,0 +1,8 @@
+{
+    "mongodb": true,
+    "neo4j": true,
+    "cassandra": true,
+    "redis": true,
+    "influxdb": true,
+    "iris": true
+}

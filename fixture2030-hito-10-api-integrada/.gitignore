@@ -1,0 +1,6 @@
+.venv/
+.venv_seed/
+__pycache__/
+*.pyc
+.env
+.influxdb3-token

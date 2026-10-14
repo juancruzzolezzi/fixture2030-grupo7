@@ -1,0 +1,31 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- /home/mailen/Escritorio/Estudios/IngDatos2/Hito 10/fixture2030-hito-10-api-integrada/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/mailen/Escritorio/Estudios/IngDatos2/Hito 10/fixture2030-hito-10-api-integrada
+plugins: anyio-4.15.1
+collecting ... collected 22 items
+
+tests/integration/test_dependencia_caida.py::test_redis_caido_devuelve_503_no_200_vacio PASSED [  4%]
+tests/integration/test_endpoints.py::test_equipo_existente_devuelve_200 PASSED [  9%]
+tests/integration/test_endpoints.py::test_equipo_inexistente_devuelve_404_con_formato_comun PASSED [ 13%]
+tests/integration/test_endpoints.py::test_confederacion_invalida_devuelve_400 PASSED [ 18%]
+tests/integration/test_endpoints.py::test_listar_equipos_paginado PASSED [ 22%]
+tests/integration/test_endpoints.py::test_partido_existente_devuelve_equipos_y_sede PASSED [ 27%]
+tests/integration/test_endpoints.py::test_partido_inexistente_devuelve_404 PASSED [ 31%]
+tests/integration/test_endpoints.py::test_eventos_de_partido_recorren_dos_relaciones PASSED [ 36%]
+tests/integration/test_endpoints.py::test_comentarios_de_bloque_existente PASSED [ 40%]
+tests/integration/test_endpoints.py::test_bloque_horario_con_formato_invalido_es_400 PASSED [ 45%]
+tests/integration/test_endpoints.py::test_crear_comentario_y_reintento_no_duplica PASSED [ 50%]
+tests/integration/test_endpoints.py::test_sesion_existente_no_expone_token PASSED [ 54%]
+tests/integration/test_endpoints.py::test_sesion_inexistente_es_404 PASSED [ 59%]
+tests/integration/test_endpoints.py::test_cache_hit_y_invalidacion PASSED [ 63%]
+tests/integration/test_endpoints.py::test_ventana_de_estadisticas PASSED [ 68%]
+tests/integration/test_endpoints.py::test_desde_mayor_a_hasta_es_400 PASSED [ 72%]
+tests/integration/test_endpoints.py::test_agregacion_incorrecta_para_el_campo_es_400 PASSED [ 77%]
+tests/integration/test_endpoints.py::test_agregacion_correcta PASSED     [ 81%]
+tests/integration/test_endpoints.py::test_entidad_compleja_existente PASSED [ 86%]
+tests/integration/test_endpoints.py::test_entidad_compleja_inexistente_es_404 PASSED [ 90%]
+tests/integration/test_endpoints.py::test_transicion_de_estado_invalida_es_409 PASSED [ 95%]
+tests/integration/test_endpoints.py::test_transicion_al_mismo_estado_es_idempotente PASSED [100%]
+
+============================== 22 passed in 4.25s ==============================
