@@ -1,15 +1,15 @@
-Escenario de falla: redis (detener) | 2026-10-19T23:06:30-03:00
-API: http://localhost:8000
+Escenario de falla: redis (detener) | 2026-10-20T00:03:25-03:00
+API: http://127.0.0.1:8000
 
 == 1. Condicion inicial
-  contenedor: h10-redis Up 3 minutes (healthy)
+  contenedor: h10-redis Up 4 minutes (healthy)
   volumenes: fixture2030-hito-10-api-integrada_h10_redis_data 
   GET /sesiones/user-00001
-    -> HTTP 200 en 0.005930s | request_id=d4ab24a8-a031-4d7f-9d7c-8ee864f05808
-    -> {"usuario_id":"user-00001","rol":"fan","estado":"activa","ultimo_acceso":"2030-06-18T18:00:00Z","paginas_vistas":3,"segundos_restantes":857}
+    -> HTTP 200 en 0.004859s | request_id=9f62062a-5020-43cf-b1e3-a028ac1eafff
+    -> {"usuario_id":"user-00001","rol":"fan","estado":"activa","ultimo_acceso":"2030-06-18T18:00:00Z","paginas_vistas":3,"segundos_restantes":1672}
   GET /salud?forzar=true
-    -> HTTP 200 en 2.437762s | request_id=542e264e-1e27-4bf7-80a8-16f679872e79
-    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":16.0},"neo4j":{"estado":"up","ms":16.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"
+    -> HTTP 200 en 0.622043s | request_id=bcdf1e6a-98ea-41bd-98fb-d7f4f904a385
+    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"up
 
 == 2. Cambio aplicado: docker compose stop redis
    Container h10-redis Stopping 
@@ -17,32 +17,32 @@ API: http://localhost:8000
 
 == 3. Durante la falla
   GET /sesiones/user-00001
-    -> HTTP 503 en 0.148293s | request_id=42fc4ac5-8348-481c-97db-2885fcab49c2
-    -> {"error":{"tipo":"dependencia_no_disponible","mensaje":"Redis no esta disponible.","request_id":"42fc4ac5-8348-481c-97db-2885fcab49c2"}}
+    -> HTTP 503 en 0.128947s | request_id=3f3e5b95-d799-4e8c-b7d6-7c701cfe1382
+    -> {"error":{"tipo":"dependencia_no_disponible","mensaje":"Redis no esta disponible.","request_id":"3f3e5b95-d799-4e8c-b7d6-7c701cfe1382"}}
   GET /salud?forzar=true
-    -> HTTP 200 en 8.145243s | request_id=9d957e32-17a4-44c6-9133-d6f127c018fa
-    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":15.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"down","ms":8125.0},"influxdb":{
+    -> HTTP 200 en 2.127419s | request_id=77301ad8-a0bd-45f3-9b33-9ed227e8568b
+    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":15.0},"cassandra":{"estado":"up","ms":15.0},"redis":{"estado":"down","ms":2125.0},"influxdb":
   GET /salud/listo
-    -> HTTP 200 en 0.003273s | request_id=2bceca19-d9d5-4e64-967c-4363810af772
+    -> HTTP 200 en 0.003591s | request_id=50b416b3-0dae-48fd-bd87-efdc190a98b3
     -> {"estado":"degraded","dependencias":{"mongodb":"up","neo4j":"up","cassandra":"up","redis":"down","influxdb":"up","iris":"up"}}
   otro modulo (deberia seguir andando):
   GET /equipos/ARG
-    -> HTTP 200 en 0.005241s | request_id=68408441-0bb7-4d6b-8084-7f5fd9c2d2d5
+    -> HTTP 200 en 0.005497s | request_id=f874adab-aaa5-477a-8928-17be09f206f2
     -> {"_id":"ARG","nombre":"Argentina","confederacion":"CONMEBOL","sede_mundial":true,"ranking_fifa":172,"cantidad_jugadores":25}
-  log de la API para la ruta afectada:
-    request_id=42fc4ac5-8348-481c-97db-2885fcab49c2 metodo=GET ruta=/sesiones/user-00001 status=503 duracion_ms=141.0
-    request_id=42fc4ac5-8348-481c-97db-2885fcab49c2 tipo=dependencia_no_disponible detalle=obtener_sesion(user-00001): network:ConnectionError
+  log de la API para esa request (request_id=3f3e5b95-d799-4e8c-b7d6-7c701cfe1382):
+    request_id=3f3e5b95-d799-4e8c-b7d6-7c701cfe1382 tipo=dependencia_no_disponible detalle=obtener_sesion(user-00001): network:ConnectionError
+    request_id=3f3e5b95-d799-4e8c-b7d6-7c701cfe1382 metodo=GET ruta=/sesiones/user-00001 status=503 duracion_ms=125.0
 
 == 4. Recuperacion: docker compose start redis
    Container h10-redis Starting 
    Container h10-redis Started 
-  la ruta volvio a responder 200 a los 0 s
+  la ruta volvio a responder 200 a los 1 s
 
 == 5. Despues de recuperar
   GET /sesiones/user-00001
-    -> HTTP 200 en 0.007279s | request_id=3cfb4ef1-681d-43bc-a2ad-123a9a55df3d
-    -> {"usuario_id":"user-00001","rol":"fan","estado":"activa","ultimo_acceso":"2030-06-18T18:00:00Z","paginas_vistas":3,"segundos_restantes":842}
+    -> HTTP 200 en 0.006193s | request_id=b9cb533c-8ebf-4b4d-89b5-9d04ac300624
+    -> {"usuario_id":"user-00001","rol":"fan","estado":"activa","ultimo_acceso":"2030-06-18T18:00:00Z","paginas_vistas":3,"segundos_restantes":1665}
   GET /salud?forzar=true
-    -> HTTP 200 en 2.437366s | request_id=5de3b920-71eb-442f-9772-48309daf38e6
-    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":15.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"u
+    -> HTTP 200 en 0.405042s | request_id=1c845f9a-ae95-4e18-b9a8-3d17b390bec5
+    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":16.0},"neo4j":{"estado":"up","ms":16.0},"cassandra":{"estado":"up","ms":32.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":
   volumenes: fixture2030-hito-10-api-integrada_h10_redis_data 

@@ -3,31 +3,40 @@
 Configuracion de la API (Hito 10, Grupo 7).
 
 Todo lo que es host/puerto/credencial sale de variables de entorno (RNF6).
-Nada de esto tiene un valor por defecto que sea un secreto real: son los
-valores del ambiente local de laboratorio, los mismos que ya documentaron
-los Hitos 4 a 9 para cada base.
+Las passwords no tienen valor por defecto: si falta alguna en el .env, la
+conexion falla y la API responde 503 (no se usa una password escrita en el codigo).
 """
 
 import os
 from dataclasses import dataclass
+from urllib.parse import quote_plus
 
 
 def _env(nombre: str, default: str) -> str:
     return os.environ.get(nombre, default)
 
 
+def _mongo_uri() -> str:
+    """La URI se arma en memoria con las partes del .env (asi no hay una URI con
+    password escrita en ningun archivo)."""
+    usuario = quote_plus(_env("MONGO_USER", ""))
+    password = quote_plus(_env("MONGO_PASSWORD", ""))
+    host, puerto = _env("MONGO_HOST", "127.0.0.1"), _env("MONGO_PORT", "27017")
+    return f"mongodb://{usuario}:{password}@{host}:{puerto}/?authSource=admin"
+
+
 @dataclass(frozen=True)
 class MongoConfig:
-    uri: str = _env("MONGO_URI", "mongodb://fixture_admin:fixture2030@localhost:27017/?authSource=admin")
+    uri: str = _mongo_uri()
     db: str = _env("MONGO_DB", "fixture2030")
     timeout_ms: int = int(_env("MONGO_TIMEOUT_MS", "3000"))
 
 
 @dataclass(frozen=True)
 class Neo4jConfig:
-    uri: str = _env("NEO4J_URI", "bolt://localhost:7687")
+    uri: str = _env("NEO4J_URI", "bolt://127.0.0.1:7687")
     usuario: str = _env("NEO4J_USER", "neo4j")
-    password: str = _env("NEO4J_PASSWORD", "fixture2030_local")
+    password: str = _env("NEO4J_PASSWORD", "")
     timeout_s: float = float(_env("NEO4J_TIMEOUT_S", "3"))
 
 
@@ -61,7 +70,7 @@ class IrisConfig:
     puerto: int = int(_env("IRIS_PORT", "1972"))
     namespace: str = _env("IRIS_NAMESPACE", "USER")
     usuario: str = _env("IRIS_USER", "_SYSTEM")
-    password: str = _env("IRIS_PASSWORD", "SYS")
+    password: str = _env("IRIS_PASSWORD", "")
     timeout_s: float = float(_env("IRIS_TIMEOUT_S", "3"))
 
 

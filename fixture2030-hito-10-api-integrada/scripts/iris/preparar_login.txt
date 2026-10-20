@@ -1,2 +1,6 @@
-Do ##class(Security.Users).UnExpireUserPasswords("*")
+Set props("Password") = $System.Util.GetEnviron("IRIS_NUEVA_PASSWORD")
+Set props("PasswordNeverExpires") = 1
+Set props("ChangePassword") = 0
+If props("Password") = "" { Write "ERROR: falta IRIS_PASSWORD en .env", ! } Else { Set sc = ##class(Security.Users).Modify("_SYSTEM", .props) Write $Select(sc=1:"Password de _SYSTEM tomada del .env", 1:"ERROR: "_$System.Status.GetErrorText(sc)), ! }
+Kill props
 Halt

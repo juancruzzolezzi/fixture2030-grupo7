@@ -37,7 +37,13 @@ from datos_referencia import (
     rng_para_equipo,
 )
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://fixture_admin:fixture2030@localhost:27017/?authSource=admin")
+# La URI se arma con las variables del .env (sin passwords escritas en el codigo).
+from urllib.parse import quote_plus
+
+MONGO_URI = "mongodb://{}:{}@{}:{}/?authSource=admin".format(
+    quote_plus(os.environ["MONGO_USER"]), quote_plus(os.environ["MONGO_PASSWORD"]),
+    os.environ.get("MONGO_HOST", "127.0.0.1"), os.environ.get("MONGO_PORT", "27017"),
+)
 DB_NAME = os.environ.get("MONGO_DB", "fixture2030")
 
 

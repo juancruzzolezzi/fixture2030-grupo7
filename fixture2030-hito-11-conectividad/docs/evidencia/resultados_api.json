@@ -3,119 +3,119 @@
   "dependencia": "-",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /salud/vivo -> HTTP 200 (esperado 200, liveness) | ok | request_id=da9ea365-3576-4e66-904e-c7ae99134096",
-  "ms": 2390.0000000001
+  "detalle": "GET /salud/vivo -> HTTP 200 (esperado 200, liveness) | ok | request_id=e9ff20be-9daf-4cc8-a882-70c725d14537",
+  "ms": 265.99999999962165
  },
  {
   "dependencia": "todas",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /salud/listo -> HTTP 200 (esperado 200, readiness) | ok | request_id=3ecab687-461b-492e-ad7d-f64a9acd2b36",
-  "ms": 4906.000000000176
+  "detalle": "GET /salud/listo -> HTTP 200 (esperado 200, readiness) | ok | request_id=11a7c6a3-d242-4be2-878c-12eb851a4614",
+  "ms": 1813.0000000001019
  },
  {
   "dependencia": "mongodb",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /equipos/ARG -> HTTP 200 (esperado 200, exitosa) | ok | request_id=ef3c6aff-69da-452c-99b1-c3c43a758f22",
-  "ms": 2359.9999999999
+  "detalle": "GET /equipos/ARG -> HTTP 200 (esperado 200, exitosa) | ok | request_id=74911fd7-698f-4fb9-8cc8-fd7bfaf03da5",
+  "ms": 250.0
  },
  {
   "dependencia": "mongodb",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /equipos/ZZZ -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=b3047478-fb55-4512-9e3d-fcfe08143c26",
-  "ms": 2281.9999999999254
+  "detalle": "GET /equipos/ZZZ -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=2f7e7a53-0842-4d4d-a5e8-c9e32da1a603",
+  "ms": 265.0000000003274
  },
  {
   "dependencia": "mongodb",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /equipos?confederacion=XXX -> HTTP 400 (esperado 400, validacion (no consulta la base)) | validacion | request_id=7bb5aef2-354f-4c1b-bab6-80b95e705e0c",
-  "ms": 2452.9999999999745
+  "detalle": "GET /equipos?confederacion=XXX -> HTTP 400 (esperado 400, validacion (no consulta la base)) | validacion | request_id=7fa5e6bf-3837-4a2a-9863-9c89a4111dd8",
+  "ms": 265.99999999962165
  },
  {
   "dependencia": "neo4j",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=1187f88f-7f40-4001-a60e-a475591c3ae1",
-  "ms": 2702.9999999999745
+  "detalle": "GET /partidos/F2030-006 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=b8674e6c-1229-45bc-b26b-daa18347d089",
+  "ms": 578.9999999997235
  },
  {
   "dependencia": "neo4j",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-001/eventos -> HTTP 200 (esperado 200, vacia valida (items=[])) | items=0 | request_id=61a120c8-9070-4bdc-ba29-0f58df2a2a75",
-  "ms": 3187.9999999998745
+  "detalle": "GET /partidos/F2030-001/eventos -> HTTP 200 (esperado 200, vacia valida (items=[])) | items=0 | request_id=3816cbb8-e341-40a3-8c87-3b2c009ac3c2",
+  "ms": 530.9999999999491
  },
  {
   "dependencia": "neo4j",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-999 -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=a1912738-bd74-49c8-9a29-d02f47714959",
-  "ms": 2469.000000000051
+  "detalle": "GET /partidos/F2030-999 -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=3fa4c831-23da-4f8d-84aa-71baec9f0de5",
+  "ms": 265.0000000003274
  },
  {
   "dependencia": "cassandra",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006/comentarios?bloque_horario=203006181800 -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=63b86b06-ea93-4156-8651-750c90d12bac",
-  "ms": 2327.9999999999745
+  "detalle": "GET /partidos/F2030-006/comentarios?bloque_horario=203006181800 -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=bedbce0d-160c-49c3-b33e-52f2d7c688c9",
+  "ms": 266.00000000053114
  },
  {
   "dependencia": "cassandra",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006/comentarios?bloque_horario=mal -> HTTP 400 (esperado 400, validacion) | validacion | request_id=a285a98c-15ea-4ace-a640-4812ea6b4edd",
-  "ms": 2421.000000000049
+  "detalle": "GET /partidos/F2030-006/comentarios?bloque_horario=mal -> HTTP 400 (esperado 400, validacion) | validacion | request_id=0faf1935-1922-4d9a-a431-05a89bab84b0",
+  "ms": 235.00000000058208
  },
  {
   "dependencia": "redis",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /sesiones/user-00001 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=72c9d465-fc5a-46a9-a0df-6d1c6b662a32",
-  "ms": 2313.000000000102
+  "detalle": "GET /sesiones/user-00001 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=89939149-3798-405e-8cbc-0ef590d08cca",
+  "ms": 282.0000000001528
  },
  {
   "dependencia": "redis",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /sesiones/no-existe -> HTTP 404 (esperado 404, sesion ausente o expirada) | no_encontrado | request_id=d5830e18-08d7-490e-a7e8-340f62205edc",
-  "ms": 2280.999999999949
+  "detalle": "GET /sesiones/no-existe -> HTTP 404 (esperado 404, sesion ausente o expirada) | no_encontrado | request_id=3d32958a-73ce-4d5b-b680-1d9a6d953aa3",
+  "ms": 327.9999999995198
  },
  {
   "dependencia": "influxdb",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=f80ae044-e246-4271-bae7-e6bf75008ad6",
-  "ms": 4733.999999999924
+  "detalle": "GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=e55260e0-ca89-46a1-9f66-934f8d172972",
+  "ms": 671.9999999995707
  },
  {
   "dependencia": "influxdb",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-19T18:00:00Z&hasta=2030-06-19T18:05:00Z -> HTTP 200 (esperado 200, vacia valida) | items=0 | request_id=402f0b01-796e-4b52-b961-a015ce272e36",
-  "ms": 5077.9999999999745
+  "detalle": "GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-19T18:00:00Z&hasta=2030-06-19T18:05:00Z -> HTTP 200 (esperado 200, vacia valida) | items=0 | request_id=7c04de8b-33ca-4166-918b-15b96d7afb58",
+  "ms": 1344.000000000051
  },
  {
   "dependencia": "iris",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-006/entidad-compleja -> HTTP 200 (esperado 200, exitosa (mismo codigo que las otras bases)) | ok | request_id=7f20742e-2066-4016-808b-35e0e1ce179e",
-  "ms": 2313.000000000102
+  "detalle": "GET /partidos/F2030-006/entidad-compleja -> HTTP 200 (esperado 200, exitosa (mismo codigo que las otras bases)) | ok | request_id=e8d92448-313e-4996-84d3-07ede83fcc67",
+  "ms": 250.0
  },
  {
   "dependencia": "iris",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/F2030-999/entidad-compleja -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=3ead31cd-5f2a-4bd3-a08e-deb5de0a5580",
-  "ms": 2390.999999999849
+  "detalle": "GET /partidos/F2030-999/entidad-compleja -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=b4429c61-fdd6-4c71-b6b0-78da6f2cb16a",
+  "ms": 250.0
  },
  {
   "dependencia": "iris",
   "capa": "api",
   "resultado": "OK",
-  "detalle": "GET /partidos/M001/entidad-compleja -> HTTP 400 (esperado 400, codigo viejo de IRIS: ya no se acepta) | validacion | request_id=c0e77df6-9ab7-45a5-b2c7-3898878b1be2",
-  "ms": 2281.9999999999254
+  "detalle": "GET /partidos/M001/entidad-compleja -> HTTP 400 (esperado 400, codigo viejo de IRIS: ya no se acepta) | validacion | request_id=a00b556e-c00e-4d5c-85f4-a25b6f5ed9f7",
+  "ms": 264.9999999994179
  }
 ]

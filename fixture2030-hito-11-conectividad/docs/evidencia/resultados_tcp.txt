@@ -1,30 +1,30 @@
 Hito 11 - pruebas de configuracion, DNS y TCP
-Fecha: 2026-10-19T22:57:42-03:00 | commit: 22ef2fc | entorno: notebook (API fuera de Docker, bases en Docker Compose)
+Fecha: 2026-10-20T00:02:26-03:00 | commit: dcb6d7e | entorno: notebook (API fuera de Docker, bases en Docker Compose)
 --------------------------------------------------------------------------------------------------------------
-[OK          ] mongodb      configuracion               localhost:27017 (variables: MONGO_URI)
-[OK          ] mongodb      dns                         localhost -> 127.0.0.1
-[OK          ] mongodb      tcp                 0.0 ms  localhost:27017 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] neo4j        configuracion               localhost:7687 (variables: NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
-[OK          ] neo4j        dns                         localhost -> 127.0.0.1
-[OK          ] neo4j        tcp                31.0 ms  localhost:7687 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] neo4j-http   configuracion               localhost:7474 (variables: NEO4J_HTTP_URL)
-[OK          ] neo4j-http   dns                         localhost -> 127.0.0.1
-[OK          ] neo4j-http   tcp                 0.0 ms  localhost:7474 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] cassandra    configuracion               localhost:9042 (variables: CASSANDRA_HOSTS, CASSANDRA_KEYSPACE)
-[OK          ] cassandra    dns                         localhost -> 127.0.0.1
-[OK          ] cassandra    tcp                16.0 ms  localhost:9042 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] redis        configuracion               localhost:6379 (variables: REDIS_HOST, REDIS_PORT)
-[OK          ] redis        dns                         localhost -> 127.0.0.1
-[OK          ] redis        tcp                 0.0 ms  localhost:6379 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] influxdb     configuracion               localhost:8181 (variables: INFLUX_URL, INFLUX_DATABASE, INFLUX_TOKEN)
-[OK          ] influxdb     dns                         localhost -> 127.0.0.1
-[OK          ] influxdb     tcp              2078.0 ms  localhost:8181 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] iris         configuracion               localhost:1972 (variables: IRIS_HOST, IRIS_NAMESPACE, IRIS_USER, IRIS_PASSWORD)
-[OK          ] iris         dns                         localhost -> 127.0.0.1
-[OK          ] iris         tcp              2047.0 ms  localhost:1972 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
-[OK          ] iris-portal  configuracion               localhost:52773 (variables: IRIS_PORTAL_URL)
-[OK          ] iris-portal  dns                         localhost -> 127.0.0.1
-[OK          ] iris-portal  tcp              2047.0 ms  localhost:52773 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] mongodb      configuracion               127.0.0.1:27017 (variables: MONGO_HOST, MONGO_PORT, MONGO_USER, MONGO_PASSWORD)
+[OK          ] mongodb      dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] mongodb      tcp                16.0 ms  127.0.0.1:27017 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] neo4j        configuracion               127.0.0.1:7687 (variables: NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+[OK          ] neo4j        dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] neo4j        tcp                16.0 ms  127.0.0.1:7687 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] neo4j-http   configuracion               127.0.0.1:7474 (variables: NEO4J_HTTP_URL)
+[OK          ] neo4j-http   dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] neo4j-http   tcp                 0.0 ms  127.0.0.1:7474 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] cassandra    configuracion               127.0.0.1:9042 (variables: CASSANDRA_HOSTS, CASSANDRA_KEYSPACE)
+[OK          ] cassandra    dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] cassandra    tcp                 0.0 ms  127.0.0.1:9042 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] redis        configuracion               127.0.0.1:6379 (variables: REDIS_HOST, REDIS_PORT)
+[OK          ] redis        dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] redis        tcp                15.0 ms  127.0.0.1:6379 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] influxdb     configuracion               127.0.0.1:8181 (variables: INFLUX_URL, INFLUX_DATABASE, INFLUX_TOKEN)
+[OK          ] influxdb     dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] influxdb     tcp                 0.0 ms  127.0.0.1:8181 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] iris         configuracion               127.0.0.1:1972 (variables: IRIS_HOST, IRIS_NAMESPACE, IRIS_USER, IRIS_PASSWORD)
+[OK          ] iris         dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] iris         tcp                 0.0 ms  127.0.0.1:1972 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
+[OK          ] iris-portal  configuracion               127.0.0.1:52773 (variables: IRIS_PORTAL_URL)
+[OK          ] iris-portal  dns                         127.0.0.1 -> 127.0.0.1
+[OK          ] iris-portal  tcp                 0.0 ms  127.0.0.1:52773 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)
 
 Contrastes (errores provocados a proposito):
 [OK          ] contraste    dns                         nombre de servicio 'mongodb' desde la notebook -> host no resuelto: [Errno 11001] getaddrinfo failed (ese nombre solo existe dentro de la red de Docker)

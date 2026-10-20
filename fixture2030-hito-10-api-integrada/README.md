@@ -18,6 +18,7 @@ es la parte operativa.
 ## 1. Levantar las seis bases
 
 ```bash
+cp .env.example .env     # y reemplazar las tres passwords CAMBIAR_... (el .env no se versiona)
 docker compose up -d
 docker compose ps        # esperar "healthy" en mongodb, neo4j, cassandra, redis
 ```
@@ -33,15 +34,12 @@ bash scripts/sembrar_datos.sh
 
 Es una muestra chica y reproducible pensada solo para probar la
 integración: no reemplaza la evidencia de volumen de cada hito (eso ya
-quedó demostrado ahí). Al final imprime el token de InfluxDB — hay que
-pegarlo en `.env` (paso siguiente).
+quedó demostrado ahí). También copia el token de InfluxDB al `.env` y le
+pone a IRIS la password del `.env`.
 
 ## 3. Configurar y levantar la API
 
 ```bash
-cp .env.example .env
-# completar INFLUX_TOKEN con el valor que imprimió sembrar_datos.sh
-
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --only-binary=:all: -r requirements.txt

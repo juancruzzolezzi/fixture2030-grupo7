@@ -26,8 +26,9 @@ docs/evidencia/                   salidas que generan los scripts + capturas
 
 ```bash
 cd ../fixture2030-hito-10-api-integrada
+cp .env.example .env                   # y poner passwords propias en los CAMBIAR_...
 docker compose up -d
-bash scripts/sembrar_datos.sh          # y copiar el token de Influx al .env
+bash scripts/sembrar_datos.sh          # carga datos y copia el token de Influx al .env
 bash scripts/iniciar_api.sh            # deja la API en :8000 y el log en api.log
 ```
 
@@ -40,7 +41,8 @@ cd fixture2030-hito-11-conectividad
 ```
 
 Se puede correr por partes: `--modo tcp`, `--modo nativos`, `--modo api`, o un
-solo producto con `--producto redis`. Cada corrida guarda su salida en
+solo producto con `--producto redis`. Una prueba solo queda OK si el resultado
+es el esperado (status, dato leído, cantidad); si no, queda FALLA. Cada corrida guarda su salida en
 `docs/evidencia/` y arma `docs/evidencia/matriz.md`.
 
 3. Escenarios de falla (con la API corriendo):

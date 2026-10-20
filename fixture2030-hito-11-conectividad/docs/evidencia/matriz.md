@@ -1,4 +1,4 @@
-# Matriz de conectividad (generada 2026-10-19T22:59:12-03:00, commit 22ef2fc)
+# Matriz de conectividad (generada 2026-10-20T00:02:52-03:00, commit dcb6d7e)
 
 | Dependencia | Estado | TCP | Cliente/driver | API | Diagnostico |
 |---|---|---|---|---|---|

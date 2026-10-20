@@ -35,8 +35,16 @@ salida completa, con los request_id y las líneas de log, está en
 - Hipótesis: con el proceso congelado, el puerto sigue aceptando conexiones TCP.
   La API no tiene que quedarse esperando para siempre.
 - Cambio: `docker compose pause influxdb`.
-- Qué esperamos: 504 `timeout_dependencia` a los ~3 s (el `INFLUX_TIMEOUT_S`).
-  El resto de la API sigue respondiendo.
+- Qué esperamos: 504 `timeout_dependencia`. El timeout configurado es 3 s
+  (`INFLUX_TIMEOUT_S`); la duración total que mide `curl` es un poco mayor
+  porque incluye conectarse y armar la respuesta. El resto de la API sigue
+  respondiendo.
+- Algo que vimos en Windows: en una primera corrida el 504 llegó a los 5,8 s y
+  hasta las respuestas correctas de Influx tardaban 2,4 s. La causa era usar
+  `localhost`: Windows prueba primero IPv6, y como InfluxDB solo escucha en
+  IPv4 (`127.0.0.1`) perdía ~2,4 s en cada conexión. Lo cambiamos por
+  `127.0.0.1` en el `.env`. La duración observada queda en la evidencia
+  (`escenario_influxdb.txt`).
 - Recuperación: `docker compose unpause influxdb`, la ruta vuelve a 200 y los
   puntos siguen estando.
 - Siguiente paso: si en el Hito 12 aparecen 504 de Influx, primero hay que

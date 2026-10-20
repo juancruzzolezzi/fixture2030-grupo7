@@ -15,15 +15,15 @@ contenedor pueden requerir hosts y puertos diferentes".
 ## Variables de entorno (RNF6, RNF7)
 
 Todo host/puerto/credencial sale de variables de entorno (`app/config.py`).
-Copiar `.env.example` a `.env` antes de `scripts/iniciar_api.sh`. Ningun
-valor del `.env.example` es un secreto real: son las mismas credenciales de
-laboratorio que ya documentaron los Hitos 4 a 9 (usuario/contraseña fijos,
-sin TLS, pensados para una notebook, no para produccion).
+Hay que copiar `.env.example` a `.env` antes de `docker compose up`, y poner
+passwords propias en lugar de los valores `CAMBIAR_...`. El `.env` no se
+versiona. Lo leen Docker Compose (para crear los usuarios de MongoDB y
+Neo4j), `scripts/sembrar_datos.sh` (que le pone esa password a IRIS) y la API.
+El código no tiene passwords por defecto.
 
-La unica excepcion es `INFLUX_TOKEN`: InfluxDB 3 Core genera ese token en el
-primer arranque (`scripts/influxdb/sembrar.sh` lo crea y lo guarda en
-`.influxdb3-token`, excluido por `.gitignore`). Hay que pegar ese valor en
-`.env` despues de sembrar los datos.
+`INFLUX_TOKEN` lo genera InfluxDB 3 Core la primera vez. `scripts/influxdb/sembrar.sh`
+lo guarda en `.influxdb3-token` (excluido por `.gitignore`) y
+`scripts/sembrar_datos.sh` lo copia al `.env`.
 
 ## Timeouts (RNF8)
 
@@ -35,11 +35,10 @@ espera indefinida del lado del cliente HTTP.
 ## Orden de arranque
 
 ```bash
+cp .env.example .env              # y completar las passwords CAMBIAR_...
 docker compose up -d
 docker compose ps                 # esperar "healthy" en mongodb/neo4j/cassandra/redis
-bash scripts/sembrar_datos.sh      # carga de prueba en las 6 fuentes
-cp .env.example .env
-#  -> pegar el INFLUX_TOKEN que imprimio sembrar_datos.sh
+bash scripts/sembrar_datos.sh      # carga de prueba en las 6 fuentes (copia el token de Influx al .env)
 python3 -m venv .venv && source .venv/bin/activate
 pip install --only-binary=:all: -r requirements.txt
 bash scripts/iniciar_api.sh
@@ -47,10 +46,9 @@ bash scripts/iniciar_api.sh
 
 **Nota sobre IRIS y el primer login.** La imagen Community exige cambiar la
 contraseña de `_SYSTEM` la primera vez que algo se conecta por el puerto
-1972 (el que usa el Native SDK de Python). `scripts/sembrar_datos.sh` ya
-corre `scripts/iris/preparar_login.txt`
-(`Do ##class(Security.Users).UnExpireUserPasswords("*")`) para evitarlo; si
-se saltea ese paso, el adaptador de IRIS falla con
+1972 (el que usa el Native SDK de Python). `scripts/sembrar_datos.sh` corre
+`scripts/iris/preparar_login.txt`, que le asigna a `_SYSTEM` la password de
+`IRIS_PASSWORD` del `.env` y la marca como vigente. Si se saltea ese paso, el adaptador de IRIS falla con
 `RuntimeError('<COMMUNICATION LINK ERROR>... Password change required')`,
 traducido por la API a `503 dependencia_no_disponible`.
 

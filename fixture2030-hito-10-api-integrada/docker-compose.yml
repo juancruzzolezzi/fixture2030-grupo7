@@ -4,8 +4,10 @@ services:
     container_name: h10-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: fixture_admin
-      MONGO_INITDB_ROOT_PASSWORD: fixture2030
+      # Usuario y password salen del .env (no se versiona). Solo se aplican la
+      # primera vez que se crea el volumen.
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:?falta MONGO_USER en .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?falta MONGO_PASSWORD en .env}
       MONGO_INITDB_DATABASE: fixture2030
     ports:
       - "27017:27017"
@@ -27,12 +29,12 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
-      NEO4J_AUTH: "neo4j/fixture2030_local"
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:?falta NEO4J_PASSWORD en .env}"
     volumes:
       - h10_neo4j_data:/data
       - h10_neo4j_logs:/logs
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p fixture2030_local 'RETURN 1' || exit 1"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"$${NEO4J_AUTH#neo4j/}\" 'RETURN 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 15

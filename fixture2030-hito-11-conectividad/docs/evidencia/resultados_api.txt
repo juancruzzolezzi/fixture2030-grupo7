@@ -1,39 +1,38 @@
 Hito 11 - pruebas de la API (cliente HTTP -> API -> adaptador -> base)
-Fecha: 2026-10-19T22:58:21-03:00 | commit: 22ef2fc | entorno: notebook (API fuera de Docker, bases en Docker Compose)
+Fecha: 2026-10-20T00:02:43-03:00 | commit: dcb6d7e | entorno: notebook (API fuera de Docker, bases en Docker Compose)
 --------------------------------------------------------------------------------------------------------------
-[OK          ] -            api              2390.0 ms  GET /salud/vivo -> HTTP 200 (esperado 200, liveness) | ok | request_id=da9ea365-3576-4e66-904e-c7ae99134096
-      log: request_id=da9ea365-3576-4e66-904e-c7ae99134096 metodo=GET ruta=/salud/vivo status=200 duracion_ms=0.0
-[OK          ] todas        api              4906.0 ms  GET /salud/listo -> HTTP 200 (esperado 200, readiness) | ok | request_id=3ecab687-461b-492e-ad7d-f64a9acd2b36
-      log: request_id=3ecab687-461b-492e-ad7d-f64a9acd2b36 metodo=GET ruta=/salud/listo status=200 duracion_ms=2656.0
-[OK          ] mongodb      api              2360.0 ms  GET /equipos/ARG -> HTTP 200 (esperado 200, exitosa) | ok | request_id=ef3c6aff-69da-452c-99b1-c3c43a758f22
-      log: request_id=ef3c6aff-69da-452c-99b1-c3c43a758f22 metodo=GET ruta=/equipos/ARG status=200 duracion_ms=16.0
-[OK          ] mongodb      api              2282.0 ms  GET /equipos/ZZZ -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=b3047478-fb55-4512-9e3d-fcfe08143c26
-      log: request_id=b3047478-fb55-4512-9e3d-fcfe08143c26 metodo=GET ruta=/equipos/ZZZ status=404 duracion_ms=0.0
-[OK          ] mongodb      api              2453.0 ms  GET /equipos?confederacion=XXX -> HTTP 400 (esperado 400, validacion (no consulta la base)) | validacion | request_id=7bb5aef2-354f-4c1b-bab6-80b95e705e0c
-      log: request_id=7bb5aef2-354f-4c1b-bab6-80b95e705e0c metodo=GET ruta=/equipos status=400 duracion_ms=0.0
-[OK          ] neo4j        api              2703.0 ms  GET /partidos/F2030-006 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=1187f88f-7f40-4001-a60e-a475591c3ae1
-      log: request_id=1187f88f-7f40-4001-a60e-a475591c3ae1 metodo=GET ruta=/partidos/F2030-006 status=200 duracion_ms=391.0
-[OK          ] neo4j        api              3188.0 ms  GET /partidos/F2030-001/eventos -> HTTP 200 (esperado 200, vacia valida (items=[])) | items=0 | request_id=61a120c8-9070-4bdc-ba29-0f58df2a2a75
-      log: request_id=61a120c8-9070-4bdc-ba29-0f58df2a2a75 metodo=GET ruta=/partidos/F2030-001/eventos status=200 duracion_ms=469.0
-[OK          ] neo4j        api              2469.0 ms  GET /partidos/F2030-999 -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=a1912738-bd74-49c8-9a29-d02f47714959
-      log: request_id=a1912738-bd74-49c8-9a29-d02f47714959 metodo=GET ruta=/partidos/F2030-999 status=404 duracion_ms=15.0
-[OK          ] cassandra    api              2328.0 ms  GET /partidos/F2030-006/comentarios?bloque_horario=203006181800 -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=63b86b06-ea93-4156-8651-750c90d12bac
-      log: request_id=63b86b06-ea93-4156-8651-750c90d12bac metodo=GET ruta=/partidos/F2030-006/comentarios status=200 duracion_ms=16.0
-[OK          ] cassandra    api              2421.0 ms  GET /partidos/F2030-006/comentarios?bloque_horario=mal -> HTTP 400 (esperado 400, validacion) | validacion | request_id=a285a98c-15ea-4ace-a640-4812ea6b4edd
-      log: request_id=a285a98c-15ea-4ace-a640-4812ea6b4edd metodo=GET ruta=/partidos/F2030-006/comentarios status=400 duracion_ms=0.0
-[OK          ] redis        api              2313.0 ms  GET /sesiones/user-00001 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=72c9d465-fc5a-46a9-a0df-6d1c6b662a32
-      log: request_id=72c9d465-fc5a-46a9-a0df-6d1c6b662a32 metodo=GET ruta=/sesiones/user-00001 status=200 duracion_ms=16.0
-[OK          ] redis        api              2281.0 ms  GET /sesiones/no-existe -> HTTP 404 (esperado 404, sesion ausente o expirada) | no_encontrado | request_id=d5830e18-08d7-490e-a7e8-340f62205edc
-      log: request_id=d5830e18-08d7-490e-a7e8-340f62205edc metodo=GET ruta=/sesiones/no-existe status=404 duracion_ms=15.0
-[OK          ] influxdb     api              4734.0 ms  GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=f80ae044-e246-4271-bae7-e6bf75008ad6
-      log: request_id=f80ae044-e246-4271-bae7-e6bf75008ad6 metodo=GET ruta=/partidos/F2030-006/estadisticas status=200 duracion_ms=2437.0
-[OK          ] influxdb     api              5078.0 ms  GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-19T18:00:00Z&hasta=2030-06-19T18:05:00Z -> HTTP 200 (esperado 200, vacia valida) | items=0 | request_id=402f0b01-796e-4b52-b961-a015ce272e36
-      log: request_id=402f0b01-796e-4b52-b961-a015ce272e36 metodo=GET ruta=/partidos/F2030-006/estadisticas status=200 duracion_ms=2656.0
-[OK          ] iris         api              2313.0 ms  GET /partidos/F2030-006/entidad-compleja -> HTTP 200 (esperado 200, exitosa (mismo codigo que las otras bases)) | ok | request_id=7f20742e-2066-4016-808b-35e0e1ce179e
-      log: request_id=7f20742e-2066-4016-808b-35e0e1ce179e metodo=GET ruta=/partidos/F2030-006/entidad-compleja status=200 duracion_ms=16.0
-[OK          ] iris         api              2391.0 ms  GET /partidos/F2030-999/entidad-compleja -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=3ead31cd-5f2a-4bd3-a08e-deb5de0a5580
-      log: request_id=3ead31cd-5f2a-4bd3-a08e-deb5de0a5580 metodo=GET ruta=/partidos/F2030-999/entidad-compleja status=404 duracion_ms=0.0
-[OK          ] iris         api              2282.0 ms  GET /partidos/M001/entidad-compleja -> HTTP 400 (esperado 400, codigo viejo de IRIS: ya no se acepta) | validacion | request_id=c0e77df6-9ab7-45a5-b2c7-3898878b1be2
-      log: request_id=c0e77df6-9ab7-45a5-b2c7-3898878b1be2 metodo=GET ruta=/partidos/M001/entidad-compleja status=400 duracion_ms=0.0
+[OK          ] -            api               266.0 ms  GET /salud/vivo -> HTTP 200 (esperado 200, liveness) | ok | request_id=e9ff20be-9daf-4cc8-a882-70c725d14537
+      log: request_id=e9ff20be-9daf-4cc8-a882-70c725d14537 metodo=GET ruta=/salud/vivo status=200 duracion_ms=0.0
+[OK          ] todas        api              1813.0 ms  GET /salud/listo -> HTTP 200 (esperado 200, readiness) | ok | request_id=11a7c6a3-d242-4be2-878c-12eb851a4614
+      log: request_id=11a7c6a3-d242-4be2-878c-12eb851a4614 metodo=GET ruta=/salud/listo status=200 duracion_ms=1563.0
+[OK          ] mongodb      api               250.0 ms  GET /equipos/ARG -> HTTP 200 (esperado 200, exitosa) | ok | request_id=74911fd7-698f-4fb9-8cc8-fd7bfaf03da5
+      log: request_id=74911fd7-698f-4fb9-8cc8-fd7bfaf03da5 metodo=GET ruta=/equipos/ARG status=200 duracion_ms=16.0
+[OK          ] mongodb      api               265.0 ms  GET /equipos/ZZZ -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=2f7e7a53-0842-4d4d-a5e8-c9e32da1a603
+[OK          ] mongodb      api               266.0 ms  GET /equipos?confederacion=XXX -> HTTP 400 (esperado 400, validacion (no consulta la base)) | validacion | request_id=7fa5e6bf-3837-4a2a-9863-9c89a4111dd8
+      log: request_id=7fa5e6bf-3837-4a2a-9863-9c89a4111dd8 metodo=GET ruta=/equipos status=400 duracion_ms=16.0
+[OK          ] neo4j        api               579.0 ms  GET /partidos/F2030-006 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=b8674e6c-1229-45bc-b26b-daa18347d089
+      log: request_id=b8674e6c-1229-45bc-b26b-daa18347d089 metodo=GET ruta=/partidos/F2030-006 status=200 duracion_ms=313.0
+[OK          ] neo4j        api               531.0 ms  GET /partidos/F2030-001/eventos -> HTTP 200 (esperado 200, vacia valida (items=[])) | items=0 | request_id=3816cbb8-e341-40a3-8c87-3b2c009ac3c2
+      log: request_id=3816cbb8-e341-40a3-8c87-3b2c009ac3c2 metodo=GET ruta=/partidos/F2030-001/eventos status=200 duracion_ms=266.0
+[OK          ] neo4j        api               265.0 ms  GET /partidos/F2030-999 -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=3fa4c831-23da-4f8d-84aa-71baec9f0de5
+      log: request_id=3fa4c831-23da-4f8d-84aa-71baec9f0de5 metodo=GET ruta=/partidos/F2030-999 status=404 duracion_ms=0.0
+[OK          ] cassandra    api               266.0 ms  GET /partidos/F2030-006/comentarios?bloque_horario=203006181800 -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=bedbce0d-160c-49c3-b33e-52f2d7c688c9
+      log: request_id=bedbce0d-160c-49c3-b33e-52f2d7c688c9 metodo=GET ruta=/partidos/F2030-006/comentarios status=200 duracion_ms=16.0
+[OK          ] cassandra    api               235.0 ms  GET /partidos/F2030-006/comentarios?bloque_horario=mal -> HTTP 400 (esperado 400, validacion) | validacion | request_id=0faf1935-1922-4d9a-a431-05a89bab84b0
+      log: request_id=0faf1935-1922-4d9a-a431-05a89bab84b0 metodo=GET ruta=/partidos/F2030-006/comentarios status=400 duracion_ms=0.0
+[OK          ] redis        api               282.0 ms  GET /sesiones/user-00001 -> HTTP 200 (esperado 200, exitosa) | ok | request_id=89939149-3798-405e-8cbc-0ef590d08cca
+      log: request_id=89939149-3798-405e-8cbc-0ef590d08cca metodo=GET ruta=/sesiones/user-00001 status=200 duracion_ms=16.0
+[OK          ] redis        api               328.0 ms  GET /sesiones/no-existe -> HTTP 404 (esperado 404, sesion ausente o expirada) | no_encontrado | request_id=3d32958a-73ce-4d5b-b680-1d9a6d953aa3
+      log: request_id=3d32958a-73ce-4d5b-b680-1d9a6d953aa3 metodo=GET ruta=/sesiones/no-existe status=404 duracion_ms=0.0
+[OK          ] influxdb     api               672.0 ms  GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z -> HTTP 200 (esperado 200, exitosa) | items=3 | request_id=e55260e0-ca89-46a1-9f66-934f8d172972
+      log: request_id=e55260e0-ca89-46a1-9f66-934f8d172972 metodo=GET ruta=/partidos/F2030-006/estadisticas status=200 duracion_ms=422.0
+[OK          ] influxdb     api              1344.0 ms  GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-19T18:00:00Z&hasta=2030-06-19T18:05:00Z -> HTTP 200 (esperado 200, vacia valida) | items=0 | request_id=7c04de8b-33ca-4166-918b-15b96d7afb58
+      log: request_id=7c04de8b-33ca-4166-918b-15b96d7afb58 metodo=GET ruta=/partidos/F2030-006/estadisticas status=200 duracion_ms=1109.0
+[OK          ] iris         api               250.0 ms  GET /partidos/F2030-006/entidad-compleja -> HTTP 200 (esperado 200, exitosa (mismo codigo que las otras bases)) | ok | request_id=e8d92448-313e-4996-84d3-07ede83fcc67
+      log: request_id=e8d92448-313e-4996-84d3-07ede83fcc67 metodo=GET ruta=/partidos/F2030-006/entidad-compleja status=200 duracion_ms=0.0
+[OK          ] iris         api               250.0 ms  GET /partidos/F2030-999/entidad-compleja -> HTTP 404 (esperado 404, recurso inexistente) | no_encontrado | request_id=b4429c61-fdd6-4c71-b6b0-78da6f2cb16a
+      log: request_id=b4429c61-fdd6-4c71-b6b0-78da6f2cb16a metodo=GET ruta=/partidos/F2030-999/entidad-compleja status=404 duracion_ms=0.0
+[OK          ] iris         api               265.0 ms  GET /partidos/M001/entidad-compleja -> HTTP 400 (esperado 400, codigo viejo de IRIS: ya no se acepta) | validacion | request_id=a00b556e-c00e-4d5c-85f4-a25b6f5ed9f7
+      log: request_id=a00b556e-c00e-4d5c-85f4-a25b6f5ed9f7 metodo=GET ruta=/partidos/M001/entidad-compleja status=400 duracion_ms=0.0
 --------------------------------------------------------------------------------------------------------------
 Resumen: OK=17

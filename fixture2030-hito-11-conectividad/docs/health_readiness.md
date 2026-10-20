@@ -42,6 +42,10 @@ por una sola base no arreglaría nada.
 | InfluxDB | 3 s | no |
 | IRIS | 3 s (antes no tenía y el SDK espera 10 s) | no |
 
+Estos son los timeouts **configurados**. La duración total de una request puede
+ser algo mayor (conexión, reintento, armado de la respuesta); la que medimos en
+cada caso está en `evidencia/escenario_*.txt`.
+
 Si una base no responde dentro del timeout, la API devuelve 504
 `timeout_dependencia`. Si rechaza la conexión, devuelve 503
 `dependencia_no_disponible`. Antes las dos cosas eran 503 con el mismo mensaje.
