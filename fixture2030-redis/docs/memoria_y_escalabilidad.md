@@ -114,3 +114,12 @@ tuvieran que operarse juntas de forma atómica, habría que forzarlas al mismo
 slot. En este modelo cada operación atómica toca **una sola clave**, salvo el
 `MULTI`/`EXEC` de la votación, que sería el único punto a revisar en una
 migración a Cluster.
+
+## 5. Revisión después de la devolución
+
+Con `volatile-lru` y TTL en todas las claves, sesiones y votaciones quedan tan
+expuestas a la evicción como la caché, y no se pueden reconstruir. Si se
+clasifica primero qué se puede perder, lo correcto es separarlas: una instancia
+para sesiones y votaciones con `noeviction` (si se llena, la escritura falla con
+error en vez de borrar datos en silencio) y otra para la caché con `allkeys-lru`.
+No lo cambiamos en este módulo de laboratorio; queda como corrección de diseño.

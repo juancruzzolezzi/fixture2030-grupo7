@@ -9,11 +9,12 @@ bloque_horario). Nunca se consulta sin ambos componentes de la particion
 import uuid
 from datetime import datetime, timezone
 
+from cassandra import OperationTimedOut, ReadTimeout, WriteTimeout
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement
 
 from app.config import settings
-from app.errors import DependenciaNoDisponible, ErrorInterno
+from app.errors import DependenciaNoDisponible, ErrorInterno, TiempoDeEsperaAgotado
 
 _session = None
 
@@ -23,15 +24,19 @@ NAMESPACE_API = uuid.UUID("6ea1f0c0-0000-4000-8000-000000000010")  # fijo: ids d
 def _sesion_activa():
     global _session
     if _session is None:
-        cluster = Cluster(list(settings.cassandra.hosts), port=settings.cassandra.puerto)
+        cluster = Cluster(list(settings.cassandra.hosts), port=settings.cassandra.puerto,
+                          connect_timeout=settings.cassandra.timeout_s)
         _session = cluster.connect(settings.cassandra.keyspace)
+        _session.default_timeout = settings.cassandra.timeout_s
     return _session
 
 
 def _traducir(exc: Exception, contexto: str):
+    if isinstance(exc, (OperationTimedOut, ReadTimeout, WriteTimeout)):
+        raise TiempoDeEsperaAgotado("Cassandra no respondio a tiempo.", detalle_interno=f"{contexto}: {exc!r}") from exc
     if isinstance(exc, NoHostAvailable):
         raise DependenciaNoDisponible(
-            "Cassandra no respondio a tiempo.",
+            "Cassandra no esta disponible.",
             detalle_interno=f"{contexto}: {exc!r}",
         ) from exc
     raise ErrorInterno("Fallo inesperado consultando Cassandra.", detalle_interno=f"{contexto}: {exc!r}") from exc

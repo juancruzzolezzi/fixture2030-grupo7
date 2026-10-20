@@ -15,7 +15,7 @@ import re
 import httpx
 
 from app.config import settings
-from app.errors import DependenciaNoDisponible, ErrorDeValidacion, ErrorInterno
+from app.errors import DependenciaNoDisponible, ErrorDeValidacion, ErrorInterno, TiempoDeEsperaAgotado
 
 _PATRON_ID = re.compile(r"^[A-Za-z0-9_-]{1,32}$")
 
@@ -50,8 +50,13 @@ def _consultar(sql: str) -> list[dict]:
             json={"db": settings.influx.database, "q": sql, "format": "json"},
             timeout=settings.influx.timeout_s,
         )
+    except httpx.TimeoutException as exc:
+        raise TiempoDeEsperaAgotado("InfluxDB no respondio a tiempo.", detalle_interno=f"{sql}: {exc!r}") from exc
     except httpx.HTTPError as exc:
-        raise DependenciaNoDisponible("InfluxDB no respondio a tiempo.", detalle_interno=f"{sql}: {exc!r}") from exc
+        raise DependenciaNoDisponible("InfluxDB no esta disponible.", detalle_interno=f"{sql}: {exc!r}") from exc
+    if respuesta.status_code in (401, 403):
+        raise DependenciaNoDisponible("InfluxDB rechazo el token de la API.",
+                                      detalle_interno=f"{sql}: {respuesta.status_code} {respuesta.text}")
     if respuesta.status_code >= 500:
         raise DependenciaNoDisponible(
             "InfluxDB devolvio un error de servidor.", detalle_interno=f"{sql}: {respuesta.status_code} {respuesta.text}"

@@ -22,3 +22,11 @@ MATCH (esp:Equipo {codigo: 'ESP'}), (p:Partido {codigo: 'F2030-006'}) MERGE (esp
 MERGE (ev:Evento {codigo: 'EVT-F2030-006-01'}) SET ev.tipo = 'Gol', ev.minuto = 23;
 MATCH (ev:Evento {codigo: 'EVT-F2030-006-01'}), (p:Partido {codigo: 'F2030-006'}) MERGE (ev)-[:OCURRE_EN]->(p);
 MATCH (j1:Jugador {codigo: 'ARG-10'}), (ev:Evento {codigo: 'EVT-F2030-006-01'}) MERGE (j1)-[:PROTAGONIZA]->(ev);
+
+// Hito 11: F2030-001 (URU vs ARG) tambien existe en Cassandra e IRIS con el mismo codigo.
+MERGE (uru:Equipo {codigo: 'URU'}) SET uru.nombre = 'Uruguay', uru.confederacion = 'CONMEBOL', uru.esAnfitrion = true;
+MERGE (mvd:Sede {codigo: 'MVD'}) SET mvd.nombre = 'Estadio Centenario', mvd.ciudad = 'Montevideo', mvd.pais = 'Uruguay';
+MERGE (p:Partido {codigo: 'F2030-001'}) SET p.fecha = date('2030-06-13'), p.fase = 'Fase de grupos';
+MATCH (p:Partido {codigo: 'F2030-001'}), (mvd:Sede {codigo: 'MVD'}) MERGE (p)-[:SE_JUEGA_EN]->(mvd);
+MATCH (uru:Equipo {codigo: 'URU'}), (p:Partido {codigo: 'F2030-001'}) MERGE (uru)-[ra:DISPUTA]->(p) SET ra.condicion = 'A';
+MATCH (arg:Equipo {codigo: 'ARG'}), (p:Partido {codigo: 'F2030-001'}) MERGE (arg)-[rb:DISPUTA]->(p) SET rb.condicion = 'B';

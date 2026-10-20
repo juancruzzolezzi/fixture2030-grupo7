@@ -10,7 +10,7 @@ Reutiliza el modelo del Hito 5: (Jugador)-[:PERTENECE_A]->(Equipo),
 """
 
 from neo4j import GraphDatabase
-from neo4j.exceptions import Neo4jError, ServiceUnavailable
+from neo4j.exceptions import AuthError, Neo4jError, ServiceUnavailable
 
 from app.config import settings
 from app.errors import DependenciaNoDisponible, ErrorInterno
@@ -25,14 +25,18 @@ def _driver_activo():
             settings.neo4j.uri,
             auth=(settings.neo4j.usuario, settings.neo4j.password),
             connection_timeout=settings.neo4j.timeout_s,
+            connection_acquisition_timeout=settings.neo4j.timeout_s,  # default del driver: 60 s
         )
     return _driver
 
 
 def _traducir(exc: Exception, contexto: str):
+    # Antes cualquier error (incluso una password incorrecta) decia "no respondio a tiempo".
+    if isinstance(exc, AuthError):
+        raise DependenciaNoDisponible("Neo4j rechazo las credenciales de la API.", detalle_interno=f"{contexto}: {exc!r}") from exc
     if isinstance(exc, (ServiceUnavailable, Neo4jError)):
         raise DependenciaNoDisponible(
-            "Neo4j no respondio a tiempo.",
+            "Neo4j no esta disponible.",
             detalle_interno=f"{contexto}: {exc!r}",
         ) from exc
     raise ErrorInterno("Fallo inesperado consultando Neo4j.", detalle_interno=f"{contexto}: {exc!r}") from exc

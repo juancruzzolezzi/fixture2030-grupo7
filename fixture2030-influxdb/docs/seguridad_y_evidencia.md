@@ -54,4 +54,4 @@ En ambos casos los datos estaban bien cargados; el error estaba en la lectura de
 - Se cargó un subconjunto (8 partidos) acorde a una notebook; el objetivo de 10M+ se proyecta, no se declara como medido.
 - El rendimiento incluye el costo de ejecutar `docker exec` por lote, por lo que es una cota inferior de lo que admite el servidor.
 - Los datos son simulados; sirven para validar el modelo, la carga y las consultas, no para sacar conclusiones deportivas.
-- La política de retención está definida pero no aplicada en la base del laboratorio.
+- La política de retención se aplica en la base del laboratorio desde la corrección posterior a la devolución (`scripts/inicializacion.sh`, ver `retencion_y_granularidad.md`); las capturas de esta carpeta son anteriores a esa corrección.

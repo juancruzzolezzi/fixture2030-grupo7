@@ -8,10 +8,10 @@ Reutiliza el modelo documental del Hito 4: colecciones `equipos` y
 """
 
 from pymongo import MongoClient
-from pymongo.errors import PyMongoError
+from pymongo.errors import NetworkTimeout, PyMongoError, ServerSelectionTimeoutError
 
 from app.config import settings
-from app.errors import DependenciaNoDisponible, ErrorInterno
+from app.errors import DependenciaNoDisponible, ErrorInterno, TiempoDeEsperaAgotado
 
 _client: MongoClient | None = None
 
@@ -28,9 +28,14 @@ def _db():
 
 
 def _traducir(exc: Exception, contexto: str):
+    # pymongo informa "connection refused" tambien como ServerSelectionTimeoutError
+    # (reintenta hasta agotar el timeout); se separa por el mensaje.
+    rechazada = "refused" in str(exc).lower()
+    if isinstance(exc, (ServerSelectionTimeoutError, NetworkTimeout)) and not rechazada:
+        raise TiempoDeEsperaAgotado("MongoDB no respondio a tiempo.", detalle_interno=f"{contexto}: {exc!r}") from exc
     if isinstance(exc, PyMongoError):
         raise DependenciaNoDisponible(
-            "MongoDB no respondio a tiempo.",
+            "MongoDB no esta disponible.",
             detalle_interno=f"{contexto}: {exc!r}",
         ) from exc
     raise ErrorInterno("Fallo inesperado consultando MongoDB.", detalle_interno=f"{contexto}: {exc!r}") from exc

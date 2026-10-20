@@ -7,14 +7,16 @@ import re
 from app.adapters import iris_adapter, neo4j_adapter
 from app.errors import ErrorDeValidacion, RecursoNoEncontrado
 
-_PATRON_CODIGO = re.compile(r"^[A-Za-z0-9-]{1,15}$")
+# Devolucion del Hito 10: un solo identificador de partido para todas las fuentes
+# (antes IRIS usaba M00x). Se valida aca, antes de llegar a cualquier adaptador.
+_PATRON_CODIGO = re.compile(r"^F2030-\d{3}$")
 ESTADOS_VALIDOS = {"Pendiente", "EnJuego", "Finalizado"}
 LIMITE_EVENTOS_MAXIMO = 200
 
 
 def _validar_codigo(codigo: str) -> str:
     if not _PATRON_CODIGO.match(codigo or ""):
-        raise ErrorDeValidacion(f"codigo de partido invalido: {codigo!r}.")
+        raise ErrorDeValidacion(f"codigo de partido invalido: {codigo!r}. Formato: F2030-NNN.")
     return codigo
 
 

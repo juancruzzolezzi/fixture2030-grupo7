@@ -11,6 +11,7 @@ correspondiente (RNF5).
 import logging
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -85,15 +86,64 @@ app.include_router(sesiones_router)
 app.include_router(estadisticas_router)
 
 
-@app.get("/salud", tags=["Operacion"], summary="Conectividad real de cada fuente (RF17, RNF11)")
-def salud():
-    """No cachea ni asume nada: prueba la conexion de verdad en cada llamada.
-    Pensado para `scripts/verificar_conectividad.*`, no para alta frecuencia."""
-    return {
-        "mongodb": mongo_adapter.verificar_conectividad(),
-        "neo4j": neo4j_adapter.verificar_conectividad(),
-        "cassandra": cassandra_adapter.verificar_conectividad(),
-        "redis": redis_adapter.verificar_conectividad(),
-        "influxdb": influx_adapter.verificar_conectividad(),
-        "iris": iris_adapter.verificar_conectividad(),
-    }
+# --- Salud (Hito 11) ----------------------------------------------------------
+# /salud/vivo   liveness: el proceso responde, no toca ninguna base.
+# /salud/listo  readiness: up / degraded (200) o down (503, ninguna base responde).
+# /salud        detalle por dependencia (estado y milisegundos).
+# El chequeo de las bases se reutiliza 10 s para no consultarlas en cada sonda.
+
+_VERIFICADORES = {
+    "mongodb": mongo_adapter.verificar_conectividad,
+    "neo4j": neo4j_adapter.verificar_conectividad,
+    "cassandra": cassandra_adapter.verificar_conectividad,
+    "redis": redis_adapter.verificar_conectividad,
+    "influxdb": influx_adapter.verificar_conectividad,
+    "iris": iris_adapter.verificar_conectividad,
+}
+CACHE_SALUD_S = 10
+_ultimo_chequeo = {"momento": 0.0, "resultado": None}
+
+
+def _chequear_dependencias(forzar: bool = False) -> dict:
+    if not forzar and time.monotonic() - _ultimo_chequeo["momento"] < CACHE_SALUD_S:
+        return _ultimo_chequeo["resultado"]
+
+    def medir(funcion):
+        inicio = time.monotonic()
+        ok = funcion()
+        return {"estado": "up" if ok else "down", "ms": round((time.monotonic() - inicio) * 1000, 1)}
+
+    # En paralelo: una base colgada no suma su timeout al de las demas.
+    with ThreadPoolExecutor(max_workers=len(_VERIFICADORES)) as pool:
+        futuros = {nombre: pool.submit(medir, f) for nombre, f in _VERIFICADORES.items()}
+        resultado = {nombre: futuro.result() for nombre, futuro in futuros.items()}
+    _ultimo_chequeo.update(momento=time.monotonic(), resultado=resultado)
+    return resultado
+
+
+def _estado_general(dependencias: dict) -> str:
+    arriba = sum(1 for d in dependencias.values() if d["estado"] == "up")
+    if arriba == len(dependencias):
+        return "up"
+    return "down" if arriba == 0 else "degraded"
+
+
+@app.get("/salud/vivo", tags=["Operacion"], summary="Liveness: el proceso de la API responde (no consulta bases)")
+def salud_vivo():
+    return {"estado": "up"}
+
+
+@app.get("/salud/listo", tags=["Operacion"], summary="Readiness: up/degraded (200) o down (503)",
+         responses={503: {"description": "Ninguna dependencia responde"}})
+def salud_listo():
+    dependencias = _chequear_dependencias()
+    estado = _estado_general(dependencias)
+    cuerpo = {"estado": estado, "dependencias": {k: v["estado"] for k, v in dependencias.items()}}
+    return JSONResponse(status_code=503 if estado == "down" else 200, content=cuerpo)
+
+
+@app.get("/salud", tags=["Operacion"], summary="Estado y latencia de cada dependencia")
+def salud(forzar: bool = False):
+    """Con ?forzar=true no usa el resultado guardado (para diagnostico manual)."""
+    dependencias = _chequear_dependencias(forzar)
+    return {"estado": _estado_general(dependencias), "dependencias": dependencias}

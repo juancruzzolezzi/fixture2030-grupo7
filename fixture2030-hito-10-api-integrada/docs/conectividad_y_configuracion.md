@@ -60,17 +60,12 @@ En otra terminal:
 bash scripts/verificar_conectividad.sh     # GET /salud
 ```
 
-## Nota de coherencia entre fuentes (identificadores)
+## Identificador de partido común
 
-Mongo, Neo4j, Cassandra e InfluxDB usan los codigos `F2030-xxx` definidos
-desde el Hito 4/5. **IRIS es la excepcion**: sus datos de prueba reutilizan
-el codigo `M00x` que ya trae `Fixture.Demo` del Hito 9 (el propio README de
-ese hito usa ese formato). Este hito no fuerza una unificacion de
-identificadores entre las seis fuentes — la consigna no lo pide ("no se
-exige integrar por codigo... se exige consistencia semantica"), y cambiar
-los datos de IRIS para que calcen con `F2030-xxx` hubiera significado tocar
-las clases del Hito 9, cosa que este modulo evita a proposito (ver
-`arquitectura_y_adaptadores.md`). Se documenta la diferencia en vez de
-esconderla: al probar `/partidos/{codigo}/entidad-compleja` o
-`/partidos/{codigo}/estado`, el codigo a usar es `M001` o `M003` (los que
-deja poblados `Fixture.Demo.Ejecutar()`), no `F2030-006`.
+Todas las fuentes usan el mismo código de partido, `F2030-xxx`. En la entrega
+original IRIS usaba los `M00x` de `Fixture.Demo` del Hito 9, y el consumidor
+tenía que saber qué base atendía cada ruta para elegir el código (devolución
+del Hito 10). Ahora `scripts/iris/sembrar.txt` corre además
+`Fixture.ApiSupport.SembrarPartidosF2030()`, que carga en IRIS los mismos
+partidos que el resto (`F2030-006` y `F2030-001`), y `partidos_service.py`
+rechaza con 400 cualquier código que no tenga ese formato.

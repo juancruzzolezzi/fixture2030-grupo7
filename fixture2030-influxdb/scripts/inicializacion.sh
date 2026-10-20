@@ -4,7 +4,8 @@
 # - Verifica el contenedor InfluxDB 3 Core (mismas comprobaciones de la Clase 9)
 # - Registra versión, imagen y recursos del ambiente (RNF10)
 # - Crea el token de administración la primera vez y lo guarda en .influxdb3-token
-# - Crea la base fixture2030_series si no existe
+# - Crea las bases con la politica de retencion de docs/retencion_y_granularidad.md
+#   (correccion de la devolucion: antes la base del laboratorio quedaba sin vencimiento)
 # Uso: ./scripts/inicializacion.sh   (desde la carpeta del módulo)
 # Salida: pantalla + docs/evidencia/00_inicializacion.txt
 # =============================================================================
@@ -54,13 +55,26 @@ main() {
   cargar_token
 
   echo
-  echo "=== 3. BASE DE DATOS DEL MÓDULO ==="
+  echo "=== 3. BASES DE DATOS DEL MÓDULO (CON RETENCIÓN) ==="
+  # Datos crudos: torneo + 15 días ≈ 50 días. Si la base ya existía sin retención
+  # (corridas anteriores a la corrección), se actualiza: InfluxDB 3 Core 3.x admite
+  # `update database --retention-period` (verificado con la 3.12.1).
   if ! docker exec "$CONTAINER" influxdb3 show databases --token "$TOKEN" --format json | grep -Fq "\"$DATABASE\""; then
-    echo "Creando la base $DATABASE..."
-    docker exec "$CONTAINER" influxdb3 create database --token "$TOKEN" "$DATABASE"
+    echo "Creando la base $DATABASE con retención $RETENCION_CRUDOS..."
+    docker exec "$CONTAINER" influxdb3 create database --token "$TOKEN" --retention-period "$RETENCION_CRUDOS" "$DATABASE"
   else
-    echo "La base $DATABASE ya existe; no se recrea."
+    echo "La base $DATABASE ya existe; se aplica la retención $RETENCION_CRUDOS."
+    docker exec "$CONTAINER" influxdb3 update database --token "$TOKEN" --database "$DATABASE" --retention-period "$RETENCION_CRUDOS"
   fi
+  # Resúmenes históricos: sin vencimiento (se crea vacía; la llenan las consultas de ventana AG2).
+  if ! docker exec "$CONTAINER" influxdb3 show databases --token "$TOKEN" --format json | grep -Fq "\"$DATABASE_HISTORICO\""; then
+    docker exec "$CONTAINER" influxdb3 create database --token "$TOKEN" "$DATABASE_HISTORICO"
+  fi
+
+  echo
+  echo "Retención configurada (system.databases, retention_period_ns -> días):"
+  docker exec "$CONTAINER" influxdb3 query --database _internal --token "$TOKEN" \
+    "SELECT database_name, retention_period_ns / 86400000000000 AS retencion_dias FROM system.databases WHERE database_name IN ('$DATABASE', '$DATABASE_HISTORICO')"
 
   echo
   echo "=== 4. VERIFICACIÓN DEL SERVIDOR ==="

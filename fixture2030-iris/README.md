@@ -68,6 +68,7 @@ classDiagram
         +Integer Minuto [Required, 1..130]
         -%OnBeforeSave(insert) Status
         Index JugadorIdx
+        Index PartidoIdx
     }
     Persona <|-- Jugador
     Persona <|-- Arbitro
@@ -105,10 +106,11 @@ saltear un paso ni retroceder. Un partido nuevo nace siempre `Pendiente`.
   uno-a-muchos, RNF3). Para cargar `jugador.Eventos`, IRIS busca qué eventos apuntan
   a ese jugador; sin índice recorre todos los eventos. Los mismos índices hacen
   barato el control de integridad al borrar un jugador o un árbitro.
-- **Eventos dentro del partido:** en la relación padre-hijo los eventos se guardan
-  físicamente *dentro* del nodo del partido (su ID es `idPartido||n`), así que la
-  propia estructura de almacenamiento ya funciona como índice: cargar
-  `partido.Eventos` lee solo ese nodo, sin recorrer los demás.
+- **`Evento.PartidoIdx`** (agregado después de la devolución). Como los eventos se
+  guardan dentro del nodo del partido (ID `idPartido||n`), al principio lo
+  consideramos innecesario. Pero la consigna pide indexar la propiedad relacional
+  del lado hijo, y además lo usan las consultas SQL que filtran eventos por
+  partido (`WHERE Partido = ?`).
 - **`Partido.CodigoIdx`** (único) y **`Persona.NacionalidadIdx`**: soportan las
   búsquedas por código de partido y la consulta por nacionalidad de la demo.
 
@@ -232,7 +234,7 @@ Para salir del Terminal: `Halt`. Para bajar el ambiente sin perder datos:
 | RF8 | `Fixture.Demo.ProyeccionSQL` y bloque 4 del `.mac` |
 | RF9 | `Partido.CambiarEstado`, `Partido.%OnBeforeSave`, `Evento.%OnBeforeSave` |
 | RNF2 | Las clases compilan con `LoadDir(...,"ck")`; solo dependen de clases del sistema (`%Persistent`, `%SQL.Statement`) |
-| RNF3 | `Evento.JugadorIdx`, `Partido.ArbitroIdx` |
+| RNF3 | `Evento.JugadorIdx`, `Evento.PartidoIdx`, `Partido.ArbitroIdx` |
 | RNF4 | Todo el dominio en archivos `.cls`, invocable desde el Terminal |
 | RNF5 | Este repositorio; `.gitignore` excluye datos de IRIS |
 

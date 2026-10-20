@@ -89,4 +89,42 @@ ClassMethod CambiarEstadoPartido(pCodigo As %String, pNuevoEstado As %String) As
     Quit obj.%ToJSON()
 }
 
+/// Carga en IRIS los mismos partidos que Neo4j/Cassandra/Redis/InfluxDB, con el
+/// mismo codigo F2030-NNN (devolucion del Hito 10: antes IRIS solo tenia M00x).
+/// Pasa por las reglas del modelo: nace Pendiente, CambiarEstado, eventos antes
+/// de Finalizado. Si el partido ya existe lo borra y lo vuelve a crear.
+ClassMethod SembrarPartidosF2030()
+{
+    Set arbitro = ##class(Fixture.Arbitro).%New()
+    Set arbitro.Nombre = "Marta Ruiz", arbitro.Nacionalidad = "ESP", arbitro.Rol = "Principal"
+    Do arbitro.%Save()
+    Set mateo = ##class(Fixture.Jugador).%New()
+    Set mateo.Nombre = "Mateo Gonzalez", mateo.Nacionalidad = "ARG", mateo.Numero = 10, mateo.Posicion = "Delantero"
+    Do mateo.%Save()
+
+    // F2030-006 ARG vs ESP queda EnJuego (igual que la cache sembrada en Redis)
+    Do ..CrearPartido("F2030-006", "Buenos Aires", "ARG", "ESP", arbitro, mateo, 23, 0)
+    // F2030-001 URU vs ARG queda Finalizado (sirve para probar el 409)
+    Do ..CrearPartido("F2030-001", "Montevideo", "URU", "ARG", arbitro, mateo, 67, 1)
+    Write "IRIS: partidos F2030-006 (EnJuego) y F2030-001 (Finalizado) cargados", !
+}
+
+ClassMethod CrearPartido(pCodigo As %String, pSede As %String, pLocal As %String, pVisitante As %String, pArbitro As Fixture.Arbitro, pGoleador As Fixture.Jugador, pMinuto As %Integer, pFinalizar As %Boolean)
+{
+    If ##class(Fixture.Partido).CodigoIdxExists(pCodigo, .id) {
+        Do ##class(Fixture.Partido).%DeleteId(id)
+    }
+    Set p = ##class(Fixture.Partido).%New()
+    Set p.Codigo = pCodigo, p.Sede = pSede, p.Local = pLocal, p.Visitante = pVisitante, p.Arbitro = pArbitro
+    Do p.%Save()
+    Do p.CambiarEstado("EnJuego")
+    Set e = ##class(Fixture.Evento).%New()
+    Set e.Tipo = "Gol", e.Minuto = pMinuto, e.Jugador = pGoleador
+    Do p.Eventos.Insert(e)
+    Do p.%Save()
+    If pFinalizar {
+        Do p.CambiarEstado("Finalizado")
+    }
+}
+
 }

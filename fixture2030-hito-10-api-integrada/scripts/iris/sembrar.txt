@@ -1,2 +1,3 @@
 Do ##class(Fixture.Demo).Ejecutar()
+Do ##class(Fixture.ApiSupport).SembrarPartidosF2030()
 Halt

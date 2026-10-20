@@ -187,26 +187,44 @@ def test_agregacion_correcta(cliente):
 # --- RF8 / IRIS ------------------------------------------------------------
 
 def test_entidad_compleja_existente(cliente):
-    r = cliente.get("/partidos/M001/entidad-compleja")
+    # Mismo codigo que en Neo4j/Cassandra/Redis/InfluxDB (devolucion del Hito 10).
+    r = cliente.get("/partidos/F2030-006/entidad-compleja")
     assert r.status_code == 200
     cuerpo = r.json()
-    assert cuerpo["codigo"] == "M001"
+    assert cuerpo["codigo"] == "F2030-006"
     assert len(cuerpo["eventos"]) >= 1
 
 
+def test_codigo_viejo_de_iris_es_400(cliente):
+    r = cliente.get("/partidos/M001/entidad-compleja")
+    assert r.status_code == 400
+
+
 def test_entidad_compleja_inexistente_es_404(cliente):
-    r = cliente.get("/partidos/M999/entidad-compleja")
+    r = cliente.get("/partidos/F2030-999/entidad-compleja")
     assert r.status_code == 404
 
 
 def test_transicion_de_estado_invalida_es_409(cliente):
-    # M001 queda Finalizado despues de Fixture.Demo.Ejecutar(): no puede retroceder.
-    r = cliente.patch("/partidos/M001/estado", json={"nuevo_estado": "EnJuego"})
+    # F2030-001 queda Finalizado despues de sembrar: no puede retroceder.
+    r = cliente.patch("/partidos/F2030-001/estado", json={"nuevo_estado": "EnJuego"})
     assert r.status_code == 409
     assert r.json()["error"]["tipo"] == "conflicto"
 
 
 def test_transicion_al_mismo_estado_es_idempotente(cliente):
-    r = cliente.patch("/partidos/M001/estado", json={"nuevo_estado": "Finalizado"})
+    r = cliente.patch("/partidos/F2030-001/estado", json={"nuevo_estado": "Finalizado"})
     assert r.status_code == 200
     assert r.json()["sin_cambios"] is True
+
+
+# --- Hito 11: salud ---------------------------------------------------------
+
+def test_liveness(cliente):
+    assert cliente.get("/salud/vivo").json() == {"estado": "up"}
+
+
+def test_readiness_con_todo_arriba(cliente):
+    r = cliente.get("/salud/listo")
+    assert r.status_code == 200
+    assert r.json()["estado"] == "up"

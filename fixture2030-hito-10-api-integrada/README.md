@@ -18,7 +18,6 @@ es la parte operativa.
 ## 1. Levantar las seis bases
 
 ```bash
-mkdir -p ~/docker/data/hito10/{cassandra,redis,influxdb,iris}
 docker compose up -d
 docker compose ps        # esperar "healthy" en mongodb, neo4j, cassandra, redis
 ```
@@ -89,6 +88,22 @@ de Redis, confirma el `503` y lo vuelve a levantar — no es un mock.
 `postman/fixture2030_collection.json`: importar en Postman, variable
 `base_url` ya apunta a `http://localhost:8000`.
 
+## Cambios hechos en el Hito 11
+
+Al evaluar la conectividad (ver `fixture2030-hito-11-conectividad/`) se
+corrigieron estas cosas de la API:
+
+- `GET /salud/vivo` (liveness) y `GET /salud/listo` (readiness); `GET /salud`
+  ahora da estado y milisegundos por dependencia.
+- Un timeout de la base devuelve **504** `timeout_dependencia`; una base caída
+  sigue siendo **503**. Antes todo era 503 "no respondió a tiempo", incluso una
+  password incorrecta de Neo4j.
+- Redis reintenta una sola vez (antes 3, por defecto de redis-py: el 503 tardaba ~4,8 s).
+- IRIS: timeout de conexión explícito y reconexión si IRIS se reinicia (antes
+  quedaba en 503 hasta reiniciar la API).
+- Código de partido único `F2030-xxx` también en IRIS (devolución del Hito 10).
+- Volúmenes nombrados para todas las bases (devolución del Hito 6).
+
 ## Estructura
 
 ```
@@ -119,9 +134,9 @@ docs/                    casos de uso, arquitectura, contratos, conectividad, pr
 - No se integran las seis fuentes en una sola request: cada caso de uso
   justifica su propia combinación (ver `docs/arquitectura_y_adaptadores.md`,
   sección "Combinación de fuentes").
-- Los identificadores de partido no están unificados entre fuentes: IRIS
-  reutiliza los códigos `M00x` del Hito 9, el resto usa `F2030-xxx`. Está
-  documentado en `docs/conectividad_y_configuracion.md`, no escondido.
+- Los identificadores de partido están unificados: todas las fuentes, IRIS
+  incluido, usan `F2030-xxx` (corregido después de la devolución; antes IRIS
+  usaba los `M00x` del Hito 9).
 - No se midió un volumen de producción para la API en sí: el rendimiento
   de cada fuente ya se midió en su propio hito (Cassandra en el Hito 6,
   InfluxDB en el Hito 8). Este hito mide latencia de la capa HTTP, no

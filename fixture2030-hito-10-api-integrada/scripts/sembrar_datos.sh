@@ -5,16 +5,19 @@
 # integracion (RNF11).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# Git Bash (Windows) convierte rutas como /dev/stdin en rutas de Windows; esto lo evita.
+export MSYS_NO_PATHCONV=1
 
 echo "=== MongoDB ==="
 docker exec -i h10-mongodb mongosh --quiet "mongodb://fixture_admin:fixture2030@localhost:27017/fixture2030?authSource=admin" <<'EOF' >/dev/null
 db.runCommand({ping:1})
 EOF
-python3 -m venv .venv_seed >/dev/null 2>&1 || true
-source .venv_seed/bin/activate
-pip install -q pymongo >/dev/null
-MONGO_URI="mongodb://fixture_admin:fixture2030@localhost:27017/?authSource=admin" python3 scripts/mongo/generate_and_load.py
-deactivate
+# En Windows el comando suele ser "python" y el venv usa Scripts/ en vez de bin/.
+if python3 --version >/dev/null 2>&1; then PYTHON=python3; else PYTHON=python; fi
+[ -d .venv_seed ] || "$PYTHON" -m venv .venv_seed
+if [ -x .venv_seed/bin/python ]; then SEED_PY=.venv_seed/bin/python; else SEED_PY=.venv_seed/Scripts/python.exe; fi
+"$SEED_PY" -m pip install -q pymongo >/dev/null
+MONGO_URI="mongodb://fixture_admin:fixture2030@localhost:27017/?authSource=admin" "$SEED_PY" scripts/mongo/generate_and_load.py
 
 echo
 echo "=== Neo4j ==="

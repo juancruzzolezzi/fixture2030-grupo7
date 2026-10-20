@@ -22,6 +22,10 @@ Relationship Jugador As Fixture.Jugador [ Cardinality = one, Inverse = Eventos ]
 /// apuntan a ese jugador. Sin indice seria un recorrido completo de todos los eventos.
 Index JugadorIdx On Jugador;
 
+/// Indice del lado hijo de la relacion con Partido (pedido en la devolucion).
+/// Lo usan las consultas SQL que filtran eventos por partido.
+Index PartidoIdx On Partido;
+
 Method %OnBeforeSave(insert As %Boolean) As %Status [ Private, ServerOnly = 1 ]
 {
     // 1. Inalterabilidad: un evento ya guardado no se puede modificar

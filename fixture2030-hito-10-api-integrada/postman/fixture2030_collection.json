@@ -8,7 +8,11 @@
   "item": [
     {
       "name": "Salud",
-      "request": { "method": "GET", "url": "{{base_url}}/salud" }
+      "item": [
+        { "name": "Liveness", "request": { "method": "GET", "url": "{{base_url}}/salud/vivo" } },
+        { "name": "Readiness", "request": { "method": "GET", "url": "{{base_url}}/salud/listo" } },
+        { "name": "Detalle por dependencia", "request": { "method": "GET", "url": "{{base_url}}/salud?forzar=true" } }
+      ]
     },
     {
       "name": "Equipos (MongoDB)",
@@ -69,13 +73,13 @@
     {
       "name": "Entidad compleja (IRIS)",
       "item": [
-        { "name": "Detalle de partido IRIS (M001)", "request": { "method": "GET", "url": "{{base_url}}/partidos/M001/entidad-compleja" } },
-        { "name": "Partido IRIS inexistente (404)", "request": { "method": "GET", "url": "{{base_url}}/partidos/M999/entidad-compleja" } },
+        { "name": "Detalle de partido IRIS (F2030-006)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-006/entidad-compleja" } },
+        { "name": "Partido IRIS inexistente (404)", "request": { "method": "GET", "url": "{{base_url}}/partidos/F2030-999/entidad-compleja" } },
         {
           "name": "Transicion invalida (409)",
           "request": {
             "method": "PATCH",
-            "url": "{{base_url}}/partidos/M001/estado",
+            "url": "{{base_url}}/partidos/F2030-001/estado",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"nuevo_estado\": \"EnJuego\"\n}" }
           }
@@ -84,7 +88,7 @@
           "name": "Transicion idempotente (mismo estado)",
           "request": {
             "method": "PATCH",
-            "url": "{{base_url}}/partidos/M001/estado",
+            "url": "{{base_url}}/partidos/F2030-001/estado",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"nuevo_estado\": \"Finalizado\"\n}" }
           }

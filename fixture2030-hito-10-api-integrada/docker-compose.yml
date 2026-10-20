@@ -45,7 +45,7 @@ services:
     ports:
       - "9042:9042"
     volumes:
-      - ${HOME}/docker/data/hito10/cassandra:/var/lib/cassandra:z
+      - h10_cassandra_data:/var/lib/cassandra
     healthcheck:
       test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
       interval: 15s
@@ -61,7 +61,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ${HOME}/docker/data/hito10/redis:/data:z
+      - h10_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -84,7 +84,9 @@ services:
     ports:
       - "127.0.0.1:8181:8181"
     volumes:
-      - ${HOME}/docker/data/hito10/influxdb:/var/lib/influxdb3/data:z
+      # Se monta la carpeta padre: existe en la imagen con dueño influxdb3, asi el
+      # volumen nombrado hereda ese permiso (montado en .../data da PermissionDenied).
+      - h10_influxdb_data:/var/lib/influxdb3
 
   # Un bind mount no admite chown (lo necesita Durable %SYS) en este host: el
   # mismo problema que el Hito 9 documenta para Windows. Se resuelve igual,
@@ -113,8 +115,13 @@ services:
       - h10_iris_durable:/durable
       - ./scripts/iris:/scripts:ro,z
 
+# Todos los datos en volumenes nombrados (devolucion del Hito 6: el bind mount
+# ~/docker/data/... no es el volumen nombrado que pide RNF2).
 volumes:
   h10_mongo_data:
+  h10_cassandra_data:
+  h10_redis_data:
+  h10_influxdb_data:
   h10_neo4j_data:
   h10_neo4j_logs:
   h10_iris_durable:

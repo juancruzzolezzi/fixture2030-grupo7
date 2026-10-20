@@ -59,6 +59,14 @@ class DependenciaNoDisponible(ErrorDeAplicacion):
     tipo = "dependencia_no_disponible"
 
 
+class TiempoDeEsperaAgotado(ErrorDeAplicacion):
+    """La fuente no respondio dentro del timeout (Hito 11: antes esto tambien
+    era un 503 y no se podia distinguir de una base caida)."""
+
+    status_code = 504
+    tipo = "timeout_dependencia"
+
+
 class ErrorInterno(ErrorDeAplicacion):
     """Cualquier otra falla no prevista. El mensaje al cliente es generico a
     proposito; el detalle_interno queda solo en el log."""

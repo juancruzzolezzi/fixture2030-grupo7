@@ -1,0 +1,184 @@
+[
+ {
+  "dependencia": "mongodb",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:27017 (variables: MONGO_URI)",
+  "ms": null
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:27017 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:7687 (variables: NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)",
+  "ms": null
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:7687 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 31.000000000176442
+ },
+ {
+  "dependencia": "neo4j-http",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:7474 (variables: NEO4J_HTTP_URL)",
+  "ms": null
+ },
+ {
+  "dependencia": "neo4j-http",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "neo4j-http",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:7474 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:9042 (variables: CASSANDRA_HOSTS, CASSANDRA_KEYSPACE)",
+  "ms": null
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:9042 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 15.999999999849024
+ },
+ {
+  "dependencia": "redis",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:6379 (variables: REDIS_HOST, REDIS_PORT)",
+  "ms": null
+ },
+ {
+  "dependencia": "redis",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "redis",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:6379 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:8181 (variables: INFLUX_URL, INFLUX_DATABASE, INFLUX_TOKEN)",
+  "ms": null
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:8181 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 2077.9999999999745
+ },
+ {
+  "dependencia": "iris",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:1972 (variables: IRIS_HOST, IRIS_NAMESPACE, IRIS_USER, IRIS_PASSWORD)",
+  "ms": null
+ },
+ {
+  "dependencia": "iris",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "iris",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:1972 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 2047.0000000000255
+ },
+ {
+  "dependencia": "iris-portal",
+  "capa": "configuracion",
+  "resultado": "OK",
+  "detalle": "localhost:52773 (variables: IRIS_PORTAL_URL)",
+  "ms": null
+ },
+ {
+  "dependencia": "iris-portal",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "localhost -> 127.0.0.1",
+  "ms": null
+ },
+ {
+  "dependencia": "iris-portal",
+  "capa": "tcp",
+  "resultado": "OK",
+  "detalle": "localhost:52773 -> conexion TCP establecida (hay un listener; todavia no se sabe si es el producto correcto)",
+  "ms": 2047.0000000000255
+ },
+ {
+  "dependencia": "contraste",
+  "capa": "dns",
+  "resultado": "OK",
+  "detalle": "nombre de servicio 'mongodb' desde la notebook -> host no resuelto: [Errno 11001] getaddrinfo failed (ese nombre solo existe dentro de la red de Docker)",
+  "ms": null
+ },
+ {
+  "dependencia": "contraste",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "PING de Redis al puerto de Mongo: TCP OK pero no contesta (espera un mensaje de Mongo). Puerto abierto != protocolo correcto",
+  "ms": null
+ }
+]

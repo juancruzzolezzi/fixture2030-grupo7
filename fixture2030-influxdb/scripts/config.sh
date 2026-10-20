@@ -7,6 +7,8 @@
 
 CONTAINER="fixture2030-influxdb"
 DATABASE="fixture2030_series"
+DATABASE_HISTORICO="fixture2030_series_historico"
+RETENCION_CRUDOS="50d"               # torneo (~33 días) + 15 días (docs/retencion_y_granularidad.md)
 TOKEN_FILE=".influxdb3-token"
 PRECISION="s"                       # precisión declarada para todas las escrituras
 

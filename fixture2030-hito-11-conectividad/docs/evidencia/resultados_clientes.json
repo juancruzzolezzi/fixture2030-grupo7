@@ -1,0 +1,289 @@
+[
+ {
+  "dependencia": "mongodb",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "hello sin credenciales -> maxWireVersion=21",
+  "ms": 15.000000000100044
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "autenticacion",
+  "resultado": "OK",
+  "detalle": "usuario autenticado: [{'user': 'fixture_admin', 'db': 'admin'}]",
+  "ms": 15.999999999849024
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "database fixture2030, colecciones: ['equipos', 'jugadores']",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "equipos.find_one(_id='ARG') -> {'_id': 'ARG', 'nombre': 'Argentina'}",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "documento inexistente (ZZZ) -> None (ausencia, no error)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "database inexistente -> [] (Mongo no da error: crea las bases al escribir)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "mongodb",
+  "capa": "cliente CLI",
+  "resultado": "OK",
+  "detalle": "mongosh en h10-mongodb -> 64",
+  "ms": 483.9999999999236
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "Bolt responde",
+  "ms": 77.99999999997453
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "autenticacion",
+  "resultado": "OK",
+  "detalle": "verify_authentication() = True",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "autorizacion",
+  "resultado": "N/A",
+  "detalle": "Neo4j Community no tiene roles: cualquier usuario autenticado accede a todo",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "database 'neo4j': 2 partidos",
+  "ms": 94.00000000005093
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "Partido F2030-006 -> F2030-006",
+  "ms": 46.99999999979809
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "partido inexistente F2030-999 -> 0 nodos",
+  "ms": 78.00000000020191
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "eventos de F2030-001 (existe, sin eventos) -> 0 (vacio valido)",
+  "ms": 125.0
+ },
+ {
+  "dependencia": "neo4j-http",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "GET http://localhost:7474 -> HTTP 200 (Browser; la API no usa este puerto)",
+  "ms": 546.9999999997981
+ },
+ {
+  "dependencia": "neo4j",
+  "capa": "cliente CLI",
+  "resultado": "OK",
+  "detalle": "cypher-shell en h10-neo4j -> count(p) | 2",
+  "ms": 2733.9999999999236
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "sesion CQL abierta, Cassandra 5.0.9",
+  "ms": 1656.9999999999254
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "autenticacion",
+  "resultado": "N/A",
+  "detalle": "sin autenticacion en el laboratorio (AllowAllAuthenticator, igual que el Hito 6)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "keyspace fixture2030, tablas: ['comentarios_pendientes_moderacion', 'comentarios_por_bloque', 'comentarios_por_usuario']",
+  "ms": 15.000000000100044
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "3 comentarios de la particion (F2030-006, 203006181800), LIMIT 5",
+  "ms": 15.999999999849024
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "particion incompleta -> InvalidRequest inmediato (no es un timeout)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "keyspace inexistente -> NoHostAvailable: (\"Unable to connect to any servers using keyspace 'no_existe'\", ['::1'])",
+  "ms": 1297.0000000000255
+ },
+ {
+  "dependencia": "cassandra",
+  "capa": "cliente CLI",
+  "resultado": "OK",
+  "detalle": "cqlsh en h10-cassandra -> count | ------- | 3 | (1 rows)",
+  "ms": 734.000000000151
+ },
+ {
+  "dependencia": "redis",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "PING -> True",
+  "ms": 15.000000000100044
+ },
+ {
+  "dependencia": "redis",
+  "capa": "autenticacion",
+  "resultado": "N/A",
+  "detalle": "sin requirepass en el laboratorio (igual que el Hito 7)",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "redis",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "db 0, maxmemory-policy=noeviction",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "redis",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "sesion user-00001: EXISTS=1, TTL=1364 s",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "redis",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "clave ausente -> TTL=-2 (-2: no existe; una clave expirada se ve igual, Redis la borra al vencer)",
+  "ms": 15.999999999849024
+ },
+ {
+  "dependencia": "redis",
+  "capa": "cliente CLI",
+  "resultado": "OK",
+  "detalle": "redis-cli en h10-redis -> 1364",
+  "ms": 187.0000000001255
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "GET /health sin token -> HTTP 401 (401 = vivo y protegido)",
+  "ms": 2265.999999999849
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "autenticacion",
+  "resultado": "OK",
+  "detalle": "GET /health con token -> HTTP 200",
+  "ms": 2328.000000000202
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "database fixture2030_series: SELECT 1 -> HTTP 200",
+  "ms": 2405.999999999949
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "3 puntos en una ventana de 5 minutos (LIMIT 10)",
+  "ms": 2469.000000000051
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "database inexistente -> HTTP 404",
+  "ms": 2312.9999999998745
+ },
+ {
+  "dependencia": "influxdb",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "token invalido -> HTTP 401",
+  "ms": 2483.9999999999236
+ },
+ {
+  "dependencia": "iris",
+  "capa": "autenticacion",
+  "resultado": "OK",
+  "detalle": "Superserver: conexion y login OK (el SDK no separa handshake y login)",
+  "ms": 47.000000000025466
+ },
+ {
+  "dependencia": "iris",
+  "capa": "contexto",
+  "resultado": "OK",
+  "detalle": "namespace USER, clase Fixture.Partido compilada = 1",
+  "ms": 15.000000000100044
+ },
+ {
+  "dependencia": "iris",
+  "capa": "lectura",
+  "resultado": "OK",
+  "detalle": "F2030-006 -> {\"encontrado\":1,\"codigo\":\"F2030-006\",\"sede\":\"Buenos Aires\",\"local\":\"ARG\",\"visitante\":\"ESP\",\"estado\":\"EnJuego\",",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "iris",
+  "capa": "contraste",
+  "resultado": "OK",
+  "detalle": "F2030-999 -> {\"encontrado\":false}",
+  "ms": 0.0
+ },
+ {
+  "dependencia": "iris-portal",
+  "capa": "protocolo",
+  "resultado": "OK",
+  "detalle": "GET /csp/sys/UtilHome.csp -> HTTP 200 (portal; la API usa el 1972)",
+  "ms": 2452.9999999999745
+ },
+ {
+  "dependencia": "iris",
+  "capa": "cliente CLI",
+  "resultado": "OK",
+  "detalle": "iris session en h10-iris -> 1",
+  "ms": 202.99999999997453
+ }
+]

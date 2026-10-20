@@ -1,0 +1,8 @@
+# Los scripts se corren con bash (tambien en Windows con Git Bash):
+# siempre con fin de linea LF, aunque git este configurado con autocrlf.
+*.sh     text eol=lf
+*.env*   text eol=lf
+*.cypher text eol=lf
+*.cql    text eol=lf
+*.txt    text eol=lf
+*.redis  text eol=lf

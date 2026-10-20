@@ -28,13 +28,20 @@ def _activo():
             namespace=settings.iris.namespace,
             username=settings.iris.usuario,
             password=settings.iris.password,
+            timeout=int(settings.iris.timeout_s),  # sin esto el SDK espera 10 s
+            sharedmemory=False,  # con "localhost" intenta memoria compartida, que no existe contra un contenedor
         )
         _irispy = iris.createIRIS(_conexion)
     return _irispy
 
 
 def _traducir(exc: Exception, contexto: str):
-    raise DependenciaNoDisponible("IRIS no respondio a tiempo.", detalle_interno=f"{contexto}: {exc!r}") from exc
+    # Hito 11: si IRIS se reinicia, la conexion guardada queda muerta y la API
+    # respondia 503 para siempre (hasta reiniciar la API). Ahora se descarta y
+    # la proxima request vuelve a conectar.
+    global _conexion, _irispy
+    _conexion, _irispy = None, None
+    raise DependenciaNoDisponible("IRIS no esta disponible.", detalle_interno=f"{contexto}: {exc!r}") from exc
 
 
 def obtener_partido_detalle(codigo: str) -> dict | None:
@@ -73,8 +80,10 @@ def cambiar_estado_partido(codigo: str, nuevo_estado: str) -> dict:
 
 
 def verificar_conectividad() -> bool:
+    global _conexion, _irispy
     try:
         _activo().classMethodValue("%SYSTEM.Version", "GetVersion")
         return True
     except Exception:  # noqa: BLE001
+        _conexion, _irispy = None, None  # que el proximo intento reconecte
         return False

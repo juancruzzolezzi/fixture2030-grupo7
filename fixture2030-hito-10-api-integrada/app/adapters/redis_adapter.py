@@ -6,10 +6,12 @@ Hash pero no se devuelve en la respuesta, tal como documenta el Hito 7).
 """
 
 import redis
-from redis.exceptions import RedisError
+from redis.backoff import ConstantBackoff
+from redis.exceptions import RedisError, TimeoutError as RedisTimeoutError
+from redis.retry import Retry
 
 from app.config import settings
-from app.errors import DependenciaNoDisponible, ErrorInterno
+from app.errors import DependenciaNoDisponible, ErrorInterno, TiempoDeEsperaAgotado
 
 _cliente: redis.Redis | None = None
 
@@ -23,15 +25,20 @@ def _activo() -> redis.Redis:
             db=settings.redis.db,
             socket_connect_timeout=settings.redis.timeout_s,
             socket_timeout=settings.redis.timeout_s,
+            # redis-py reintenta 3 veces por defecto: con Redis caido el 503 tardaba
+            # ~4,8 s con un timeout de 2 s (Hito 11). Se deja 1 reintento.
+            retry=Retry(ConstantBackoff(0.1), 1),
             decode_responses=True,
         )
     return _cliente
 
 
 def _traducir(exc: Exception, contexto: str):
+    if isinstance(exc, RedisTimeoutError):
+        raise TiempoDeEsperaAgotado("Redis no respondio a tiempo.", detalle_interno=f"{contexto}: {exc!r}") from exc
     if isinstance(exc, RedisError):
         raise DependenciaNoDisponible(
-            "Redis no respondio a tiempo.",
+            "Redis no esta disponible.",
             detalle_interno=f"{contexto}: {exc!r}",
         ) from exc
     raise ErrorInterno("Fallo inesperado consultando Redis.", detalle_interno=f"{contexto}: {exc!r}") from exc

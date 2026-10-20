@@ -669,22 +669,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /salud:
+  /salud/vivo:
     get:
       tags:
       - Operacion
-      summary: Conectividad real de cada fuente (RF17, RNF11)
-      description: 'No cachea ni asume nada: prueba la conexion de verdad en cada
-        llamada.
-
-        Pensado para `scripts/verificar_conectividad.*`, no para alta frecuencia.'
-      operationId: salud_salud_get
+      summary: 'Liveness: el proceso de la API responde (no consulta bases)'
+      operationId: salud_vivo_salud_vivo_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema: {}
+  /salud/listo:
+    get:
+      tags:
+      - Operacion
+      summary: 'Readiness: up/degraded (200) o down (503)'
+      operationId: salud_listo_salud_listo_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '503':
+          description: Ninguna dependencia responde
+  /salud:
+    get:
+      tags:
+      - Operacion
+      summary: Estado y latencia de cada dependencia
+      description: Con ?forzar=true no usa el resultado guardado (para diagnostico
+        manual).
+      operationId: salud_salud_get
+      parameters:
+      - name: forzar
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Forzar
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
     AgregacionEstadistica:

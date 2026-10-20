@@ -25,7 +25,7 @@ Las estadísticas en vivo no valen lo mismo durante el partido, durante el torne
 
 ## 3. Cómo se aplica en InfluxDB 3 Core
 
-En Core el período de retención se fija **al crear la base** y no se puede cambiar después. Por eso el diseño usa dos bases:
+En Core el período de retención se define por base (`--retention-period`). La entrega original indicaba que solo podía fijarse al crear la base; con InfluxDB 3 Core 3.12.1 se verificó que también se puede cambiar con `influxdb3 update database --retention-period`. El diseño usa dos bases:
 
 | Base | Contenido | Retención |
 |---|---|---|
@@ -34,7 +34,15 @@ En Core el período de retención se fija **al crear la base** y no se puede cam
 
 Los resúmenes se obtienen con consultas de ventana como AG2: la misma consulta de agregación acotada a cada rango de tiempo (`WHERE time >= inicio AND time < fin`). En la prueba se ve la reducción: 6.300 puntos de un equipo en un partido pasan a 21 filas de 5 minutos (serían 105 filas con ventanas de 1 minuto).
 
-**En la prueba local** la base se crea sin retención, porque los datos son simulados y se necesitan para repetir las consultas. La política queda definida y justificada pero no aplicada al laboratorio (el hito pide definirla y documentarla, RF10).
+**Aplicación en el laboratorio (corregido después de la devolución).** Antes la base del laboratorio se creaba sin retención. Ahora `scripts/inicializacion.sh` crea `fixture2030_series` con `--retention-period 50d` (o la actualiza si ya existía) y `fixture2030_series_historico` sin vencimiento, y al final muestra la configuración leída de `system.databases` (base `_internal`):
+
+```sql
+SELECT database_name, retention_period_ns / 86400000000000 AS retencion_dias
+FROM system.databases
+WHERE database_name IN ('fixture2030_series', 'fixture2030_series_historico');
+```
+
+Los datos simulados tienen fechas de junio/julio de 2030 (en el futuro respecto de la fecha de prueba), así que la retención de 50 días no los borra mientras se repiten las consultas.
 
 ## 4. Efecto de la política
 

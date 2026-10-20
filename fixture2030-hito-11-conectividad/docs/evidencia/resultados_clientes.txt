@@ -1,0 +1,58 @@
+Hito 11 - pruebas con el cliente/driver de cada producto
+Fecha: 2026-10-19T22:57:54-03:00 | commit: 22ef2fc | entorno: notebook (API fuera de Docker, bases en Docker Compose)
+--------------------------------------------------------------------------------------------------------------
+
+== mongodb
+[OK          ] mongodb      protocolo          15.0 ms  hello sin credenciales -> maxWireVersion=21
+[OK          ] mongodb      autenticacion      16.0 ms  usuario autenticado: [{'user': 'fixture_admin', 'db': 'admin'}]
+[OK          ] mongodb      contexto            0.0 ms  database fixture2030, colecciones: ['equipos', 'jugadores']
+[OK          ] mongodb      lectura             0.0 ms  equipos.find_one(_id='ARG') -> {'_id': 'ARG', 'nombre': 'Argentina'}
+[OK          ] mongodb      contraste           0.0 ms  documento inexistente (ZZZ) -> None (ausencia, no error)
+[OK          ] mongodb      contraste           0.0 ms  database inexistente -> [] (Mongo no da error: crea las bases al escribir)
+[OK          ] mongodb      cliente CLI       484.0 ms  mongosh en h10-mongodb -> 64
+
+== neo4j
+[OK          ] neo4j        protocolo          78.0 ms  Bolt responde
+[OK          ] neo4j        autenticacion       0.0 ms  verify_authentication() = True
+[N/A         ] neo4j        autorizacion        0.0 ms  Neo4j Community no tiene roles: cualquier usuario autenticado accede a todo
+[OK          ] neo4j        contexto           94.0 ms  database 'neo4j': 2 partidos
+[OK          ] neo4j        lectura            47.0 ms  Partido F2030-006 -> F2030-006
+[OK          ] neo4j        contraste          78.0 ms  partido inexistente F2030-999 -> 0 nodos
+[OK          ] neo4j        contraste         125.0 ms  eventos de F2030-001 (existe, sin eventos) -> 0 (vacio valido)
+[OK          ] neo4j-http   protocolo         547.0 ms  GET http://localhost:7474 -> HTTP 200 (Browser; la API no usa este puerto)
+[OK          ] neo4j        cliente CLI      2734.0 ms  cypher-shell en h10-neo4j -> count(p) | 2
+
+== cassandra
+[OK          ] cassandra    protocolo        1657.0 ms  sesion CQL abierta, Cassandra 5.0.9
+[N/A         ] cassandra    autenticacion       0.0 ms  sin autenticacion en el laboratorio (AllowAllAuthenticator, igual que el Hito 6)
+[OK          ] cassandra    contexto           15.0 ms  keyspace fixture2030, tablas: ['comentarios_pendientes_moderacion', 'comentarios_por_bloque', 'comentarios_por_usuario']
+[OK          ] cassandra    lectura            16.0 ms  3 comentarios de la particion (F2030-006, 203006181800), LIMIT 5
+[OK          ] cassandra    contraste           0.0 ms  particion incompleta -> InvalidRequest inmediato (no es un timeout)
+[OK          ] cassandra    contraste        1297.0 ms  keyspace inexistente -> NoHostAvailable: ("Unable to connect to any servers using keyspace 'no_existe'", ['::1'])
+[OK          ] cassandra    cliente CLI       734.0 ms  cqlsh en h10-cassandra -> count | ------- | 3 | (1 rows)
+
+== redis
+[OK          ] redis        protocolo          15.0 ms  PING -> True
+[N/A         ] redis        autenticacion       0.0 ms  sin requirepass en el laboratorio (igual que el Hito 7)
+[OK          ] redis        contexto            0.0 ms  db 0, maxmemory-policy=noeviction
+[OK          ] redis        lectura             0.0 ms  sesion user-00001: EXISTS=1, TTL=1364 s
+[OK          ] redis        contraste          16.0 ms  clave ausente -> TTL=-2 (-2: no existe; una clave expirada se ve igual, Redis la borra al vencer)
+[OK          ] redis        cliente CLI       187.0 ms  redis-cli en h10-redis -> 1364
+
+== influxdb
+[OK          ] influxdb     protocolo        2266.0 ms  GET /health sin token -> HTTP 401 (401 = vivo y protegido)
+[OK          ] influxdb     autenticacion    2328.0 ms  GET /health con token -> HTTP 200
+[OK          ] influxdb     contexto         2406.0 ms  database fixture2030_series: SELECT 1 -> HTTP 200
+[OK          ] influxdb     lectura          2469.0 ms  3 puntos en una ventana de 5 minutos (LIMIT 10)
+[OK          ] influxdb     contraste        2313.0 ms  database inexistente -> HTTP 404
+[OK          ] influxdb     contraste        2484.0 ms  token invalido -> HTTP 401
+
+== iris
+[OK          ] iris         autenticacion      47.0 ms  Superserver: conexion y login OK (el SDK no separa handshake y login)
+[OK          ] iris         contexto           15.0 ms  namespace USER, clase Fixture.Partido compilada = 1
+[OK          ] iris         lectura             0.0 ms  F2030-006 -> {"encontrado":1,"codigo":"F2030-006","sede":"Buenos Aires","local":"ARG","visitante":"ESP","estado":"EnJuego",
+[OK          ] iris         contraste           0.0 ms  F2030-999 -> {"encontrado":false}
+[OK          ] iris-portal  protocolo        2453.0 ms  GET /csp/sys/UtilHome.csp -> HTTP 200 (portal; la API usa el 1972)
+[OK          ] iris         cliente CLI       203.0 ms  iris session en h10-iris -> 1
+--------------------------------------------------------------------------------------------------------------
+Resumen: N/A=3, OK=38
