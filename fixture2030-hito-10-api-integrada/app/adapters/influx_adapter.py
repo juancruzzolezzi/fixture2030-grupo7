@@ -11,6 +11,7 @@ antes de interpolar, porque esta API HTTP no admite bind parameters.
 """
 
 import re
+import threading
 
 import httpx
 
@@ -42,14 +43,39 @@ def validar_agregacion(campo: str, funcion: str) -> tuple[str, str]:
     return campo, funcion
 
 
+# Hito 12: httpx.post() crea un httpx.Client en cada llamada, y crear un
+# cliente cuesta ~30 ms de CPU (arma el contexto SSL aunque la URL sea http).
+# Con INFLUX_REUSAR_CLIENTE=1 se usa un unico cliente con pool de conexiones
+# (httpx.Client se puede compartir entre threads). Con 0 queda como en el
+# Hito 10: es la linea base de la prueba de carga.
+_cliente = None
+_cliente_lock = threading.Lock()
+MAX_CONEXIONES = 20  # si hay mas consultas simultaneas, esperan una conexion libre (hasta el timeout -> 504)
+
+
+def _cliente_compartido() -> httpx.Client:
+    global _cliente
+    with _cliente_lock:
+        if _cliente is None:
+            _cliente = httpx.Client(
+                timeout=settings.influx.timeout_s,
+                limits=httpx.Limits(max_connections=MAX_CONEXIONES, max_keepalive_connections=MAX_CONEXIONES),
+            )
+    return _cliente
+
+
 def _consultar(sql: str) -> list[dict]:
+    pedido = dict(
+        headers={"Authorization": f"Bearer {settings.influx.token}"},
+        json={"db": settings.influx.database, "q": sql, "format": "json"},
+        timeout=settings.influx.timeout_s,
+    )
+    url = f"{settings.influx.url}/api/v3/query_sql"
     try:
-        respuesta = httpx.post(
-            f"{settings.influx.url}/api/v3/query_sql",
-            headers={"Authorization": f"Bearer {settings.influx.token}"},
-            json={"db": settings.influx.database, "q": sql, "format": "json"},
-            timeout=settings.influx.timeout_s,
-        )
+        if settings.influx.reusar_cliente:
+            respuesta = _cliente_compartido().post(url, **pedido)
+        else:
+            respuesta = httpx.post(url, **pedido)
     except httpx.TimeoutException as exc:
         raise TiempoDeEsperaAgotado("InfluxDB no respondio a tiempo.", detalle_interno=f"{sql}: {exc!r}") from exc
     except httpx.HTTPError as exc:

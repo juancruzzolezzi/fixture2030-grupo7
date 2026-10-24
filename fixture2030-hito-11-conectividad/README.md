@@ -81,3 +81,10 @@ por `***` antes de imprimir o guardar.
   (ver `docs/topologia_y_entornos.md`).
 - Los tiempos que aparecen son de una sola request, sin carga. Las pruebas de
   carga son del Hito 12.
+
+## Después de la devolución
+
+- Los archivos `escenario_*.txt` ahora registran el commit (y cuántos archivos
+  de la API o de los scripts había sin commitear), igual que la matriz. Los
+  tres escenarios se volvieron a correr después de commitear, así que el
+  commit que figura es el código que se probó.

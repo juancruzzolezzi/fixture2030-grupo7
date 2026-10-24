@@ -45,8 +45,13 @@ pedir() {
 
 compose() { (cd "$HITO10" && docker compose "$@"); }
 
+# Version exacta que se probo: commit y, si los hay, archivos con cambios sin commitear.
+COMMIT="$(git -C "$HITO11" rev-parse --short HEAD 2>/dev/null || echo desconocido)"
+CAMBIOS="$(git -C "$HITO11/.." status --porcelain -- fixture2030-hito-10-api-integrada fixture2030-hito-11-conectividad/scripts 2>/dev/null | wc -l | tr -d ' ')"
+
 {
   echo "Escenario de falla: $SERVICIO ($ACCION) | $(date -Iseconds)"
+  echo "Commit: $COMMIT | archivos de la API o de los scripts sin commitear: $CAMBIOS"
   echo "API: $API"
   echo
   echo "== 1. Condicion inicial"

@@ -62,6 +62,7 @@ class InfluxConfig:
     database: str = _env("INFLUX_DATABASE", "fixture2030_series")
     token: str = _env("INFLUX_TOKEN", "")  # sale de .influxdb3-token, nunca hardcodeado
     timeout_s: float = float(_env("INFLUX_TIMEOUT_S", "3"))
+    reusar_cliente: bool = _env("INFLUX_REUSAR_CLIENTE", "1") == "1"  # Hito 12; 0 = como en el Hito 10
 
 
 @dataclass(frozen=True)

@@ -141,3 +141,6 @@ docs/                    casos de uso, arquitectura, contratos, conectividad, pr
   throughput de escritura masiva.
 - La API no tiene autenticación propia: ningún endpoint la requiere, igual
   que ninguna de las seis bases la tiene configurada en su ambiente local.
+- Hito 12: el adaptador de InfluxDB usa un solo cliente HTTP con pool de
+  conexiones (`INFLUX_REUSAR_CLIENTE=1`). Con `0` vuelve a crear un cliente
+  por consulta, como antes. La medición está en `../fixture2030-hito-12-carga-optimizacion/`.
