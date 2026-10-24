@@ -1,14 +1,15 @@
-Escenario de falla: iris (detener) | 2026-10-20T00:03:07-03:00
+Escenario de falla: iris (detener) | 2026-10-23T23:18:31-03:00
+Commit: a6609bb | archivos de la API o de los scripts sin commitear: 0
 API: http://127.0.0.1:8000
 
 == 1. Condicion inicial
-  contenedor: h10-iris Up 4 minutes (healthy)
+  contenedor: h10-iris Up 22 minutes (healthy)
   volumenes: fixture2030-hito-10-api-integrada_h10_iris_durable 
   GET /partidos/F2030-006/entidad-compleja
-    -> HTTP 200 en 0.004789s | request_id=b2b108c5-2571-42c9-b438-c91362786c67
+    -> HTTP 200 en 0.026986s | request_id=30dd889e-af7c-492e-82c2-109e56b96b92
     -> {"codigo":"F2030-006","sede":"Buenos Aires","local":"ARG","visitante":"ESP","estado":"EnJuego","arbitro":"Marta Ruiz","eventos":[{"tipo":"Gol","minuto":23,"jugador":"Mateo Gonzalez"}]}
   GET /salud?forzar=true
-    -> HTTP 200 en 0.770582s | request_id=82908d80-72bf-4b8f-bf5f-def65f481c8b
+    -> HTTP 200 en 0.023887s | request_id=ea7cd9cb-ecd5-4074-9770-7953972e749e
     -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":16.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"u
 
 == 2. Cambio aplicado: docker compose stop iris
@@ -17,21 +18,21 @@ API: http://127.0.0.1:8000
 
 == 3. Durante la falla
   GET /partidos/F2030-006/entidad-compleja
-    -> HTTP 503 en 0.006426s | request_id=6fb40bff-b62c-46aa-a0ff-f725323e0e89
-    -> {"error":{"tipo":"dependencia_no_disponible","mensaje":"IRIS no esta disponible.","request_id":"6fb40bff-b62c-46aa-a0ff-f725323e0e89"}}
+    -> HTTP 503 en 0.010055s | request_id=98d6391b-13fd-4a29-b64b-a34dc49ef6c5
+    -> {"error":{"tipo":"dependencia_no_disponible","mensaje":"IRIS no esta disponible.","request_id":"98d6391b-13fd-4a29-b64b-a34dc49ef6c5"}}
   GET /salud?forzar=true
-    -> HTTP 200 en 2.060936s | request_id=143869f2-a461-4d76-96a1-ed1381dac032
-    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estad
+    -> HTTP 200 en 2.081869s | request_id=31f15817-3044-4e7a-adfd-14990392f692
+    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":16.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"esta
   GET /salud/listo
-    -> HTTP 200 en 0.029277s | request_id=46c3251f-2a9b-4788-8fe7-756252b8eee2
+    -> HTTP 200 en 0.002561s | request_id=176094ce-393b-4565-bfb2-213d1bf09c13
     -> {"estado":"degraded","dependencias":{"mongodb":"up","neo4j":"up","cassandra":"up","redis":"up","influxdb":"up","iris":"down"}}
   otro modulo (deberia seguir andando):
   GET /equipos/ARG
-    -> HTTP 200 en 0.005135s | request_id=9e1743d6-a8fe-4ee3-86f0-46ffc4ceb3c1
+    -> HTTP 200 en 0.005422s | request_id=ec5f6346-a587-43b8-ae5f-eb268dc90683
     -> {"_id":"ARG","nombre":"Argentina","confederacion":"CONMEBOL","sede_mundial":true,"ranking_fifa":172,"cantidad_jugadores":25}
-  log de la API para esa request (request_id=6fb40bff-b62c-46aa-a0ff-f725323e0e89):
-    request_id=6fb40bff-b62c-46aa-a0ff-f725323e0e89 tipo=dependencia_no_disponible detalle=obtener_partido_detalle(F2030-006): RuntimeError('<COMMUNICATION LINK ERROR> Failed to receive message; Details: Error code: 10053 Error message: read_all:  re
-    request_id=6fb40bff-b62c-46aa-a0ff-f725323e0e89 metodo=GET ruta=/partidos/F2030-006/entidad-compleja status=503 duracion_ms=0.0
+  log de la API para esa request (request_id=98d6391b-13fd-4a29-b64b-a34dc49ef6c5):
+    request_id=98d6391b-13fd-4a29-b64b-a34dc49ef6c5 tipo=dependencia_no_disponible detalle=obtener_partido_detalle(F2030-006): RuntimeError('<COMMUNICATION LINK ERROR> Failed to receive message; Details: Error code: 10053 Error message: read_all:  re
+    request_id=98d6391b-13fd-4a29-b64b-a34dc49ef6c5 metodo=GET ruta=/partidos/F2030-006/entidad-compleja status=503 duracion_ms=0.0
 
 == 4. Recuperacion: docker compose start iris
    Container fixture2030-hito-10-api-integrada-iris-init-1 Starting 
@@ -40,13 +41,13 @@ API: http://127.0.0.1:8000
    Container fixture2030-hito-10-api-integrada-iris-init-1 Exited 
    Container h10-iris Starting 
    Container h10-iris Started 
-  la ruta volvio a responder 200 a los 4 s
+  la ruta volvio a responder 200 a los 2 s
 
 == 5. Despues de recuperar
   GET /partidos/F2030-006/entidad-compleja
-    -> HTTP 200 en 0.005219s | request_id=b03acfb9-2100-43fa-825d-830d4fdda30a
+    -> HTTP 200 en 0.005058s | request_id=c7ed9a60-8b8d-4809-888c-1abe3bcbbfb4
     -> {"codigo":"F2030-006","sede":"Buenos Aires","local":"ARG","visitante":"ESP","estado":"EnJuego","arbitro":"Marta Ruiz","eventos":[{"tipo":"Gol","minuto":23,"jugador":"Mateo Gonzalez"}]}
   GET /salud?forzar=true
-    -> HTTP 200 en 0.418683s | request_id=cd0e80ba-3ebf-4185-b602-904fa2396605
-    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":15.0},"neo4j":{"estado":"up","ms":15.0},"cassandra":{"estado":"up","ms":15.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":
+    -> HTTP 200 en 0.016147s | request_id=5cb4b895-12f9-4589-bee6-d55071cc2ea1
+    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"up
   volumenes: fixture2030-hito-10-api-integrada_h10_iris_durable 

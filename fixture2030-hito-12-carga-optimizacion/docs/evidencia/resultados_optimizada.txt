@@ -1,0 +1,64 @@
+Hito 12 - prueba de carga | modo: optimizada (INFLUX_REUSAR_CLIENTE=1) | corrida op1023230530-5ef1
+Fecha: 2026-10-23T23:07:11-03:00 | commit: a6609bb (sin cambios sin commitear)
+Entorno: Windows 11, 8 CPU logicas, 15.7 GB de RAM, Python 3.12.2; fastapi 0.143.1, uvicorn 0.54.0, httpx 0.28.1, cassandra-driver 3.30.1, psutil 7.2.2
+Imagenes: h10-cassandra: cassandra:latest CASSANDRA_VERSION=5.0.9 | h10-influxdb: influxdb:3-core INFLUXDB_VERSION=3.12.1
+Escenario: 30 usuarios virtuales x 2 ops/s = 60 ops/s objetivo; calentamiento 10 s, rampa 20 s, sostenimiento 60 s; mezcla 60/20/20 (leer comentarios/publicar/leer estadisticas); timeout 10 s
+Datos: partido F2030-006 minuto 60 (bloque 203006181900); keyspace fixture2030_h12, base InfluxDB fixture2030_h12 (ver preparacion_datos.txt)
+Resultado de la corrida: completa
+Medicion: latencia = tiempo de cada request visto por el generador (ms, solo respuestas correctas);
+  una respuesta es correcta si tiene el status esperado Y el contenido esperado (cantidad de items, id).
+
+== Calentamiento (10.0 s, no se compara)
+operacion                ops    ok  err   ok/s    min    p50    p90    p95     p99     max  (ms)
+leer_comentarios          61    61    0    6.1    7.7   22.1   32.8   34.5    38.2    38.2
+publicar_comentario       20    20    0    2.0   11.3   27.5   34.7   34.7    35.2    35.2
+leer_estadisticas         14    14    0    1.4   12.0   17.5   24.2   28.2    28.2    28.2
+total                     95    95    0    9.5    7.7   22.5   34.2   34.7    38.2    38.2
+errores: ninguno
+
+== Rampa (20.0 s, no se compara)
+operacion                ops    ok  err   ok/s    min    p50    p90    p95     p99     max  (ms)
+leer_comentarios         407   407    0   20.4    4.2   20.5   25.2   30.2    43.5    63.2
+publicar_comentario      134   134    0    6.7    9.8   29.5   37.9   43.8    57.4    80.4
+leer_estadisticas        130   130    0    6.5    9.4   14.5   25.3   28.1    34.4    35.7
+total                    671   671    0   33.5    4.2   20.5   33.5   35.9    54.8    80.4
+errores: ninguno
+
+== Sostenimiento (60.0 s, lo que se compara)
+operacion                ops    ok  err   ok/s    min    p50    p90    p95     p99     max  (ms)
+leer_comentarios        2210  2210    0   36.8    3.9   20.3   24.9   26.7    49.3    88.7
+publicar_comentario      653   653    0   10.9    5.4   23.6   35.9   38.6    49.6    73.3
+leer_estadisticas        736   736    0   12.3    8.9   13.6   24.2   29.0    53.2    57.6
+total                   3599  3599    0   60.0    3.9   20.0   28.2   34.4    50.3    88.7
+errores: ninguno
+
+Tasa objetivo 60 ops/s; lograda en sostenimiento 60.0 ops/s; operaciones que salieron tarde porque la anterior no habia respondido: 0
+
+== Recursos durante el sostenimiento (10 muestras cada 5 s; promedio / maximo)
+API (uvicorn, 1 proceso):   CPU 23 / 26 %  (100 % = 1 nucleo), memoria 120 / 121 MB
+Generador de carga:         CPU 14 / 54 %
+Contenedor h10-cassandra:   CPU 25 / 66 %, memoria 4659 / 4685 MB
+Contenedor h10-influxdb:    CPU 6 / 10 %, memoria 122 / 124 MB
+
+== Evolucion cada 5 s
+ t (s)  fase            ops/s   p95 ms  errores
+     0  calentamiento     9.0     33.4        0
+     5  calentamiento    10.0     36.6        0
+    10  rampa            14.6     34.6        0
+    15  rampa            27.2     43.8        0
+    20  rampa            40.0     33.9        0
+    25  rampa            52.4     36.2        0
+    30  sostenimiento    59.8     34.0        0
+    35  sostenimiento    60.2     34.8        0
+    40  sostenimiento    59.8     32.9        0
+    45  sostenimiento    60.0     35.2        0
+    50  sostenimiento    60.2     34.1        0
+    55  sostenimiento    60.0     33.7        0
+    60  sostenimiento    60.0     36.3        0
+    65  sostenimiento    60.0     36.5        0
+    70  sostenimiento    60.0     33.5        0
+    75  sostenimiento    60.0     34.7        0
+    80  sostenimiento    59.8     33.3        0
+    85  sostenimiento    60.0     34.3        0
+
+Escrituras: 807 aceptadas (201), 0 rechazadas, 0 sin respuesta. La verificacion contra Cassandra esta en integridad_optimizada.txt

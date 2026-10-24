@@ -31,9 +31,10 @@ notebook
 
 ## Límites de la notebook (RNF9)
 
-- 30 usuarios virtuales y 60 ops/s es una carga que la notebook atiende sin
-  trabarse. Para probar más, cambiar `USUARIOS_VIRTUALES` en `config/local.env`
-  de a poco, nunca de golpe.
+- 30 usuarios virtuales y 60 ops/s: en nuestra notebook la línea base ya se
+  satura (API al 556 % de CPU) y la optimizada lo atiende con la API al 23 %.
+  Para probar más, cambiar `USUARIOS_VIRTUALES` en `config/local.env` de a
+  poco, nunca de golpe.
 - Cada request tiene un timeout de 10 s.
 - La prueba se corta sola si falla más del 20 % de las operaciones en 5 s. Con
   Ctrl+C se corta a mano y guarda lo medido hasta ahí.

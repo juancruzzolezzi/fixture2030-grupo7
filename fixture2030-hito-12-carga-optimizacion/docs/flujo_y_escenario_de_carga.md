@@ -39,7 +39,7 @@ se guardan en el resultado de cada corrida.
 | Parámetro | Valor | Por qué |
 |---|---|---|
 | Datos iniciales | 6.300 comentarios (21 bloques × 300) y 12.600 puntos (105 min × 2 equipos × 1/s) | Un partido completo, ver `datos-o-generadores/README.md` |
-| Usuarios virtuales | 30 | Lo que una notebook genera y atiende sin trabarse (RNF9) |
+| Usuarios virtuales | 30 | Lo que una notebook genera sin exigirse: el generador usó ~15 % de CPU en nuestra corrida (RNF9) |
 | Tasa objetivo | 2 operaciones/s por usuario = **60 ops/s** | Cada usuario espera su respuesta antes de la siguiente (modelo cerrado). Si la API tarda más de 0,5 s, la tasa real baja y se cuenta como "operación atrasada". |
 | Proporción | 60 % leer comentarios, 20 % publicar, 20 % leer estadísticas | 80 % lecturas / 20 % escrituras. Mucha más gente lee que escribe. |
 | Distribución de claves | 80 % de las lecturas de comentarios van al bloque actual (19:00), 20 % a un bloque anterior al azar. Todas las escrituras van al bloque actual. Estadísticas: ARG o ESP al 50 %. | El bloque actual es la clave "caliente", como en un partido real. |

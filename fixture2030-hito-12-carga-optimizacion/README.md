@@ -9,10 +9,12 @@ verificamos que no se pierdan ni se dupliquen datos, y proponemos un Data Mart
 para una pregunta analítica.
 
 **Resultado en una línea**: el adaptador de InfluxDB creaba un cliente HTTP
-nuevo por consulta, y eso costaba más CPU que la consulta misma. Reutilizando
-un solo cliente, a la misma carga bajan mucho la latencia de las estadísticas
-y la CPU de la API, y también bajan los p95 y p99 de las rutas de comentarios. Los números
-están en `docs/evidencia/comparacion.md`.
+nuevo por consulta, y en nuestra notebook eso tardaba ~250 ms, más que la
+consulta misma (5 ms). Reutilizando un solo cliente, con 30 usuarios
+virtuales la API pasó de atender 39,3 a 60 ops/s (las pedidas), el p95 de las
+estadísticas bajó de 2.767 ms a 29 ms y la CPU de la API de 556 % a 23 %. Sin
+errores y sin pérdidas de datos en ninguna de las dos corridas. Detalle en
+`docs/evidencia/comparacion.md`.
 
 ## Qué hay en esta carpeta
 
@@ -100,10 +102,11 @@ las deja escritas al principio de `comparacion.md`.
 
 - **Decisión**: dejamos el cliente compartido (`INFLUX_REUSAR_CLIENTE=1` por
   defecto en el `.env.example` del Hito 10).
-- **Mejora observada**: a 60 ops/s, mucho menos p95 y p99 en estadísticas y
-  bastante menos CPU de la API. En los comentarios bajan las colas (p95 y
-  p99) sin haber tocado Cassandra; la mediana queda parecida. El throughput es el mismo porque las dos versiones llegan
-  a la tasa objetivo: la ganancia es margen, no más ops/s medidas.
+- **Mejora observada**: la línea base estaba saturada (39,3 de 60 ops/s,
+  579 operaciones atrasadas). La optimizada atiende las 60 ops/s sin atrasos.
+  Estadísticas: p95 de 2.767 a 29 ms. Comentarios: bajan p95 y p99 sin haber
+  tocado Cassandra (leer 34 → 27 ms, publicar 55 → 39 ms). CPU de la API: de
+  556 % a 23 %.
 - **Trade-offs**: un cliente que vive todo el proceso, un límite explícito de
   20 conexiones (si se llena, 504 por timeout) y conexiones abiertas contra
   InfluxDB aunque no haya tráfico.

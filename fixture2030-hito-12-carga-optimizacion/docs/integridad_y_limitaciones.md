@@ -46,7 +46,7 @@ habría que medirla con este mismo escenario antes de adoptarlo.
 | | Probado en la notebook | Proyectado para el Fixture |
 |---|---|---|
 | Comentarios en la base | 6.300 de un partido (300 por bloque) + los de cada corrida | Hito 6: 160.000 para F2030-006 y bloques calientes de hasta ~90.000 filas |
-| Escrituras de comentarios | ~12/s (20 % de 60 ops/s) | Hito 6: picos de hasta 300 comentarios/s por partido |
+| Escrituras de comentarios | 7,2/s en la línea base y 10,9/s en la optimizada (20 % de la mezcla) | Hito 6: picos de hasta 300 comentarios/s por partido |
 | Puntos de estadísticas | 12.600 (un partido) | Hito 8: ~1,6 millones en la tabla `estadisticas` (127 partidos) |
 | Usuarios simultáneos | 30 usuarios virtuales | Miles por partido |
 
@@ -60,10 +60,12 @@ habría que medirla con este mismo escenario antes de adoptarlo.
 
 **Qué no pudimos medir**
 
-- La capacidad máxima (a partir de qué tasa la API empieza a fallar o a
-  atrasarse) en las dos versiones. Para eso habría que subir
-  `USUARIOS_VIRTUALES` en `config/local.env` por escalones. Lo dejamos fuera
-  para no exigir la notebook (RNF9).
+- La capacidad máxima de la versión optimizada. La línea base ya se saturó con
+  30 usuarios (39,3 de 60 ops/s). La optimizada atendió las 60 ops/s con la
+  API al 23 % de CPU, pero no sabemos hasta cuánto llega. Para eso habría que
+  subir `USUARIOS_VIRTUALES` en `config/local.env` por escalones. Lo dejamos
+  fuera para no exigir la notebook (RNF9). Que tenga margen no quiere decir
+  que soporte, por ejemplo, 5 veces más: eso hay que medirlo.
 - La red: todo corre en la misma máquina, así que la latencia de red es casi
   cero. En producción habría que sumarla.
 - Disco y red de los contenedores. `docker stats` da CPU y memoria, que es lo
@@ -72,7 +74,9 @@ habría que medirla con este mismo escenario antes de adoptarlo.
 **Qué depende del entorno**
 
 - Los milisegundos absolutos dependen de la notebook: CPU, Windows o Linux,
-  memoria asignada a Docker. Por eso el entorno queda en el encabezado de cada
+  memoria asignada a Docker. Nuestra corrida es en Windows 11 con 8 CPU
+  lógicas y 15,7 GB de RAM. Ahí crear un cliente HTTP tarda ~250 ms; en otro
+  sistema el costo puede ser muy distinto, y con él la mejora. Por eso el entorno queda en el encabezado de cada
   resultado, y comparamos línea base y optimizada en la misma máquina, una
   después de la otra.
 - Docker Desktop en Windows corre las bases dentro de una VM (WSL2), y la API

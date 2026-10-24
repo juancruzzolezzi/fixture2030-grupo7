@@ -1,0 +1,17 @@
+Hito 12 - integridad | modo: linea_base | corrida li1023230127-1e4d
+Fecha: 2026-10-23T23:03:07-03:00 | commit: a6609bb | keyspace fixture2030_h12
+
+[OK      ] comentarios_por_bloque: 548 aceptados por la API (201), 548 filas de esta corrida en la tabla, faltantes 0
+[OK      ] ids repetidos en comentarios_por_bloque: 0
+[OK      ] rechazadas por la API: 0, sin respuesta (timeout/conexion): 0
+[OK      ] comentarios_por_usuario: 548 filas de esta corrida, diferencias con comentarios_por_bloque: 0
+[OK      ] comentarios sembrados: 6300 filas, 6300 ids distintos (esperado 6300)
+[OK      ] puntos de InfluxDB por equipo: {'ARG': 6300, 'ESP': 6300} (esperado 6300 cada uno)
+[OK      ] leer_comentarios: 1446 respuestas con el contenido esperado, 0 con contenido incorrecto
+[OK      ] leer_estadisticas: 481 respuestas con el contenido esperado, 0 con contenido incorrecto
+[HALLAZGO] reintento li1023230127-1e4d-reintento-0: 2 envios, mismo id: si, filas en la tabla: 2
+[HALLAZGO] reintento li1023230127-1e4d-reintento-1: 2 envios, mismo id: si, filas en la tabla: 2
+[HALLAZGO] reintento li1023230127-1e4d-reintento-2: 2 envios, mismo id: si, filas en la tabla: 2
+
+HALLAZGO: el reintento devuelve el mismo id pero deja dos filas. El id es deterministico, pero
+creado_en (parte de la clave primaria) se toma en cada request. Ver docs/integridad_y_limitaciones.md.

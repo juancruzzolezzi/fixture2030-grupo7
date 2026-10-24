@@ -44,7 +44,8 @@ def validar_agregacion(campo: str, funcion: str) -> tuple[str, str]:
 
 
 # Hito 12: httpx.post() crea un httpx.Client en cada llamada, y crear un
-# cliente cuesta ~30 ms de CPU (arma el contexto SSL aunque la URL sea http).
+# cliente es caro: arma el contexto SSL aunque la URL sea http (en nuestra
+# notebook, ~250 ms; ver docs/evidencia/prueba_hipotesis.txt del Hito 12).
 # Con INFLUX_REUSAR_CLIENTE=1 se usa un unico cliente con pool de conexiones
 # (httpx.Client se puede compartir entre threads). Con 0 queda como en el
 # Hito 10: es la linea base de la prueba de carga.

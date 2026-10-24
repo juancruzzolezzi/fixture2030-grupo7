@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="300" font-family="sans-serif" font-size="12">
+<rect width="640" height="300" fill="white"/>
+<text x="50" y="20" font-size="14">p95 de latencia en el sostenimiento (ms, menor es mejor)</text>
+<line x1="50" y1="250" x2="590" y2="250" stroke="#333"/>
+<rect x="60" y="248" width="54" height="2" fill="#c0504d"/>
+<text x="62" y="244">34</text>
+<rect x="120" y="248" width="54" height="2" fill="#4f81bd"/>
+<text x="122" y="244">27</text>
+<text x="60" y="266">leer_comentarios</text>
+<rect x="195" y="247" width="54" height="3" fill="#c0504d"/>
+<text x="197" y="243">55</text>
+<rect x="254" y="248" width="54" height="2" fill="#4f81bd"/>
+<text x="256" y="244">39</text>
+<text x="195" y="266">publicar_comentario</text>
+<rect x="330" y="93" width="54" height="157" fill="#c0504d"/>
+<text x="332" y="89">2767</text>
+<rect x="390" y="248" width="54" height="2" fill="#4f81bd"/>
+<text x="392" y="244">29</text>
+<text x="330" y="266">leer_estadisticas</text>
+<rect x="465" y="131" width="54" height="119" fill="#c0504d"/>
+<text x="467" y="127">2107</text>
+<rect x="524" y="248" width="54" height="2" fill="#4f81bd"/>
+<text x="526" y="244">34</text>
+<text x="465" y="266">total</text>
+<rect x="440" y="32" width="12" height="12" fill="#c0504d"/>
+<text x="458" y="43">linea base (li1023230127-1e4d)</text>
+<rect x="440" y="50" width="12" height="12" fill="#4f81bd"/>
+<text x="458" y="61">optimizada (op1023230530-5ef1)</text>
+</svg>

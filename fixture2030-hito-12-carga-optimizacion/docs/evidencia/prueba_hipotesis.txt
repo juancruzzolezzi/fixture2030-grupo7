@@ -1,0 +1,8 @@
+Hito 12 - prueba de la hipotesis | 2026-10-23T23:00:58-03:00 | commit a6609bb
+50 repeticiones de cada caso, una por vez (sin concurrencia). La consulta devuelve 300 filas.
+Tiempo de pared medido con time.perf_counter() en este proceso, en ms.
+
+caso                                                     p50     p95     max
+crear httpx.Client() (sin consultar)                   249.3   352.5   381.2
+consulta con cliente nuevo (httpx.post, Hito 10)       244.3   298.4   327.6
+consulta con cliente reutilizado                         4.9    24.4    30.3

@@ -30,20 +30,26 @@ bajo el escenario de `flujo_y_escenario_de_carga.md`. Se corre con
 
 ## Cómo leer la línea base
 
-Lo que mostró en nuestras corridas, y lo que hay que verificar en cada una:
+Nuestra corrida: `li1023230127-1e4d`, 23/10/2026, Windows 11, 8 CPU
+lógicas, 15,7 GB de RAM, commit a6609bb sin cambios pendientes. Cassandra
+5.0.9 e InfluxDB 3.12.1.
 
-- **La tasa objetivo se alcanza** (60 ops/s, sin operaciones atrasadas ni
-  errores). La API no está saturada al punto de rechazar, pero eso no quiere
-  decir que esté bien: hay que mirar la latencia.
-- **leer_estadisticas tiene un p95 varias veces mayor que las lecturas de
-  comentarios**, aunque la consulta trae pocos datos. El p99 y el máximo
-  muestran colas: algunas requests esperan mucho más que la mediana.
-  Mirando solo el promedio no se vería.
-- **La CPU de la API anda en un núcleo entero o más**, mientras InfluxDB
-  casi no usa CPU. El generador queda bajo, así que no es él el que limita.
-- **La evolución cada 5 s** muestra que el p95 sube con la rampa y se
-  estabiliza en el sostenimiento. No hay degradación progresiva, así que
-  60 s alcanzan para comparar.
+- **La API no alcanza la tasa pedida**: logra 39,3 de 60 ops/s, y 579
+  operaciones salieron tarde porque la anterior no había respondido. No hubo
+  errores (ninguna request llegó al timeout de 10 s), pero la API estaba
+  saturada: atendía todo, lento.
+- **leer_estadisticas es la que tarda**: mediana 1.681 ms, p95 2.767 ms y
+  máximo 3.290 ms, para una consulta de 300 puntos. Las lecturas de
+  comentarios tienen mediana 21 ms y p95 34 ms. El p99 de publicar (90 ms,
+  contra una mediana de 34 ms) muestra que también hay colas en las rutas de
+  comentarios, pero chicas al lado de las estadísticas.
+- **La CPU de la API promedia 556 %** (más de 5 núcleos de 8), mientras
+  InfluxDB usa 9 %. El generador promedia 15 %, con un pico de 69 % en una
+  muestra. No es él el que limita: si lo fuera, la API estaría ociosa.
+- **La evolución cada 5 s**: en el sostenimiento el p95 oscila entre 1,5 y
+  2,8 s y las ops/s entre 33 y 45, sin una tendencia a empeorar. Es una
+  saturación estable, no una degradación progresiva, así que 60 s alcanzan
+  para comparar.
 
 Esa combinación (API ocupada, base tranquila, una sola ruta lenta) es la que
 llevó a la hipótesis de `hipotesis_y_optimizacion.md`.

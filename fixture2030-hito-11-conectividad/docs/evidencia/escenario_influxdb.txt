@@ -1,46 +1,47 @@
-Escenario de falla: influxdb (pausar) | 2026-10-20T00:02:52-03:00
+Escenario de falla: influxdb (pausar) | 2026-10-23T23:18:19-03:00
+Commit: a6609bb | archivos de la API o de los scripts sin commitear: 0
 API: http://127.0.0.1:8000
 
 == 1. Condicion inicial
-  contenedor: h10-influxdb Up 4 minutes
+  contenedor: h10-influxdb Up 21 minutes
   volumenes: fixture2030-hito-10-api-integrada_h10_influxdb_data 
   GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z
-    -> HTTP 200 en 0.584371s | request_id=d74d7daa-3fca-4b04-937e-dc141098df82
+    -> HTTP 200 en 0.011645s | request_id=6bba9e90-882e-4fe0-a2ce-bbc1889dc8f8
     -> {"partido_id":"F2030-006","equipo_id":"ARG","desde":"2030-06-18T18:00:00Z","hasta":"2030-06-18T18:05:00Z","items":[{"time":"2030-06-18T18:00:00","equipo_id":"ARG","posesion_pct":52.3,"pases_com
   GET /salud?forzar=true
-    -> HTTP 200 en 0.330274s | request_id=88cdcf60-4e8c-4941-996c-95a18e48a4b0
-    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":15.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"u
+    -> HTTP 200 en 0.015854s | request_id=ab3a645c-c53f-420c-adc1-444bbe2e6982
+    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":16.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"u
 
 == 2. Cambio aplicado: docker compose pause influxdb
    Container h10-influxdb Paused 
 
 == 3. Durante la falla
   GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z
-    -> HTTP 504 en 3.502258s | request_id=68587035-7092-456e-bddc-bb5535d47102
-    -> {"error":{"tipo":"timeout_dependencia","mensaje":"InfluxDB no respondio a tiempo.","request_id":"68587035-7092-456e-bddc-bb5535d47102"}}
+    -> HTTP 504 en 3.015325s | request_id=79c00723-9fd4-4b53-bd43-57ce6c0b8229
+    -> {"error":{"tipo":"timeout_dependencia","mensaje":"InfluxDB no respondio a tiempo.","request_id":"79c00723-9fd4-4b53-bd43-57ce6c0b8229"}}
   GET /salud?forzar=true
-    -> HTTP 200 en 3.694266s | request_id=b140709d-9bcd-4aaa-b6c0-82ce7fd2c2a4
-    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":16.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"esta
+    -> HTTP 200 en 3.011478s | request_id=ceb461e3-9671-49ea-8ad1-a2fb8f9102a0
+    -> {"estado":"degraded","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estad
   GET /salud/listo
-    -> HTTP 200 en 0.003381s | request_id=7ae6dac4-3a17-40a7-a29d-65eb60f781ea
+    -> HTTP 200 en 0.005872s | request_id=e265a2d5-1be5-420e-a165-f202cb8c00fe
     -> {"estado":"degraded","dependencias":{"mongodb":"up","neo4j":"up","cassandra":"up","redis":"up","influxdb":"down","iris":"up"}}
   otro modulo (deberia seguir andando):
   GET /equipos/ARG
-    -> HTTP 200 en 0.004366s | request_id=ea6fb015-77fd-4136-90d4-1536237472a9
+    -> HTTP 200 en 0.005588s | request_id=48204da9-efd2-42e2-bfab-9c908251eadf
     -> {"_id":"ARG","nombre":"Argentina","confederacion":"CONMEBOL","sede_mundial":true,"ranking_fifa":172,"cantidad_jugadores":25}
-  log de la API para esa request (request_id=68587035-7092-456e-bddc-bb5535d47102):
-    request_id=68587035-7092-456e-bddc-bb5535d47102 tipo=timeout_dependencia detalle=SELECT time, equipo_id, posesion_pct, pases_completados, tiros FROM estadisticas WHERE partido_id = 'F2030-006' AND equipo_id = 'ARG' AND time >= '2030-06-18T18:00:0
-    request_id=68587035-7092-456e-bddc-bb5535d47102 metodo=GET ruta=/partidos/F2030-006/estadisticas status=504 duracion_ms=3485.0
+  log de la API para esa request (request_id=79c00723-9fd4-4b53-bd43-57ce6c0b8229):
+    request_id=79c00723-9fd4-4b53-bd43-57ce6c0b8229 tipo=timeout_dependencia detalle=SELECT time, equipo_id, posesion_pct, pases_completados, tiros FROM estadisticas WHERE partido_id = 'F2030-006' AND equipo_id = 'ARG' AND time >= '2030-06-18T18:00:0
+    request_id=79c00723-9fd4-4b53-bd43-57ce6c0b8229 metodo=GET ruta=/partidos/F2030-006/estadisticas status=504 duracion_ms=3015.0
 
 == 4. Recuperacion: docker compose unpause influxdb
    Container h10-influxdb Unpaused 
-  la ruta volvio a responder 200 a los 0 s
+  la ruta volvio a responder 200 a los 1 s
 
 == 5. Despues de recuperar
   GET /partidos/F2030-006/estadisticas?equipo_id=ARG&desde=2030-06-18T18:00:00Z&hasta=2030-06-18T18:05:00Z
-    -> HTTP 200 en 0.408791s | request_id=a4fade15-6c52-481a-8590-046c24264127
+    -> HTTP 200 en 0.009257s | request_id=5fcbf6d7-fb09-4dc6-ae33-33c5d713e949
     -> {"partido_id":"F2030-006","equipo_id":"ARG","desde":"2030-06-18T18:00:00Z","hasta":"2030-06-18T18:05:00Z","items":[{"time":"2030-06-18T18:00:00","equipo_id":"ARG","posesion_pct":52.3,"pases_com
   GET /salud?forzar=true
-    -> HTTP 200 en 0.397525s | request_id=b6cfdd37-9dd6-4382-bcfe-eb9f99fd58d6
-    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":0.0},"cassandra":{"estado":"up","ms":0.0},"redis":{"estado":"up","ms":0.0},"influxdb":{"estado":"up
+    -> HTTP 200 en 0.012479s | request_id=d1cdabb4-110b-42b9-916a-4ab4b3647c1f
+    -> {"estado":"up","dependencias":{"mongodb":{"estado":"up","ms":0.0},"neo4j":{"estado":"up","ms":15.0},"cassandra":{"estado":"up","ms":15.0},"redis":{"estado":"up","ms":15.0},"influxdb":{"estado":
   volumenes: fixture2030-hito-10-api-integrada_h10_influxdb_data 

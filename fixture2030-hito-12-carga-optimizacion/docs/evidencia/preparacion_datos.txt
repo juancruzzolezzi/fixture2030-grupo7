@@ -1,0 +1,4 @@
+Hito 12 - preparacion de datos | 2026-10-23T23:00:45-03:00 | commit a6609bb
+Partido F2030-006 (ARG vs ESP), 6300 s de juego desde 2030-06-18T18:00:00+00:00
+[OK] Cassandra keyspace fixture2030_h12: 6300 comentarios generados en 21 bloques, 0 inserts fallidos, 6300 leidos de vuelta en comentarios_por_bloque
+[OK] InfluxDB base fixture2030_h12: 12600 puntos en lotes de 5000, 0 lotes fallidos, leidos de vuelta por equipo: {'ARG': 6300, 'ESP': 6300}
