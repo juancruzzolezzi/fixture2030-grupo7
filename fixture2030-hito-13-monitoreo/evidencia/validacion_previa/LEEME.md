@@ -7,7 +7,7 @@ Corrida del 05/11/2026 para comprobar que la instrumentación, la configuración
 | Qué corrió de verdad | Qué no |
 |---|---|
 | `prometheus.yml` y `reglas-o-alertas.yml` sin cambios, en Prometheus 3.16 | Grafana: el dashboard **no se abrió**. Sus consultas sí se ejecutaron contra Prometheus. |
-| redis_exporter 1.97, mongodb_exporter 0.54 y node_exporter 1.12, con los parámetros del compose | Docker: el `docker-compose.yml` solo se validó con `docker compose config` |
+| redis_exporter 1.97, mongodb_exporter 0.54 (y 0.53, la imagen del compose, solo sus métricas) y node_exporter 1.12, con los parámetros del compose | Docker: el `docker-compose.yml` solo se validó con `docker compose config` |
 | Redis 7 y MongoDB 8 reales (con autenticación); la API instrumentada | Neo4j, Cassandra, InfluxDB e IRIS: no había forma de instalarlos, sus rutas dan 503 reales |
 
 `docker compose stop/start redis` se reemplazó por apagar y arrancar `redis-server`. Por eso los números de

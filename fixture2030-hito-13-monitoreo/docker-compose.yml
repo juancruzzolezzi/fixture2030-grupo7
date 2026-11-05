@@ -1,7 +1,7 @@
 # Hito 13 - Monitoreo del Fixture 2030. Parte del compose de la clase, con cuatro cambios:
 #  - volumenes nombrados en lugar de ${HOME}/docker/data (devolucion del Hito 6);
 #  - la password de Grafana sale del .env (RNF6);
-#  - se agregan los exporters de Redis y MongoDB de la Clase 13;
+#  - se agregan los exporters de Redis y MongoDB de la Clase 13 (MongoDB con tag fijo, no latest);
 #  - host.docker.internal tambien anda en Linux (extra_hosts).
 # Las seis bases siguen en el compose del Hito 10 y la API corre en la notebook.
 name: fixture2030-monitoreo
@@ -62,8 +62,9 @@ services:
       REDIS_ADDR: redis://host.docker.internal:6379
 
   # Usuario y password salen del .env del Hito 10 (ver scripts/iniciar_monitoreo.sh).
+  # La imagen no publica el tag latest que usa la Clase 13: se fija la 0.53.
   mongodb-exporter:
-    image: percona/mongodb_exporter:latest
+    image: percona/mongodb_exporter:0.53
     container_name: fixture2030-mongodb-exporter
     restart: unless-stopped
     ports:
