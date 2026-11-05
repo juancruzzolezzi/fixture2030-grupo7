@@ -6,6 +6,7 @@ particionada para resolverla (ver Hito 6, decisiones_de_particionamiento.md)."""
 
 import re
 
+from app import metricas
 from app.adapters import cassandra_adapter
 from app.errors import ErrorDeValidacion
 
@@ -31,4 +32,6 @@ def crear_comentario(partido_id: str, bloque_horario: str, usuario_id: str, usua
         raise ErrorDeValidacion(f"bloque_horario invalido: {bloque_horario!r}. Formato esperado AAAAMMDDHHmm.")
     if not contenido.strip():
         raise ErrorDeValidacion("contenido no puede estar vacio.")
-    return cassandra_adapter.crear_comentario(partido_id, bloque_horario, usuario_id, usuario_nombre, contenido, clave_idempotencia)
+    resultado = cassandra_adapter.crear_comentario(partido_id, bloque_horario, usuario_id, usuario_nombre, contenido, clave_idempotencia)
+    metricas.contar_comentario(partido_id)  # Hito 13
+    return resultado

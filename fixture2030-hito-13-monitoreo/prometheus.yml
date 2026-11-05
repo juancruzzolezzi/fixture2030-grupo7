@@ -1,0 +1,47 @@
+# Hito 13 - Que mira Prometheus. Cada job representa un componente; "capa" separa
+# las metricas de aplicacion de las de infraestructura (RF4).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/reglas/reglas-o-alertas.yml
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['prometheus:9090']
+        labels:
+          capa: monitoreo
+          componente: prometheus
+
+  - job_name: node-exporter
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          capa: infraestructura
+          componente: host-docker
+
+  # La API corre en la notebook, fuera de Docker (Hito 11). Sus metricas cubren
+  # las seis bases: database_up, database_query_duration_seconds y database_errors_total.
+  - job_name: fixture-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          capa: aplicacion
+          componente: api-integrada
+
+  - job_name: redis-exporter
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          capa: infraestructura
+          componente: redis
+
+  - job_name: mongodb-exporter
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          capa: infraestructura
+          componente: mongodb

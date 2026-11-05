@@ -1,0 +1,67 @@
+[
+  {
+    "job": "fixture-api",
+    "labels": {
+      "capa": "aplicacion",
+      "componente": "api-integrada",
+      "instance": "host.docker.internal:8000",
+      "job": "fixture-api"
+    },
+    "health": "up",
+    "scrapeUrl": "http://host.docker.internal:8000/metrics",
+    "lastError": "",
+    "lastScrape": "2026-11-05T18:51:37.346564906-03:00"
+  },
+  {
+    "job": "mongodb-exporter",
+    "labels": {
+      "capa": "infraestructura",
+      "componente": "mongodb",
+      "instance": "mongodb-exporter:9216",
+      "job": "mongodb-exporter"
+    },
+    "health": "up",
+    "scrapeUrl": "http://mongodb-exporter:9216/metrics",
+    "lastError": "",
+    "lastScrape": "2026-11-05T18:51:40.520506723-03:00"
+  },
+  {
+    "job": "node-exporter",
+    "labels": {
+      "capa": "infraestructura",
+      "componente": "host-docker",
+      "instance": "node-exporter:9100",
+      "job": "node-exporter"
+    },
+    "health": "up",
+    "scrapeUrl": "http://node-exporter:9100/metrics",
+    "lastError": "",
+    "lastScrape": "2026-11-05T18:51:29.634349604-03:00"
+  },
+  {
+    "job": "prometheus",
+    "labels": {
+      "capa": "monitoreo",
+      "componente": "prometheus",
+      "instance": "prometheus:9090",
+      "job": "prometheus"
+    },
+    "health": "up",
+    "scrapeUrl": "http://prometheus:9090/metrics",
+    "lastError": "",
+    "lastScrape": "2026-11-05T18:51:37.744086591-03:00"
+  },
+  {
+    "job": "redis-exporter",
+    "labels": {
+      "capa": "infraestructura",
+      "componente": "redis",
+      "instance": "redis-exporter:9121",
+      "job": "redis-exporter"
+    },
+    "health": "up",
+    "scrapeUrl": "http://redis-exporter:9121/metrics",
+    "lastError": "",
+    "lastScrape": "2026-11-05T18:51:42.022299976-03:00"
+  }
+]

@@ -1,0 +1,20 @@
+Hito 13 - Carga transversal | corrida h13-5ae118
+Fecha: 2026-11-05T21:56:33+00:00 | commit: 3352bd8 | archivos sin commitear: 7
+Entorno: Linux 6.18.44-fc-v242, 2 CPU logicas, Python 3.13.18
+Imagenes: no disponible (docker no respondio)
+Nota del entorno: validacion sin Docker: Prometheus, exporters, MongoDB y Redis reales como binarios; Neo4j, Cassandra, InfluxDB, IRIS y Grafana NO disponibles (sus rutas dan 503). docker compose stop/start se reemplazo por detener y arrancar redis-server
+Escenario: 10 usuarios x 1 ops/s = 10 ops/s objetivo; 148 s, rampa 5 s; pesos leer_comentarios 25%, publicar_comentario 10%, leer_estadisticas 15%, leer_sesion 15%, leer_equipo 10%, leer_plantel 5%, leer_partido 10%, leer_eventos 5%, leer_entidad_compleja 5%
+Ventana (unix): 1793915645 a 1793915793
+
+== Medido por el generador (latencia solo de respuestas 2xx)
+operacion               base          ops exitosas  ops/s  p50 ms  p95 ms   max ms  status
+leer_comentarios        cassandra     352        0    2.4     0.0     0.0      0.0  {'503': 352}
+publicar_comentario     cassandra     142        0    1.0     0.0     0.0      0.0  {'503': 142}
+leer_estadisticas       influxdb      228        0    1.5     0.0     0.0      0.0  {'503': 228}
+leer_sesion             redis         228      118    1.5     3.7     5.7     14.1  {'200': 118, '503': 110}
+leer_equipo             mongodb       135      135    0.9     4.1     5.1     10.3  {'200': 135}
+leer_plantel            mongodb        77       77    0.5     6.3     9.2     21.6  {'200': 77}
+leer_partido            neo4j         163        0    1.1     0.0     0.0      0.0  {'503': 163}
+leer_eventos            neo4j          64        0    0.4     0.0     0.0      0.0  {'503': 64}
+leer_entidad_compleja   iris           69        0    0.5     0.0     0.0      0.0  {'503': 69}
+total                                1458      330    9.9     4.1     7.4     21.6

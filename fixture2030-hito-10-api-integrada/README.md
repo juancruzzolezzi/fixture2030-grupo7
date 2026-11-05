@@ -102,6 +102,17 @@ corrigieron estas cosas de la API:
 - Código de partido único `F2030-xxx` también en IRIS (devolución del Hito 10).
 - Volúmenes nombrados para todas las bases (devolución del Hito 6).
 
+## Cambios hechos en el Hito 13
+
+Para el monitoreo (ver `fixture2030-hito-13-monitoreo/`):
+
+- `GET /metrics` en formato Prometheus (`app/metricas.py`). Las rutas, los
+  contratos y los datos no cambian. Hay que volver a correr
+  `pip install --only-binary=:all: -r requirements.txt`, porque se agregó `prometheus-client`.
+- `docker-compose.yml`: Redis arranca con `--maxmemory 256mb
+  --maxmemory-policy volatile-lru`, la configuración que el Hito 7 define y el
+  compose integrado no tenía.
+
 ## Estructura
 
 ```
@@ -112,6 +123,7 @@ app/
   schemas/       modelos Pydantic de entrada/salida
   config.py      variables de entorno
   errors.py      taxonomia de errores
+  metricas.py    metricas para Prometheus (Hito 13)
   main.py        arma la app, middleware de request_id, manejo de errores
 docker-compose.yml       las 6 bases (no la API: esa corre en la notebook)
 scripts/

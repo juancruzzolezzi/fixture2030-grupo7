@@ -1,0 +1,85 @@
+# Hito 13 - Condiciones de alerta. El detalle de cada una (impacto, accion, por que
+# ese umbral) esta en docs/alertas_y_umbral.md. Los umbrales de latencia y errores
+# son los de la Clase 13; todavia no estan calibrados contra el trafico real de un torneo.
+groups:
+  - name: fixture2030_disponibilidad
+    rules:
+      - alert: ApiFixtureCaida
+        expr: up{job="fixture-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          componente: api-integrada
+        annotations:
+          summary: "La API integrada no responde a Prometheus"
+          description: "Ninguna pantalla del Fixture puede consultar datos. Ver docs/alertas_y_umbral.md"
+
+      - alert: BaseDeDatosCaida
+        expr: database_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.database }} no responde al chequeo de la API"
+          description: "Las rutas de {{ $labels.database }} devuelven 503 o 504; el resto de los modulos sigue. Ver docs/alertas_y_umbral.md"
+
+      - alert: ExporterCaido
+        expr: up{capa="infraestructura"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus no puede leer {{ $labels.job }}"
+          description: "Se pierde la vista de infraestructura de {{ $labels.componente }}; no significa que la base este caida. Ver docs/alertas_y_umbral.md"
+
+  - name: fixture2030_rendimiento
+    rules:
+      - alert: ApiLatenciaP95Alta
+        expr: histogram_quantile(0.95, sum by (le, ruta) (rate(api_latency_seconds_bucket[5m]))) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          componente: api-integrada
+        annotations:
+          summary: "p95 de {{ $labels.ruta }} supera 100 ms"
+          description: "p95 actual: {{ $value }} s. Comparar con database_query_duration_seconds para ver si el tiempo esta en la API o en la base."
+
+      - alert: BaseLatenciaP95Alta
+        expr: histogram_quantile(0.95, sum by (le, database) (rate(database_query_duration_seconds_bucket[5m]))) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 de {{ $labels.database }} supera 100 ms"
+          description: "p95 actual: {{ $value }} s, medido en el adaptador (driver + base)."
+
+      - alert: ApiErroresAltos
+        expr: sum(rate(api_http_requests_total{clase="5xx"}[5m])) / sum(rate(api_http_requests_total[5m])) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          componente: api-integrada
+        annotations:
+          summary: "Mas del 1 % de las requests termina en 5xx"
+          description: "Proporcion actual: {{ $value }}. Mirar database_errors_total para ver que base las origina."
+
+      - alert: BaseConErrores
+        expr: sum by (database) (rate(database_errors_total[5m])) > 0.01
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.database }} acumula fallas de infraestructura"
+          description: "{{ $value }} fallas por segundo. El tipo (dependencia_no_disponible o timeout_dependencia) esta en la etiqueta tipo de la metrica."
+
+  - name: fixture2030_capacidad
+    rules:
+      - alert: RedisMemoriaAlta
+        expr: redis_memory_used_bytes / (redis_memory_max_bytes > 0) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+          componente: redis
+        annotations:
+          summary: "Redis uso mas del 85 % de su maxmemory"
+          description: "Proporcion actual: {{ $value }}. Con volatile-lru empezaria a expulsar sesiones y votos, no solo cache."

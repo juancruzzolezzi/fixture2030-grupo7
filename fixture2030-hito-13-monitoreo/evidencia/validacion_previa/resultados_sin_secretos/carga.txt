@@ -1,0 +1,63 @@
+Hito 13 - Carga transversal | corrida h13-45efb4
+Fecha: 2026-11-05T21:53:44+00:00 | commit: 3352bd8 | archivos sin commitear: 7
+Entorno: Linux 6.18.44-fc-v242, 2 CPU logicas, Python 3.13.18
+Imagenes: no disponible (docker no respondio)
+Nota del entorno: validacion sin Docker: Prometheus, exporters, MongoDB y Redis reales como binarios; Neo4j, Cassandra, InfluxDB, IRIS y Grafana NO disponibles (sus rutas dan 503). docker compose stop/start se reemplazo por detener y arrancar redis-server
+Escenario: 30 usuarios x 2 ops/s = 60 ops/s objetivo; 121 s, rampa 20 s; pesos leer_comentarios 25%, publicar_comentario 10%, leer_estadisticas 15%, leer_sesion 15%, leer_equipo 10%, leer_plantel 5%, leer_partido 10%, leer_eventos 5%, leer_entidad_compleja 5%
+Ventana (unix): 1793915504 a 1793915625
+
+== Medido por el generador (latencia solo de respuestas 2xx)
+operacion               base          ops exitosas  ops/s  p50 ms  p95 ms   max ms  status
+leer_comentarios        cassandra    1683        0   14.0     0.0     0.0      0.0  {'503': 1683}
+publicar_comentario     cassandra     663        0    5.5     0.0     0.0      0.0  {'503': 663}
+leer_estadisticas       influxdb     1000        0    8.3     0.0     0.0      0.0  {'503': 1000}
+leer_sesion             redis        1015     1015    8.5     2.7     5.8     17.9  {'200': 1015}
+leer_equipo             mongodb       636      636    5.3     3.1     5.9     13.3  {'200': 636}
+leer_plantel            mongodb       321      321    2.7     5.2     8.9     18.3  {'200': 321}
+leer_partido            neo4j         675        0    5.6     0.0     0.0      0.0  {'503': 675}
+leer_eventos            neo4j         311        0    2.6     0.0     0.0      0.0  {'503': 311}
+leer_entidad_compleja   iris          309        0    2.6     0.0     0.0      0.0  {'503': 309}
+total                                6613     1972   55.1     3.0     6.6     18.3
+
+== Leido de Prometheus al terminar la carga (ventana de 121 s)
+
+p95 de la API por ruta (s)
+  PromQL: histogram_quantile(0.95, sum by (le, ruta) (rate(api_latency_seconds_bucket[121s])))
+  /equipos/{codigo}                     0.0049
+  /equipos/{codigo}/jugadores           0.0081
+  /partidos/{codigo}                    0.0048
+  /partidos/{codigo}/comentarios        0.0064
+  /partidos/{codigo}/entidad-compleja   0.0048
+  /partidos/{codigo}/estadisticas       0.0048
+  /partidos/{codigo}/eventos            0.0048
+  /sesiones/{usuario_id}                0.0049
+
+p95 por base, medido en el adaptador (s)
+  PromQL: histogram_quantile(0.95, sum by (le, database) (rate(database_query_duration_seconds_bucket[121s])))
+  cassandra                             0.0049
+  influxdb                              0.0047
+  iris                                  0.0047
+  mongodb                               0.0048
+  neo4j                                 0.0047
+  redis                                 0.0048
+
+operaciones por segundo por base
+  PromQL: sum by (database) (rate(database_operations_total[121s]))
+  cassandra                             19.5763
+  influxdb                              8.2487
+  iris                                  2.6005
+  mongodb                               10.8030
+  neo4j                                 8.1405
+  redis                                 8.4383
+
+fallas por segundo por base
+  PromQL: sum by (database) (rate(database_errors_total[121s]))
+  cassandra                             19.5763
+  influxdb                              8.2487
+  iris                                  2.6005
+  neo4j                                 8.1405
+
+requests por segundo por clase de status
+  PromQL: sum by (clase) (rate(api_http_requests_total[121s]))
+  2xx                                   16.5163
+  5xx                                   38.5660

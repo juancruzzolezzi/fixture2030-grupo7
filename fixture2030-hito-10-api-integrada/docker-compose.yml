@@ -59,7 +59,9 @@ services:
     image: redis:latest
     container_name: h10-redis
     restart: unless-stopped
-    command: redis-server --save 60 1 --loglevel notice
+    # maxmemory y politica del Hito 7: el compose integrado no los tenia y
+    # redis_memory_max_bytes daba 0 (lo encontramos armando el monitoreo del Hito 13).
+    command: redis-server --save 60 1 --loglevel notice --maxmemory 256mb --maxmemory-policy volatile-lru
     ports:
       - "6379:6379"
     volumes:

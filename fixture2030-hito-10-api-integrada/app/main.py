@@ -13,9 +13,10 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
+from app import metricas
 from app.adapters import cassandra_adapter, influx_adapter, iris_adapter, mongo_adapter, neo4j_adapter, redis_adapter
 from app.errors import ErrorDeAplicacion
 from app.routes.comentarios_routes import router as comentarios_router
@@ -27,6 +28,16 @@ from app.routes.sesiones_routes import router as sesiones_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("fixture2030.api")
+
+# Hito 13: Prometheus mide cada operacion de los adaptadores que usan las rutas.
+metricas.instrumentar_adaptadores({
+    (mongo_adapter, "mongodb"): ["obtener_equipo", "listar_equipos", "obtener_jugador", "listar_jugadores_de_equipo"],
+    (neo4j_adapter, "neo4j"): ["obtener_partido", "listar_eventos_de_partido", "existe_partido"],
+    (cassandra_adapter, "cassandra"): ["listar_comentarios", "crear_comentario"],
+    (redis_adapter, "redis"): ["obtener_sesion", "obtener_cache_partido", "invalidar_cache_partido"],
+    (influx_adapter, "influxdb"): ["estadisticas_ventana", "estadisticas_agregadas"],
+    (iris_adapter, "iris"): ["obtener_partido_detalle", "cambiar_estado_partido"],
+})
 
 app = FastAPI(
     title="Fixture 2030 - API REST Integrada",
@@ -46,8 +57,13 @@ async def middleware_request_id(request: Request, call_next):
     request_id = str(uuid.uuid4())
     request.state.request_id = request_id
     inicio = time.monotonic()
-    respuesta = await call_next(request)
+    try:
+        respuesta = await call_next(request)
+    except Exception:
+        metricas.registrar_request(request, 500, time.monotonic() - inicio)  # Hito 13
+        raise
     duracion_ms = (time.monotonic() - inicio) * 1000
+    metricas.registrar_request(request, respuesta.status_code, duracion_ms / 1000)  # Hito 13
     respuesta.headers["X-Request-Id"] = request_id
     logger.info(
         "request_id=%s metodo=%s ruta=%s status=%s duracion_ms=%.1f",
@@ -147,3 +163,13 @@ def salud(forzar: bool = False):
     """Con ?forzar=true no usa el resultado guardado (para diagnostico manual)."""
     dependencias = _chequear_dependencias(forzar)
     return {"estado": _estado_general(dependencias), "dependencias": dependencias}
+
+
+# --- Metricas para Prometheus (Hito 13) ---------------------------------------
+# Prometheus la llama cada 15 s. Reutiliza el chequeo de /salud (hace ping o una
+# lectura minima por base, nunca escribe) y lo publica como database_up.
+
+@app.get("/metrics", tags=["Operacion"], summary="Metricas en formato Prometheus", include_in_schema=False)
+def exponer_metricas():
+    metricas.actualizar_salud(_chequear_dependencias())
+    return Response(content=metricas.exportar(), media_type=metricas.CONTENT_TYPE)
