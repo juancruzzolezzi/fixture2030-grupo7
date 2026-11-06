@@ -16,7 +16,7 @@ Separamos cuatro cosas (RNF8). Si un número no tiene archivo o commit, no lo pr
 | IRIS "healthy" sin aceptar conexiones | 480 de 480 requests con 503; `database_up` en 0; se resolvió con `docker compose restart iris` | `evidencia/hallazgo_iris_sin_super_server.md` | Windows 11, 16 CPU |
 | InfluxDB congelada | 504 en 3,0 s; vuelve a 200 | `hito-11/docs/evidencia/escenario_influxdb.txt` | Notebook |
 | Ingesta en InfluxDB | 706.151 puntos, 9.945 puntos/s, 0 lotes fallidos | `fixture2030-influxdb/docs/evidencia/02_carga.txt` | Docker con 16 CPU |
-| Targets, carga transversal y falla con Prometheus | Se completa con la corrida final | `evidencia/` de esta carpeta | Ver el encabezado de cada archivo |
+| Targets, carga transversal y falla con Prometheus | Las seis bases con 30 usuarios y 0 errores; falla de Redis detectada y recuperada | `evidencia/resumen_corrida.md` y los archivos que cita | Windows 11, 16 CPU (ver encabezados) |
 
 ## Objetivos de diseño (no son mediciones)
 

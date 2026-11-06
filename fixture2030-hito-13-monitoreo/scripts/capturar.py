@@ -16,7 +16,7 @@ import sys
 
 from comun import EVIDENCIA, GRAFANA, HITO13
 
-ALTO_DASHBOARD = 2350  # entra el dashboard completo, sin scroll
+ALTO_DASHBOARD = 2800  # entra el dashboard completo, sin scroll
 PANEL_DE_CONTROL = "Estado de salud por base"  # un titulo del dashboard: confirma que no quedo en el login
 
 

@@ -61,6 +61,7 @@ class Carga:
     def __init__(self, a, silenciosa=False):
         self.a, self.run_id, self.silenciosa = a, f"h13-{uuid.uuid4().hex[:6]}", silenciosa
         self.ops, self.lock, self.parar = [], threading.Lock(), threading.Event()
+        self.cortada = False
 
     def usuario(self, vu, t0):
         rng = random.Random(f"h13-vu-{vu}")
@@ -102,6 +103,7 @@ class Carga:
                 malas = sum(1 for o in recientes if not o[2].startswith("2"))
                 if self.a.corte and len(recientes) >= 20 and 100 * malas / len(recientes) > self.a.corte:
                     print(f"Corte seguro: {malas} de {len(recientes)} operaciones fallaron en 5 s (limite {self.a.corte} %)")
+                    self.cortada = True
                     self.parar.set()
                 if int(t) % 15 == 0 and not self.silenciosa:
                     print(f"  t={int(t):3d}/{self.a.duracion} s  ops={len(self.ops)}  no exitosas en 5 s={malas}")
@@ -185,7 +187,9 @@ def guardar(carga, inicio, fin, con_prometheus, nombre):
     (destino / f"{nombre}.txt").write_text(texto, encoding="utf-8")
     (destino / f"{nombre}.json").write_text(json.dumps(
         {"run_id": carga.run_id, "inicio": inicio, "fin": fin, "usuarios": a.usuarios, "ops_por_usuario": a.ops,
-         "operaciones": len(carga.ops)}, indent=2), encoding="utf-8")
+         "operaciones": len(carga.ops), "exitosas": sum(1 for o in carga.ops if o[2].startswith("2")),
+         "p95_ms": round(percentil(sorted(o[3] for o in carga.ops if o[2].startswith("2")), 95), 1),
+         "timeouts": sum(1 for o in carga.ops if o[2] in ("timeout", "conexion"))}, indent=2), encoding="utf-8")
     return texto
 
 
@@ -206,6 +210,8 @@ def main():
     inicio = time.time()
     carga.correr()
     print(guardar(carga, inicio, time.time(), not a.sin_prometheus, a.nombre) + controlar_secretos())
+    if carga.cortada:
+        raise SystemExit("ATENCION: la carga se corto antes de terminar: la evidencia no sirve.")
     colgadas = sum(1 for o in carga.ops if o[2] in ("timeout", "conexion"))
     if colgadas:
         raise SystemExit(f"ATENCION: {colgadas} operaciones sin respuesta de la API (timeout o conexion).")

@@ -81,6 +81,7 @@ def main():
     p.add_argument("--accion", choices=("detener", "pausar"), default="detener")
     p.add_argument("--espera-inicial", type=int, default=60, help="segundos de estado normal antes de la falla")
     p.add_argument("--usuarios", type=int, default=10, help="usuarios de la carga de fondo (0 = sin carga)")
+    p.add_argument("--mantener-falla", type=int, default=50, help="segundos con la falla activa despues de la alerta (para las capturas)")
     a = p.parse_args()
     s = a.servicio
     cambio, vuelta = ("pause", "unpause") if a.accion == "pausar" else ("stop", "start")
@@ -132,6 +133,8 @@ def main():
         anotar(f"  alerta BaseDeDatosCaida en firing a los {resultado['alerta_firing_s']} s de la falla (for: 1m)"
                if pendiente is not None else "  ATENCION: la alerta no llego a firing en 150 s")
         estado_prometheus(s)
+        anotar(f"  se mantiene la falla {a.mantener_falla} s mas (capturas)")
+        time.sleep(a.mantener_falla)
     finally:
         if detenido:
             anotar(f"\n== 4. Recuperacion: docker compose {vuelta} {s}")

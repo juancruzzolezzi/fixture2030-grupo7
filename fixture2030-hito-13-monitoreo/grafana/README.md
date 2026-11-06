@@ -10,7 +10,7 @@ con qué significa y qué haríamos ante una señal mala.
 | Fila | Paneles | Fuente | Para qué sirve |
 |---|---|---|---|
 | Disponibilidad | Estado de salud por base, targets | API, `up` | Ver de un vistazo qué está caído |
-| Latencia | p95 de la API por ruta, p95 por base | API | Qué módulo está lento; línea roja en 100 ms |
+| Latencia | p95 de la API por ruta, p95 por base, en escala logarítmica | API | Qué módulo está lento; línea roja en 100 ms |
 | Volumen | Requests/s, operaciones/s por base, escrituras en Cassandra por partido | API | Dónde está el tráfico en un pico |
 | Errores | Proporción de 5xx, fallas por base, respuestas por clase | API | Qué falla y qué base lo origina |
 | Comparación | API contra adaptadores; Redis contra MongoDB | API, exporters | Separar un problema de la API de uno de la base |

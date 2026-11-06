@@ -26,16 +26,16 @@
     {
       "id": 1,
       "type": "text",
-      "title": "Como leer este panel",
+      "title": "Cómo leer este panel",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "markdown",
-        "content": "**Metricas de aplicacion**: `/metrics` de la API (`api_*`, `database_*`, `comentarios_*`). **Metricas de infraestructura**: exporters de Redis, MongoDB y host Docker. Neo4j, Cassandra, InfluxDB e IRIS se ven solo desde la API: no tienen exporter en este laboratorio.\n\n**Latencia**: p95 en una ventana de 1 min (la linea roja es el umbral de la alerta, 100 ms). **Volumen y errores**: por segundo, ventana de 1 min. Los umbrales son de la Clase 13 y no estan calibrados con trafico real. Los numeros valen para una notebook. Detalle en `docs/metricas_y_consultas.md`."
+        "content": "**Métricas de aplicación**: `/metrics` de la API (`api_*`, `database_*`, `comentarios_*`). **Métricas de infraestructura**: exporters de Redis, MongoDB y host Docker. Neo4j, Cassandra, InfluxDB e IRIS se ven solo desde la API: no tienen exporter en este laboratorio.\n\n**Latencia**: p95 en una ventana de 1 min (la línea roja es el umbral de la alerta, 100 ms). **Volumen y errores**: por segundo, ventana de 1 min. Los umbrales son de la Clase 13 y no están calibrados con tráfico real. Los números valen para una notebook. Detalle en `docs/metricas_y_consultas.md`."
       }
     },
     {
@@ -47,7 +47,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "panels": []
     },
@@ -78,7 +78,7 @@
         "h": 5,
         "w": 14,
         "x": 0,
-        "y": 5
+        "y": 6
       },
       "fieldConfig": {
         "defaults": {
@@ -127,9 +127,13 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
-        "orientation": "horizontal",
+        "orientation": "vertical",
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": false,
+        "text": {
+          "titleSize": 16,
+          "valueSize": 26
+        }
       }
     },
     {
@@ -159,7 +163,7 @@
         "h": 5,
         "w": 10,
         "x": 14,
-        "y": 5
+        "y": 6
       },
       "fieldConfig": {
         "defaults": {
@@ -208,9 +212,13 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
-        "orientation": "horizontal",
+        "orientation": "vertical",
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": false,
+        "text": {
+          "titleSize": 16,
+          "valueSize": 26
+        }
       }
     },
     {
@@ -222,14 +230,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "panels": []
     },
     {
       "id": 6,
       "type": "timeseries",
-      "title": "Latencia p95 de la API por ruta (s, ventana 1 min)",
+      "title": "Latencia p95 de la API por ruta (s, ventana 1 min, escala log)",
       "description": "Tiempo total de la request vista por la API. Si sube una sola ruta, el problema es de esa base o adaptador; si suben todas, mirar la API y el host.",
       "datasource": {
         "type": "prometheus",
@@ -250,15 +258,15 @@
         }
       ],
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "min": 0,
+          "min": 0.001,
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,
@@ -267,6 +275,10 @@
             "axisLabel": "",
             "thresholdsStyle": {
               "mode": "line"
+            },
+            "scaleDistribution": {
+              "type": "log",
+              "log": 10
             }
           },
           "thresholds": {
@@ -292,7 +304,7 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true,
           "calcs": [
             "lastNotNull",
@@ -308,7 +320,7 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Latencia p95 por base (s, ventana 1 min)",
+      "title": "Latencia p95 por base (s, ventana 1 min, escala log)",
       "description": "Llamada al adaptador: incluye driver, cliente y base. Comparar con Redis y Mongo del exporter antes de culpar a la base.",
       "datasource": {
         "type": "prometheus",
@@ -329,15 +341,15 @@
         }
       ],
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 12,
-        "y": 11
+        "y": 12
       },
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "min": 0,
+          "min": 0.001,
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,
@@ -346,6 +358,10 @@
             "axisLabel": "",
             "thresholdsStyle": {
               "mode": "line"
+            },
+            "scaleDistribution": {
+              "type": "log",
+              "log": 10
             }
           },
           "thresholds": {
@@ -371,7 +387,7 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true,
           "calcs": [
             "lastNotNull",
@@ -393,7 +409,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 22
       },
       "panels": []
     },
@@ -421,10 +437,10 @@
         }
       ],
       "gridPos": {
-        "h": 8,
-        "w": 8,
+        "h": 10,
+        "w": 12,
         "x": 0,
-        "y": 20
+        "y": 23
       },
       "fieldConfig": {
         "defaults": {
@@ -459,7 +475,7 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true,
           "calcs": [
             "lastNotNull",
@@ -496,10 +512,10 @@
         }
       ],
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 20
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 23
       },
       "fieldConfig": {
         "defaults": {
@@ -534,7 +550,7 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true,
           "calcs": [
             "lastNotNull",
@@ -571,10 +587,10 @@
         }
       ],
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 20
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -609,7 +625,7 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true,
           "calcs": [
             "lastNotNull",
@@ -631,15 +647,15 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 39
       },
       "panels": []
     },
     {
       "id": 13,
       "type": "timeseries",
-      "title": "Proporcion de respuestas 5xx (ventana 1 min)",
-      "description": "Requests que terminan en 5xx sobre el total. La linea roja es el 1 % de la alerta ApiErroresAltos. Sin series: no hubo 5xx.",
+      "title": "Proporción de respuestas 5xx (ventana 1 min)",
+      "description": "Requests que terminan en 5xx sobre el total. La línea roja es el 1 % de la alerta ApiErroresAltos. Sin series: no hubo 5xx.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -662,7 +678,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 29
+        "y": 40
       },
       "fieldConfig": {
         "defaults": {
@@ -742,7 +758,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 29
+        "y": 40
       },
       "fieldConfig": {
         "defaults": {
@@ -817,7 +833,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 29
+        "y": 40
       },
       "fieldConfig": {
         "defaults": {
@@ -868,20 +884,20 @@
     {
       "id": 16,
       "type": "row",
-      "title": "Comparacion: donde esta el tiempo",
+      "title": "Comparación: dónde está el tiempo",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 48
       },
       "panels": []
     },
     {
       "id": 17,
       "type": "timeseries",
-      "title": "API contra adaptadores: p95 total (s, ventana 1 min)",
+      "title": "API contra adaptadores: p95 total (s, ventana 1 min, escala log)",
       "description": "Si la API sube y los adaptadores no, el tiempo se va en la API (cola, CPU). Si suben los dos, esta en un adaptador o su base. Ojo: el adaptador incluye el cliente, como en el hallazgo del Hito 12.",
       "datasource": {
         "type": "prometheus",
@@ -917,12 +933,12 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 38
+        "y": 49
       },
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "min": 0,
+          "min": 0.001,
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,
@@ -931,6 +947,10 @@
             "axisLabel": "",
             "thresholdsStyle": {
               "mode": "line"
+            },
+            "scaleDistribution": {
+              "type": "log",
+              "log": 10
             }
           },
           "thresholds": {
@@ -1008,7 +1028,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 38
+        "y": 49
       },
       "fieldConfig": {
         "defaults": {
@@ -1065,7 +1085,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 57
       },
       "panels": []
     },
@@ -1073,7 +1093,7 @@
       "id": 20,
       "type": "timeseries",
       "title": "CPU del host Docker (ventana 1 min)",
-      "description": "node-exporter. En Docker Desktop es la VM de los contenedores, no Windows, y la API corre afuera. La linea roja es el 80 % de la Clase 13.",
+      "description": "node-exporter. En Docker Desktop es la VM de los contenedores, no Windows, y la API corre afuera. La línea roja es el 80 % de la Clase 13.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1096,7 +1116,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 47
+        "y": 58
       },
       "fieldConfig": {
         "defaults": {
@@ -1153,7 +1173,7 @@
       "id": 21,
       "type": "timeseries",
       "title": "Memoria del host Docker",
-      "description": "node-exporter. Cassandra es lo que mas usa (Hito 12: ~4,6 GB). La linea roja es el 90 % de la Clase 13.",
+      "description": "node-exporter. Cassandra es lo que mas usa (Hito 12: ~4,6 GB). La línea roja es el 90 % de la Clase 13.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1176,7 +1196,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 47
+        "y": 58
       },
       "fieldConfig": {
         "defaults": {
@@ -1256,7 +1276,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 47
+        "y": 58
       },
       "fieldConfig": {
         "defaults": {
@@ -1348,7 +1368,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 47
+        "y": 58
       },
       "fieldConfig": {
         "defaults": {
