@@ -11,7 +11,9 @@ Separamos cuatro cosas (RNF8). Si un número no tiene archivo o commit, no lo pr
 | Carga optimizada (mismo escenario) | 60,0 ops/s; p95 total 34,4 ms; CPU de API 23 %; 0 errores | `hito-12/docs/evidencia/resultados_optimizada.txt`, commit a6609bb | Igual |
 | Integridad de escrituras | 807 aceptados, 807 en cada tabla, 0 faltantes | `hito-12/docs/evidencia/integridad_optimizada.txt` | Igual |
 | Reintento duplica el comentario | 3 de 3 casos con 2 filas | El mismo archivo | Igual |
-| Redis detenido | 503 en 0,19 s; `/equipos/ARG` sigue en 200; vuelve a 200 sin reiniciar la API | `hito-11/docs/evidencia/escenario_redis.txt` | Notebook |
+| Redis detenido (Hito 11) | 503 en 0,19 s; `/equipos/ARG` sigue en 200; vuelve a 200 sin reiniciar la API | `hito-11/docs/evidencia/escenario_redis.txt` | Notebook |
+| Redis detenido (Hito 13) | Otra notebook: 504 en unos 4 s, no 503. Es un timeout y no un rechazo; no investigamos por qué cambia entre máquinas | `evidencia/prueba_de_falla.txt` | Windows 11, 16 CPU |
+| IRIS "healthy" sin aceptar conexiones | 480 de 480 requests con 503; `database_up` en 0; se resolvió con `docker compose restart iris` | `evidencia/hallazgo_iris_sin_super_server.md` | Windows 11, 16 CPU |
 | InfluxDB congelada | 504 en 3,0 s; vuelve a 200 | `hito-11/docs/evidencia/escenario_influxdb.txt` | Notebook |
 | Ingesta en InfluxDB | 706.151 puntos, 9.945 puntos/s, 0 lotes fallidos | `fixture2030-influxdb/docs/evidencia/02_carga.txt` | Docker con 16 CPU |
 | Targets, carga transversal y falla con Prometheus | Se completa con la corrida final | `evidencia/` de esta carpeta | Ver el encabezado de cada archivo |

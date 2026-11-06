@@ -22,7 +22,7 @@ con lo que medimos en el Hito 12, no con el tráfico de un torneo.
 | Componente | La base de la etiqueta `database` |
 | Impacto en el Fixture | Depende de la base. Redis: sesiones. Cassandra: comentarios. InfluxDB: estadísticas. IRIS: control del partido. Neo4j: partido y eventos. MongoDB: fichas. Los demás módulos siguen. |
 | Quién atiende | Operación de datos |
-| Investigación y recuperación | `docker compose ps` y `logs` de esa base en el Hito 10; `GET /salud?forzar=true`; `docker compose start <base>`. No borrar volúmenes. |
+| Investigación y recuperación | `docker compose ps` y `logs` de esa base en el Hito 10; `GET /salud?forzar=true`; `docker compose start <base>`. Si figura `healthy` y sigue en 0, `docker compose restart <base>` (nos pasó con IRIS). No borrar volúmenes. |
 | Por qué ese umbral | 1 minuto son al menos 4 scrapes: evita avisar por un chequeo perdido. Con cuatro lecturas seguidas ya no parece ruido. En un partido en vivo se podría bajar. |
 
 ### `ApiFixtureCaida`

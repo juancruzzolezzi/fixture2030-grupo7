@@ -100,6 +100,21 @@ nohup bash scripts/iniciar_api.sh >/dev/null 2>&1 &
 for _ in $(seq 1 30); do curl -fs -m 2 http://127.0.0.1:8000/salud/vivo >/dev/null && break; sleep 2; done
 curl -fs -m 15 http://127.0.0.1:8000/metrics >/dev/null || parar "la API no expone /metrics"
 
+# "healthy" en Docker no alcanza: IRIS puede figurar asi sin aceptar conexiones (evidencia/hallazgo_iris_sin_super_server.md).
+# Se pregunta a la API, y si IRIS sigue caida al minuto se reinicia una vez, sin tocar sus datos.
+echo "Comprobando que la API llegue a las seis bases..."
+reiniciada=no
+for intento in $(seq 1 24); do
+  salud="$(curl -s -m 30 'http://127.0.0.1:8000/salud?forzar=true')"
+  case "$salud" in '{"estado":"up"'*) break ;; esac
+  if [ "$intento" -ge 6 ] && [ "$reiniciada" = no ] && printf '%s' "$salud" | grep -q '"iris":{"estado":"down"'; then
+    echo "IRIS no acepta conexiones aunque el contenedor este arriba: se reinicia."
+    docker compose restart iris; reiniciada=si
+  fi
+  sleep 10
+done
+case "$salud" in '{"estado":"up"'*) echo "Las seis bases responden." ;; *) parar "la API no llega a todas las bases: $salud" ;; esac
+
 paso "6/8 Commit del codigo (la evidencia queda vinculada a este commit)"
 cd "$RAIZ" || exit 1
 git add fixture2030-hito-10-api-integrada

@@ -78,7 +78,7 @@ ninguna request combina dos bases. Así, si se cae una, las otras siguen: lo pro
 5. **Carga y recuperación**: `HSET` + `EXPIRE`, `SET ... EX`, `HGETALL`, `GET`, `DEL`.
 6. **Escala**: **diseño**: primero réplicas de lectura, después Cluster si el límite pasa a ser memoria o escritura (Hito 7). **Laboratorio**: un nodo con RDB y 256 MB.
 7. **Consistencia**: baja a propósito. La caché se invalida con `DEL` al cambiar la fuente y el TTL de 60 s es el tope.
-8. **Falla**: `/sesiones` da 503 en ~0,2 s; `/equipos` sigue en 200 (Hito 11). Se pueden perder las escrituras posteriores a la última foto RDB. Los votos no se pueden reconstruir.
+8. **Falla**: `/sesiones` da 503 en ~0,2 s en el Hito 11 y 504 en unos 4 s en el Hito 13, en otra notebook; `/equipos` sigue en 200. Se pueden perder las escrituras posteriores a la última foto RDB. Los votos no se pueden reconstruir.
 9. **Trade-offs**: RAM cara. `volatile-lru` con TTL en todas las claves expone sesiones y votos a la expulsión; la devolución del Hito 7 propone separar instancias y **no está aplicado**.
 10. **Evidencia**: `escenario_redis.txt` (Hito 11); `redis_*` en el panel; `prueba_de_falla.txt`.
 
@@ -106,7 +106,7 @@ ninguna request combina dos bases. Así, si se cae una, las otras siguen: lo pro
 5. **Carga y recuperación**: clases compiladas con `LoadDir`; Native SDK; proyección SQL disponible.
 6. **Escala**: vertical (Clase 13). El volumen de partidos es chico. **Laboratorio**: un nodo.
 7. **Consistencia**: **fuerte**. `%Save()` guarda padre e hijos juntos o nada.
-8. **Falla**: 503. El cambio de estado no se aplica a medias. La API reconecta sola al volver IRIS (Hito 11).
+8. **Falla**: 503. El cambio de estado no se aplica a medias. La API reconecta sola al volver IRIS (Hito 11). Las llamadas comparten una conexión y pasan de a una; si no consiguen turno en 3 s, 504. Nos pasó que el contenedor figurara `healthy` sin aceptar conexiones (`evidencia/hallazgo_iris_sin_super_server.md`).
 9. **Trade-offs**: un producto más y un lenguaje más (ObjectScript); hay datos de partido también en Neo4j, unidos por código.
 10. **Evidencia**: 26 verificaciones de la demo (Hito 9); una transición ilegal da 409 (`tests/integration`, Hito 10).
 
@@ -148,6 +148,12 @@ Armando el panel de memoria de Redis, encontramos que el compose integrado arran
 eso quedaba en un script aparte. Lo agregamos al `docker-compose.yml` del Hito 10. Es un tipo de
 error que solo aparece mirando el sistema corriendo.
 
+### Observada: "healthy" no significa "se puede usar"
+
+Con Docker marcando IRIS como `healthy`, sus 480 requests de la carga dieron 503. `database_up` lo mostró y las otras
+cinco bases siguieron atendiendo. Se resolvió reiniciando IRIS; la causa de fondo no quedó comprobada
+(`evidencia/hallazgo_iris_sin_super_server.md`). La mejora para todos los módulos es chequear el camino real de la API.
+
 ### Propuestas (no implementadas)
 
 | Mejora | Por qué | Costo o riesgo | Cómo se validaría |
@@ -155,6 +161,8 @@ error que solo aparece mirando el sistema corriendo.
 | Cache-aside real en `GET /partidos/{codigo}` | Es la ficha más leída y hoy siempre va a Neo4j | Invalidación; hay que respetar el `DEL` y el TTL de 60 s | p95 de la ruta y `redis_keyspace_hits_total`, misma carga |
 | Tabla `comentarios_por_clave` para la idempotencia | Arregla el duplicado del Hito 12 | `IF NOT EXISTS` agrega idas y vueltas entre réplicas | p95 de publicar con la carga del Hito 12 |
 | Separar Redis de sesiones y votos del de caché | Devolución del Hito 7 | Una instancia más | `redis_evicted_keys_total` |
+| Healthcheck de IRIS contra el puerto 1972 | El de la imagen dio `healthy` con la API sin poder conectarse | Hay que probarlo sin que dé falsas alarmas al arrancar | Repetir el arranque y comparar con `database_up` |
+| Más de una conexión a IRIS | Hoy las llamadas pasan de a una por una sola conexión | Límite de conexiones de la edición Community | p95 de la ruta de IRIS con más carga |
 | Prueba por escalones | No conocemos el límite de la versión optimizada | Exigir la notebook | Subir usuarios de a poco y mirar el p95 |
 | Quitar `ix_goles_desc` | Ninguna ruta lo usa y el recorte del Hito 4 sacó las estadísticas de jugadores | Casi nulo | Revisar la carga |
 

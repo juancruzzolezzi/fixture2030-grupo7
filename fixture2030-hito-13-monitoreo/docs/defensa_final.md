@@ -66,6 +66,9 @@ uvicorn y el bloque caliente de Cassandra.
 Comparamos el p95 de la API con el de los adaptadores y con el motor. En el Hito 12: API al 556 % de
 CPU, InfluxDB al 9 %, una sola ruta lenta. Ojo con el adaptador: incluye el cliente.
 
+Un caso real: Docker marcaba IRIS como `healthy`, pero `database_up` daba 0 y sus requests daban 503. Las otras cinco bases
+siguieron bien. Mirar solo el contenedor nos habría engañado (`evidencia/hallazgo_iris_sin_super_server.md`).
+
 **¿Qué métrica observarían primero ante un aumento de latencia?**
 1. ¿Es una ruta o todas? `api_latency_seconds` por ruta. 2. ¿API o adaptador? Panel de comparación.
 3. ¿Hay errores? `database_errors_total`. 4. ¿Saturación? CPU y memoria.

@@ -63,7 +63,7 @@ La prueba completa tarda ~3 min, y la alerta necesita más de 1 min para pasar a
 ```bash
 cd ../fixture2030-hito-10-api-integrada
 docker compose stop redis
-curl -s -o /dev/null -w "sesion: %{http_code}\n" http://localhost:8000/sesiones/user-00001   # 503
+curl -s -o /dev/null -w "sesion: %{http_code}\n" http://localhost:8000/sesiones/user-00001   # 503 o 504
 curl -s -o /dev/null -w "equipo: %{http_code}\n" http://localhost:8000/equipos/ARG          # 200
 # en Grafana, el estado de Redis pasa a CAIDA en hasta ~25 s
 docker compose start redis

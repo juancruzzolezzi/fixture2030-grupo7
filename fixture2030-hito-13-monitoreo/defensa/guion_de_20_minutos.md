@@ -9,7 +9,7 @@ responder sobre cualquier módulo. Dejar 20 s de margen en cada cambio de orador
 | 2:00-5:00 | **Arquitectura** | ___ | Recorrido: qué guarda cada base y por qué no una sola. Cada ruta termina en un adaptador. | Diapositivas 3-4 |
 | 5:00-11:00 | **Decisiones** | ___ y ___ | Tres casos a fondo: partición de Cassandra, consistencia fuerte en IRIS, TTL e invalidación en Redis. Después distribución y CAP: qué es laboratorio y qué es diseño. | Diapositivas 5-8 |
 | 11:00-14:00 | **Operación** | ___ | Dos flujos: comentarios (partición) contra eventos (recorrido). Decir qué base responde y por qué el patrón es distinto. | `defensa/demo.md`, flujos 1 y 2 |
-| 14:00-18:00 | **Evidencia** | ___ | Leer el panel: qué significa cada fila. Mostrar la falla de Redis, antes preparada: qué se cayó y qué siguió. Contar el hallazgo del Hito 12 con números. | Grafana y diapositivas 9-10 |
+| 14:00-18:00 | **Evidencia** | ___ | Leer el panel: qué significa cada fila. Mostrar la falla de Redis, antes preparada: qué se cayó y qué siguió. Contar el hallazgo del Hito 12 con números y el caso de IRIS "healthy" que `database_up` marcó caída. | Grafana y diapositivas 9-10 |
 | 18:00-20:00 | **Cierre** | ___ | Por qué es adecuada, qué trade-offs aceptamos, qué no medimos y qué haríamos después. Responder la pregunta central. | Diapositivas 11-12 |
 
 ## Frases que conviene evitar

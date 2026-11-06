@@ -35,6 +35,8 @@ RUTAS = {
     "iris": "/partidos/F2030-006/entidad-compleja",
 }
 SALIDA = []
+# Un solo cliente: crear uno por pedido cuesta cientos de ms en Windows (Hito 12) y ensuciaba los tiempos medidos.
+CLIENTE = httpx.Client(timeout=20)
 
 
 def anotar(texto=""):
@@ -50,7 +52,7 @@ def compose(*args):
 def pedir(ruta):
     inicio = time.perf_counter()
     try:
-        r = httpx.get(API + ruta, timeout=20)
+        r = CLIENTE.get(API + ruta)
         tipo = r.json().get("error", {}).get("tipo", "") if r.status_code >= 400 else ""
         return f"HTTP {r.status_code} en {(time.perf_counter() - inicio) * 1000:.0f} ms {tipo}".rstrip()
     except httpx.HTTPError as exc:
