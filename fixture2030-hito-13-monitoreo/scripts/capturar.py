@@ -6,7 +6,8 @@
     python scripts/capturar.py 06_targets --url http://127.0.0.1:9090/targets
 
 Usa Microsoft Edge (viene con Windows) o el Chromium de Playwright. Entra a Grafana con el
-usuario del laboratorio; la password viaja en el pedido y no se ve en la captura.
+usuario del laboratorio; la password viaja en el pedido y no se ve en la captura. Si no llega
+al dashboard, no guarda nada y lo avisa.
 """
 
 import argparse
@@ -16,6 +17,7 @@ import sys
 from comun import EVIDENCIA, GRAFANA, HITO13
 
 ALTO_DASHBOARD = 2350  # entra el dashboard completo, sin scroll
+PANEL_DE_CONTROL = "Estado de salud por base"  # un titulo del dashboard: confirma que no quedo en el login
 
 
 def password_grafana() -> str:
@@ -42,13 +44,21 @@ def capturar(nombre: str, url: str | None = None, desde: int | None = None, hast
                 navegador = p.chromium.launch(channel=os.environ.get("CANAL_NAVEGADOR", "msedge"))
             except Error:
                 navegador = p.chromium.launch()
-            contexto = navegador.new_context(
-                viewport={"width": 1600, "height": ALTO_DASHBOARD if es_grafana else 1000},
-                http_credentials={"username": "admin", "password": password_grafana()} if es_grafana else None,
-            )
+            contexto = navegador.new_context(viewport={"width": 1600, "height": ALTO_DASHBOARD if es_grafana else 1000})
+            if es_grafana:
+                # Inicia sesion antes de abrir el dashboard: Grafana no pide credenciales, redirige al login.
+                sesion = contexto.request.post(f"{GRAFANA}/login", data={"user": "admin", "password": password_grafana()})
+                if not sesion.ok:
+                    print(f"AVISO: Grafana rechazo el inicio de sesion (HTTP {sesion.status}); no se saca {nombre}.")
+                    navegador.close()
+                    return False
             pagina = contexto.new_page()
             pagina.goto(url, wait_until="load", timeout=60000)
-            pagina.wait_for_timeout(10000 if es_grafana else 3000)
+            if es_grafana:
+                pagina.get_by_text(PANEL_DE_CONTROL).first.wait_for(timeout=45000)  # si no aparece, no es el dashboard
+                pagina.wait_for_timeout(10000)
+            else:
+                pagina.wait_for_timeout(3000)
             pagina.screenshot(path=str(destino / f"{nombre}.png"))
             navegador.close()
         print(f"Captura guardada: dashboards/{nombre}.png")

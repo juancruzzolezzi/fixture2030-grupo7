@@ -43,6 +43,9 @@ def main() -> int:
         print("ATENCION: la API no responde a Prometheus. No se sigue: la evidencia no serviria.")
         return 1
     capturas = [capturar("01_estado_normal"), capturar("06_targets_prometheus", f"{PROMETHEUS}/targets")]
+    if not capturas[0]:
+        print("ATENCION: no se pudo capturar el dashboard de Grafana. No se sigue, para no gastar la corrida.")
+        return 1
 
     print("\n== Carga transversal (3 min)")
     carga = correr("scripts/generar_carga.py")
