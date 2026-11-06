@@ -87,18 +87,26 @@ if [ -f .venv/Scripts/python.exe ]; then PY="$PWD/.venv/Scripts/python.exe"; eli
   if [ -f .venv/Scripts/python.exe ]; then PY="$PWD/.venv/Scripts/python.exe"; else PY="$PWD/.venv/bin/python"; fi
 fi
 "$PY" -m pip install -q --only-binary=:all: -r requirements.txt || parar "no se instalaron las dependencias"
-"$PY" -m pip install -q playwright || echo "AVISO: sin Playwright no habra capturas automaticas"
-if ! curl -fs -m 3 http://127.0.0.1:8000/metrics >/dev/null; then
-  echo "Si Windows pregunta por el firewall para Python, hay que tocar Permitir."
-  nohup bash scripts/iniciar_api.sh >/dev/null 2>&1 &
-  for _ in $(seq 1 30); do curl -fs -m 2 http://127.0.0.1:8000/salud/vivo >/dev/null && break; sleep 2; done
+"$PY" -m pip install -q playwright py-spy || echo "AVISO: sin Playwright no habra capturas automaticas"
+# Siempre una API nueva: asi corre el codigo de este commit, aunque haya quedado otra colgada.
+if command -v powershell.exe >/dev/null 2>&1; then
+  powershell.exe -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*uvicorn*app.main:app*--port 8000*' } | ForEach-Object { taskkill /F /T /PID \$_.ProcessId }" >/dev/null 2>&1
+else
+  pkill -f 'uvicorn app.main:app.*--port 8000' 2>/dev/null
 fi
-curl -fs -m 15 http://127.0.0.1:8000/metrics >/dev/null || parar "la API no expone /metrics; hay que reiniciarla con el codigo nuevo"
+sleep 2
+echo "Si Windows pregunta por el firewall para Python, hay que tocar Permitir."
+nohup bash scripts/iniciar_api.sh >/dev/null 2>&1 &
+for _ in $(seq 1 30); do curl -fs -m 2 http://127.0.0.1:8000/salud/vivo >/dev/null && break; sleep 2; done
+curl -fs -m 15 http://127.0.0.1:8000/metrics >/dev/null || parar "la API no expone /metrics"
 
 paso "6/8 Commit del codigo (la evidencia queda vinculada a este commit)"
 cd "$RAIZ" || exit 1
 git add fixture2030-hito-10-api-integrada
-git add fixture2030-hito-13-monitoreo
+# La evidencia va en su propio commit, y solo si la corrida se completa.
+git reset -q
+git add fixture2030-hito-10-api-integrada
+git add -- fixture2030-hito-13-monitoreo ':(exclude)fixture2030-hito-13-monitoreo/evidencia/*'
 if ! git diff --cached --quiet; then git commit -q -m "Hito 13: monitoreo con Prometheus y Grafana, y material de la defensa" || parar "fallo el commit"; fi
 git log -1 --format='%h %s'
 
@@ -106,7 +114,12 @@ paso "7/8 Monitoreo y evidencia (~8 min, no cierres esta ventana)"
 cd "$H13" || exit 1
 bash scripts/iniciar_monitoreo.sh || parar "no levanto el monitoreo"
 "$PY" scripts/generar_evidencia.py; EVIDENCIA_OK=$?
-[ "$EVIDENCIA_OK" = 0 ] || parar "la evidencia quedo incompleta; revisar la salida de arriba. No se subio nada."
+if [ "$EVIDENCIA_OK" != 0 ] && ! curl -fs -m 10 http://127.0.0.1:8000/metrics >/dev/null && command -v powershell.exe >/dev/null 2>&1; then
+  # La API quedo trabada: se guarda en que parte del codigo, para poder diagnosticarlo.
+  (cd "$H10" && powershell.exe -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name='python.exe'\" | Where-Object { \$_.CommandLine -like '*spawn_main*' } | ForEach-Object { .\\.venv\\Scripts\\py-spy.exe dump --pid \$_.ProcessId }") > "$H13/trabajo/api_trabada.txt" 2>&1
+  echo "La API quedo trabada. Diagnostico en fixture2030-hito-13-monitoreo/trabajo/api_trabada.txt"
+fi
+[ "$EVIDENCIA_OK" = 0 ] || parar "la evidencia quedo incompleta; no se commiteo ni se subio. Revisar la salida de arriba."
 
 paso "8/8 Commit de la evidencia"
 cd "$RAIZ" || exit 1

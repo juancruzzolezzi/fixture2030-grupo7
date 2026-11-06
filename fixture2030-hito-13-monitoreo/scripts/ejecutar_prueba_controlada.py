@@ -84,14 +84,18 @@ def main():
     cambio, vuelta = ("pause", "unpause") if a.accion == "pausar" else ("stop", "start")
     otro = "/partidos/F2030-006" if s == "mongodb" else "/equipos/ARG"
 
-    if not consultar('up{job="fixture-api"}'):
-        sys.exit("ERROR: Prometheus todavia no tiene datos de la API. Correr antes verificar_targets.py")
+    if not any(v == 1 for _, v in consultar('up{job="fixture-api"}')):
+        sys.exit("ERROR: Prometheus no ve la API arriba: no se aplica la falla. Revisar con verificar_targets.py")
+    sembrar_sesion()  # la sesion de prueba vence a los 30 min
+    try:
+        httpx.get(API + RUTAS[s], timeout=10).raise_for_status()
+    except httpx.HTTPError as exc:
+        sys.exit(f"ERROR: {RUTAS[s]} no responde bien antes de la prueba ({type(exc).__name__}): no se aplica la falla.")
 
     for linea in encabezado(f"Hito 13 - Prueba de falla controlada: {s} ({a.accion})"):
         anotar(linea)
     carga, hilo = None, None
     if a.usuarios:
-        sembrar_sesion()
         carga = Carga(argparse.Namespace(usuarios=a.usuarios, ops=1, duracion=3600, rampa=5, corte=0), silenciosa=True)
         hilo = threading.Thread(target=carga.correr, daemon=True)
         hilo.start()
@@ -173,6 +177,8 @@ def main():
     (EVIDENCIA / "prueba_de_falla.txt").write_text("\n".join(SALIDA) + "\n", encoding="utf-8")
     (EVIDENCIA / "prueba_de_falla.json").write_text(json.dumps(resultado, indent=2), encoding="utf-8")
     print(controlar_secretos())
+    if None in (resultado.get("deteccion_s"), resultado.get("alerta_firing_s"), r200, visto):
+        sys.exit("La prueba de falla no se completo: revisar los ATENCION de arriba.")
 
 
 if __name__ == "__main__":

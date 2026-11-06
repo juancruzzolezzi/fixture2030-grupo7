@@ -206,6 +206,9 @@ def main():
     inicio = time.time()
     carga.correr()
     print(guardar(carga, inicio, time.time(), not a.sin_prometheus, a.nombre) + controlar_secretos())
+    colgadas = sum(1 for o in carga.ops if o[2] in ("timeout", "conexion"))
+    if colgadas:
+        raise SystemExit(f"ATENCION: {colgadas} operaciones sin respuesta de la API (timeout o conexion).")
 
 
 if __name__ == "__main__":

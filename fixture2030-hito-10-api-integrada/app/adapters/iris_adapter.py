@@ -9,14 +9,22 @@ objeto, nunca por SQL directo contra las tablas (RNF5, consigna 5.10).
 """
 
 import json
+import threading
 
 import iris
 
 from app.config import settings
-from app.errors import ConflictoDeNegocio, DependenciaNoDisponible, ErrorInterno
+from app.errors import ConflictoDeNegocio, DependenciaNoDisponible, ErrorInterno, TiempoDeEsperaAgotado
 
 _conexion = None
 _irispy = None
+# Hito 13: hay una sola conexion a IRIS y la API atiende en varios hilos. Las llamadas
+# pasan de a una; si no se consigue el turno a tiempo, responde 504 y no traba al resto de la API.
+_turno = threading.Lock()
+
+
+class _ConexionOcupada(Exception):
+    pass
 
 
 def _activo():
@@ -35,7 +43,18 @@ def _activo():
     return _irispy
 
 
+def _llamar(clase: str, metodo: str, *argumentos):
+    if not _turno.acquire(timeout=settings.iris.timeout_s):
+        raise _ConexionOcupada()
+    try:
+        return _activo().classMethodValue(clase, metodo, *argumentos)
+    finally:
+        _turno.release()
+
+
 def _traducir(exc: Exception, contexto: str):
+    if isinstance(exc, _ConexionOcupada):  # la conexion sigue en uso: no se descarta
+        raise TiempoDeEsperaAgotado("IRIS no respondio a tiempo.", detalle_interno=f"{contexto}: conexion ocupada") from exc
     # Hito 11: si IRIS se reinicia, la conexion guardada queda muerta y la API
     # respondia 503 para siempre (hasta reiniciar la API). Ahora se descarta y
     # la proxima request vuelve a conectar.
@@ -46,7 +65,7 @@ def _traducir(exc: Exception, contexto: str):
 
 def obtener_partido_detalle(codigo: str) -> dict | None:
     try:
-        crudo = _activo().classMethodValue("Fixture.ApiSupport", "ObtenerPartidoDetalle", codigo)
+        crudo = _llamar("Fixture.ApiSupport", "ObtenerPartidoDetalle", codigo)
     except Exception as exc:  # noqa: BLE001
         _traducir(exc, f"obtener_partido_detalle({codigo})")
     try:
@@ -60,7 +79,7 @@ def obtener_partido_detalle(codigo: str) -> dict | None:
 
 def cambiar_estado_partido(codigo: str, nuevo_estado: str) -> dict:
     try:
-        crudo = _activo().classMethodValue("Fixture.ApiSupport", "CambiarEstadoPartido", codigo, nuevo_estado)
+        crudo = _llamar("Fixture.ApiSupport", "CambiarEstadoPartido", codigo, nuevo_estado)
     except Exception as exc:  # noqa: BLE001
         _traducir(exc, f"cambiar_estado_partido({codigo},{nuevo_estado})")
     try:
@@ -82,8 +101,10 @@ def cambiar_estado_partido(codigo: str, nuevo_estado: str) -> dict:
 def verificar_conectividad() -> bool:
     global _conexion, _irispy
     try:
-        _activo().classMethodValue("%SYSTEM.Version", "GetVersion")
+        _llamar("%SYSTEM.Version", "GetVersion")
         return True
+    except _ConexionOcupada:
+        return False
     except Exception:  # noqa: BLE001
         _conexion, _irispy = None, None  # que el proximo intento reconecte
         return False
