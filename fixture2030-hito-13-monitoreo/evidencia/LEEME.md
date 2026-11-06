@@ -9,6 +9,7 @@ archivos sin commitear y entorno en el encabezado. Los generan los scripts: se p
 | `resultados_sin_secretos/carga.txt` / `.json` | `scripts/generar_carga.py` | Las seis bases con carga: lo que mide el generador y lo que queda en Prometheus |
 | `prueba_de_falla.txt` / `.json` | `scripts/ejecutar_prueba_controlada.py` | Antes, durante y después de detener una base; detección, alerta y recuperación |
 | `resultados_sin_secretos/carga_durante_falla.txt` | El mismo script | La carga de fondo de esa prueba |
+| `hallazgo_iris_sin_super_server.md` | Escrito a mano con la salida real de esa corrida | Una base `healthy` en Docker que la API no podía usar |
 | `dashboards/*.png` | `scripts/generar_evidencia.py` | El dashboard durante cada estado |
 
 ## Capturas de Grafana y Prometheus

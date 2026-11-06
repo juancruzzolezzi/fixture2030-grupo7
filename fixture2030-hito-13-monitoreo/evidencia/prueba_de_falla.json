@@ -1,0 +1,12 @@
+{
+  "servicio": "redis",
+  "accion": "detener",
+  "inicio": 1793925540.66005,
+  "t_falla": 1793925602.3300073,
+  "deteccion_s": 17.5,
+  "alerta_firing_s": 99.0,
+  "t_recuperacion": 1793925703.0304794,
+  "ruta_200_s": 0.4,
+  "database_up_1_s": 0.4,
+  "fin": 1793925753.843147
+}
