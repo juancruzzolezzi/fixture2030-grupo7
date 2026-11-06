@@ -1,14 +1,14 @@
 Hito 13 - Targets de Prometheus
-Fecha: 2026-11-05T21:34:05-03:00 | commit: 9cbce91 | archivos sin commitear: 0
+Fecha: 2026-11-05T21:48:31-03:00 | commit: 1c02d02 | archivos sin commitear: 0
 Entorno: Windows 11, 16 CPU logicas, Python 3.12.10
 Imagenes: fixture2030-prometheus=prom/prometheus:latest@e04987641b57, fixture2030-grafana=grafana/grafana:latest@488984b716c0, fixture2030-node-exporter=prom/node-exporter:latest@1b4e4438faca, fixture2030-redis-exporter=oliver006/redis_exporter:latest@f5f903fbe775, fixture2030-mongodb-exporter=percona/mongodb_exporter:0.53@0214e482b2cd, h10-mongodb=mongo:7.0@b6421fd6d1c5, h10-neo4j=neo4j:latest@dbc377fb9cd8, h10-cassandra=cassandra:latest@da9dad3aaf67, h10-redis=redis:latest@718f745deb7d, h10-influxdb=influxdb:3-core@26875ba5ae6e, h10-iris=intersystems/iris-community:latest-cd@cd2ebcab02d1
 
 job               capa             componente     estado   scrape ms  endpoint
-fixture-api       aplicacion       api-integrada  UP             6.3  http://host.docker.internal:8000/metrics
-mongodb-exporter  infraestructura  mongodb        UP           132.7  http://mongodb-exporter:9216/metrics
-node-exporter     infraestructura  host-docker    UP            15.2  http://node-exporter:9100/metrics
-prometheus        monitoreo        prometheus     UP             5.0  http://prometheus:9090/metrics
-redis-exporter    infraestructura  redis          UP            30.1  http://redis-exporter:9121/metrics
+fixture-api       aplicacion       api-integrada  UP             8.7  http://host.docker.internal:8000/metrics
+mongodb-exporter  infraestructura  mongodb        UP           113.6  http://mongodb-exporter:9216/metrics
+node-exporter     infraestructura  host-docker    UP            18.2  http://node-exporter:9100/metrics
+prometheus        monitoreo        prometheus     UP             5.4  http://prometheus:9090/metrics
+redis-exporter    infraestructura  redis          UP            28.7  http://redis-exporter:9121/metrics
 
 Estado de cada base segun la API (database_up, 1 = responde):
   cassandra   UP
