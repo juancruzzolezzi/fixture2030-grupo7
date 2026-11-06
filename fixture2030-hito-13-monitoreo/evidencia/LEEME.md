@@ -5,6 +5,7 @@ archivos sin commitear y entorno en el encabezado. Los generan los scripts: se p
 
 | Archivo | Lo genera | Qué demuestra |
 |---|---|---|
+| `resumen_corrida.md` | `scripts/generar_evidencia.py` | Los números de la última corrida |
 | `prometheus_targets.txt` / `.json` | `scripts/verificar_targets.py` | Targets UP, estado de cada base y métricas clave |
 | `resultados_sin_secretos/carga.txt` / `.json` | `scripts/generar_carga.py` | Las seis bases con carga: lo que mide el generador y lo que queda en Prometheus |
 | `prueba_de_falla.txt` / `.json` | `scripts/ejecutar_prueba_controlada.py` | Antes, durante y después de detener una base; detección, alerta y recuperación |

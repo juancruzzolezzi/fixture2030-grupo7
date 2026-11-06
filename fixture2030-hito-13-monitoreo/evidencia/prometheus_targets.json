@@ -10,7 +10,7 @@
     "health": "up",
     "scrapeUrl": "http://host.docker.internal:8000/metrics",
     "lastError": "",
-    "lastScrape": "2026-11-06T00:48:28.36214439Z"
+    "lastScrape": "2026-11-06T01:14:28.247410836Z"
   },
   {
     "job": "mongodb-exporter",
@@ -23,7 +23,7 @@
     "health": "up",
     "scrapeUrl": "http://mongodb-exporter:9216/metrics",
     "lastError": "",
-    "lastScrape": "2026-11-06T00:48:20.604293285Z"
+    "lastScrape": "2026-11-06T01:14:20.489047669Z"
   },
   {
     "job": "node-exporter",
@@ -36,7 +36,7 @@
     "health": "up",
     "scrapeUrl": "http://node-exporter:9100/metrics",
     "lastError": "",
-    "lastScrape": "2026-11-06T00:48:23.490797756Z"
+    "lastScrape": "2026-11-06T01:14:23.375668749Z"
   },
   {
     "job": "prometheus",
@@ -49,7 +49,7 @@
     "health": "up",
     "scrapeUrl": "http://prometheus:9090/metrics",
     "lastError": "",
-    "lastScrape": "2026-11-06T00:48:22.311932943Z"
+    "lastScrape": "2026-11-06T01:14:22.197562179Z"
   },
   {
     "job": "redis-exporter",
@@ -62,6 +62,6 @@
     "health": "up",
     "scrapeUrl": "http://redis-exporter:9121/metrics",
     "lastError": "",
-    "lastScrape": "2026-11-06T00:48:28.055039643Z"
+    "lastScrape": "2026-11-06T01:14:27.939218864Z"
   }
 ]

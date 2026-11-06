@@ -1,53 +1,53 @@
-Hito 13 - Carga transversal | corrida h13-d2caca
-Fecha: 2026-11-05T21:53:04-03:00 | commit: 1c02d02 | archivos sin commitear: 0
+Hito 13 - Carga transversal | corrida h13-2671c8
+Fecha: 2026-11-05T22:19:12-03:00 | commit: 9b05452 | archivos sin commitear: 0
 Entorno: Windows 11, 16 CPU logicas, Python 3.12.10
 Imagenes: fixture2030-prometheus=prom/prometheus:latest@e04987641b57, fixture2030-grafana=grafana/grafana:latest@488984b716c0, fixture2030-node-exporter=prom/node-exporter:latest@1b4e4438faca, fixture2030-redis-exporter=oliver006/redis_exporter:latest@f5f903fbe775, fixture2030-mongodb-exporter=percona/mongodb_exporter:0.53@0214e482b2cd, h10-mongodb=mongo:7.0@b6421fd6d1c5, h10-neo4j=neo4j:latest@dbc377fb9cd8, h10-cassandra=cassandra:latest@da9dad3aaf67, h10-redis=redis:latest@718f745deb7d, h10-influxdb=influxdb:3-core@26875ba5ae6e, h10-iris=intersystems/iris-community:latest-cd@cd2ebcab02d1
 Escenario: 30 usuarios x 2 ops/s = 60 ops/s objetivo; 181 s, rampa 20 s; pesos leer_comentarios 25%, publicar_comentario 10%, leer_estadisticas 15%, leer_sesion 15%, leer_equipo 10%, leer_plantel 5%, leer_partido 10%, leer_eventos 5%, leer_entidad_compleja 5%
-Ventana (unix): 1793926202 a 1793926383
+Ventana (unix): 1793927769 a 1793927951
 
 == Medido por el generador (latencia solo de respuestas 2xx)
 operacion               base          ops exitosas  ops/s  p50 ms  p95 ms   max ms  status
-leer_comentarios        cassandra    2597     2597   14.4    22.9    30.2    135.3  {'200': 2597}
-publicar_comentario     cassandra    1024     1024    5.7    37.0    44.1    180.8  {'201': 1024}
-leer_estadisticas       influxdb     1535     1535    8.5    17.0    32.6    166.2  {'200': 1535}
-leer_sesion             redis        1563     1563    8.7    10.1    19.7    135.0  {'200': 1563}
-leer_equipo             mongodb       962      962    5.3     9.0    18.4    125.6  {'200': 962}
-leer_plantel            mongodb       512      512    2.8    14.5    28.6    124.1  {'200': 512}
-leer_partido            neo4j        1023     1023    5.7    11.0    23.9     72.1  {'200': 1023}
-leer_eventos            neo4j         491      491    2.7    15.4    29.4     99.9  {'200': 491}
-leer_entidad_compleja   iris          480      480    2.7     8.0    16.9     47.6  {'200': 480}
-total                               10187    10187   56.6    16.0    37.7    180.8
+leer_comentarios        cassandra    2594     2594   14.4    22.5    28.9    100.2  {'200': 2594}
+publicar_comentario     cassandra    1023     1023    5.7    36.7    43.0     90.9  {'201': 1023}
+leer_estadisticas       influxdb     1533     1533    8.5    17.4    31.2    102.9  {'200': 1533}
+leer_sesion             redis        1562     1562    8.7     9.4    18.1     80.0  {'200': 1562}
+leer_equipo             mongodb       963      963    5.3     8.2    16.6     76.3  {'200': 963}
+leer_plantel            mongodb       512      512    2.8    13.4    25.3     65.5  {'200': 512}
+leer_partido            neo4j        1022     1022    5.7     9.9    19.6     64.1  {'200': 1022}
+leer_eventos            neo4j         491      491    2.7    13.5    27.2     83.3  {'200': 491}
+leer_entidad_compleja   iris          479      479    2.7     7.8    16.5     84.6  {'200': 479}
+total                               10179    10179   56.5    15.3    37.2    102.9
 
 == Leido de Prometheus al terminar la carga (ventana de 181 s)
 
 p95 de la API por ruta (s)
   PromQL: histogram_quantile(0.95, sum by (le, ruta) (rate(api_latency_seconds_bucket[181s])))
-  /equipos/{codigo}                     0.0237
-  /equipos/{codigo}/jugadores           0.0311
-  /partidos/{codigo}                    0.0244
-  /partidos/{codigo}/comentarios        0.0475
-  /partidos/{codigo}/entidad-compleja   0.0237
-  /partidos/{codigo}/estadisticas       0.0419
-  /partidos/{codigo}/eventos            0.0397
-  /sesiones/{usuario_id}                0.0241
+  /equipos/{codigo}                     0.0234
+  /equipos/{codigo}/jugadores           0.0245
+  /partidos/{codigo}                    0.0242
+  /partidos/{codigo}/comentarios        0.0474
+  /partidos/{codigo}/entidad-compleja   0.0234
+  /partidos/{codigo}/estadisticas       0.0425
+  /partidos/{codigo}/eventos            0.0272
+  /sesiones/{usuario_id}                0.0240
 
 p95 por base, medido en el adaptador (s)
   PromQL: histogram_quantile(0.95, sum by (le, database) (rate(database_query_duration_seconds_bucket[181s])))
-  cassandra                             0.0438
-  influxdb                              0.0240
+  cassandra                             0.0439
+  influxdb                              0.0243
   iris                                  0.0048
-  mongodb                               0.0090
-  neo4j                                 0.0098
-  redis                                 0.0091
+  mongodb                               0.0088
+  neo4j                                 0.0095
+  redis                                 0.0089
 
 operaciones por segundo por base
   PromQL: sum by (database) (rate(database_operations_total[181s]))
-  cassandra                             20.1624
-  influxdb                              8.5137
-  iris                                  2.6455
-  mongodb                               11.1017
-  neo4j                                 11.1608
-  redis                                 8.6905
+  cassandra                             20.1004
+  influxdb                              8.4930
+  iris                                  2.5888
+  mongodb                               10.9150
+  neo4j                                 11.2794
+  redis                                 8.6474
 
 fallas por segundo por base
   PromQL: sum by (database) (rate(database_errors_total[181s]))
@@ -55,4 +55,4 @@ fallas por segundo por base
 
 requests por segundo por clase de status
   PromQL: sum by (clase) (rate(api_http_requests_total[181s]))
-  2xx                                   56.6801
+  2xx                                   56.4906

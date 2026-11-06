@@ -1,19 +1,19 @@
-Hito 13 - Carga transversal | corrida h13-331893
-Fecha: 2026-11-05T21:57:06-03:00 | commit: 1c02d02 | archivos sin commitear: 0
+Hito 13 - Carga transversal | corrida h13-d4a6bf
+Fecha: 2026-11-05T22:24:03-03:00 | commit: 9b05452 | archivos sin commitear: 0
 Entorno: Windows 11, 16 CPU logicas, Python 3.12.10
 Imagenes: fixture2030-prometheus=prom/prometheus:latest@e04987641b57, fixture2030-grafana=grafana/grafana:latest@488984b716c0, fixture2030-node-exporter=prom/node-exporter:latest@1b4e4438faca, fixture2030-redis-exporter=oliver006/redis_exporter:latest@f5f903fbe775, fixture2030-mongodb-exporter=percona/mongodb_exporter:0.53@0214e482b2cd, h10-mongodb=mongo:7.0@b6421fd6d1c5, h10-neo4j=neo4j:latest@dbc377fb9cd8, h10-cassandra=cassandra:latest@da9dad3aaf67, h10-redis=redis:latest@718f745deb7d, h10-influxdb=influxdb:3-core@26875ba5ae6e, h10-iris=intersystems/iris-community:latest-cd@cd2ebcab02d1
-Escenario: 10 usuarios x 1 ops/s = 10 ops/s objetivo; 213 s, rampa 5 s; pesos leer_comentarios 25%, publicar_comentario 10%, leer_estadisticas 15%, leer_sesion 15%, leer_equipo 10%, leer_plantel 5%, leer_partido 10%, leer_eventos 5%, leer_entidad_compleja 5%
-Ventana (unix): 1793926412 a 1793926624
+Escenario: 10 usuarios x 1 ops/s = 10 ops/s objetivo; 262 s, rampa 5 s; pesos leer_comentarios 25%, publicar_comentario 10%, leer_estadisticas 15%, leer_sesion 15%, leer_equipo 10%, leer_plantel 5%, leer_partido 10%, leer_eventos 5%, leer_entidad_compleja 5%
+Ventana (unix): 1793927979 a 1793928241
 
 == Medido por el generador (latencia solo de respuestas 2xx)
 operacion               base          ops exitosas  ops/s  p50 ms  p95 ms   max ms  status
-leer_comentarios        cassandra     440      440    2.1    21.7    24.0     39.1  {'200': 440}
-publicar_comentario     cassandra     172      172    0.8    36.4    38.9     60.9  {'201': 172}
-leer_estadisticas       influxdb      275      275    1.3    12.6    18.7     37.4  {'200': 275}
-leer_sesion             redis         279      178    1.3     7.5    12.5   3655.6  {'200': 178, '503': 1, '504': 100}
-leer_equipo             mongodb       156      156    0.7     6.4     9.9     12.6  {'200': 156}
-leer_plantel            mongodb        96       96    0.5    11.7    19.0     74.0  {'200': 96}
-leer_partido            neo4j         195      195    0.9     7.7    10.8     14.4  {'200': 195}
-leer_eventos            neo4j          79       79    0.4    11.1    17.2     25.0  {'200': 79}
-leer_entidad_compleja   iris           85       85    0.4     6.0     9.0     12.6  {'200': 85}
-total                                1777     1676    8.4    12.3    36.6   3655.6
+leer_comentarios        cassandra     531      531    2.0    21.8    24.6     57.3  {'200': 531}
+publicar_comentario     cassandra     204      204    0.8    36.5    39.2     74.0  {'201': 204}
+leer_estadisticas       influxdb      337      337    1.3    14.3    21.7     34.4  {'200': 337}
+leer_sesion             redis         329      176    1.3     7.6    11.3   2619.2  {'200': 176, '503': 1, '504': 152}
+leer_equipo             mongodb       186      186    0.7     6.4     9.4     16.4  {'200': 186}
+leer_plantel            mongodb       115      115    0.4    11.9    16.9     23.5  {'200': 115}
+leer_partido            neo4j         220      220    0.8     7.9    11.2     31.2  {'200': 220}
+leer_eventos            neo4j          95       95    0.4    11.2    14.8     18.5  {'200': 95}
+leer_entidad_compleja   iris          103      103    0.4     6.2     8.1     13.0  {'200': 103}
+total                                2120     1967    8.1    13.5    36.6   2619.2

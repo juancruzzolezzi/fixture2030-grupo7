@@ -1,57 +1,61 @@
 Hito 13 - Prueba de falla controlada: redis (detener)
-Fecha: 2026-11-05T21:53:31-03:00 | commit: 1c02d02 | archivos sin commitear: 0
+Fecha: 2026-11-05T22:19:39-03:00 | commit: 9b05452 | archivos sin commitear: 0
 Entorno: Windows 11, 16 CPU logicas, Python 3.12.10
 Imagenes: fixture2030-prometheus=prom/prometheus:latest@e04987641b57, fixture2030-grafana=grafana/grafana:latest@488984b716c0, fixture2030-node-exporter=prom/node-exporter:latest@1b4e4438faca, fixture2030-redis-exporter=oliver006/redis_exporter:latest@f5f903fbe775, fixture2030-mongodb-exporter=percona/mongodb_exporter:0.53@0214e482b2cd, h10-mongodb=mongo:7.0@b6421fd6d1c5, h10-neo4j=neo4j:latest@dbc377fb9cd8, h10-cassandra=cassandra:latest@da9dad3aaf67, h10-redis=redis:latest@718f745deb7d, h10-influxdb=influxdb:3-core@26875ba5ae6e, h10-iris=intersystems/iris-community:latest-cd@cd2ebcab02d1
 Carga de fondo: 10 usuarios x 1 op/s, salida en resultados_sin_secretos/carga_durante_falla.txt
 
 == 1. Estado normal (60 s de linea base)
-  GET /sesiones/user-00001: HTTP 200 en 8 ms
+  GET /sesiones/user-00001: HTTP 200 en 28 ms
   database_up{database="redis"} = 1.0
   redis_up (exporter) = 1.0
   up{job="fixture-api"} = 1.0
   alertas: ninguna
 
 == 2. Falla aplicada: docker compose stop redis (sin borrar volumenes)
-  aplicada a las 21:54:33
+  aplicada a las 22:20:41
 
 == 3. Durante la falla
-  Prometheus vio database_up=0 a los 14.4 s
-  GET /sesiones/user-00001: HTTP 504 en 4114 ms timeout_dependencia
+  Prometheus vio database_up=0 a los 7.6 s
+  GET /sesiones/user-00001: HTTP 504 en 4129 ms timeout_dependencia
   otro modulo, GET /equipos/ARG: HTTP 200 en 6 ms
-  alerta BaseDeDatosCaida en firing a los 96.5 s de la falla (for: 1m)
+  alerta BaseDeDatosCaida en firing a los 90.3 s de la falla (for: 1m)
   database_up{database="redis"} = 0.0
   redis_up (exporter) = 0.0
   up{job="fixture-api"} = 1.0
-  alertas: BaseDeDatosCaida(redis)=firing, ApiLatenciaP95Alta()=pending, BaseLatenciaP95Alta(redis)=pending, BaseConErrores(redis)=pending
+  alertas: BaseDeDatosCaida(redis)=firing, BaseConErrores(redis)=pending
+  se mantiene la falla 50 s mas (capturas)
 
 == 4. Recuperacion: docker compose start redis
-  la ruta volvio a 200 a los 0.6 s
-  Prometheus vio database_up=1 a los 0.7 s de la ruta
-  alerta fuera de firing a los 28.1 s
+  la ruta volvio a 200 a los 0.5 s
+  Prometheus vio database_up=1 a los 11.3 s de la ruta
+  alerta fuera de firing a los 22.9 s
 
 == 5. Despues de recuperar
-  GET /sesiones/user-00001: HTTP 200 en 22 ms
+  GET /sesiones/user-00001: HTTP 200 en 18 ms
   database_up{database="redis"} = 1.0
   redis_up (exporter) = 1.0
   up{job="fixture-api"} = 1.0
-  alertas: ApiLatenciaP95Alta()=pending, BaseLatenciaP95Alta(redis)=pending, ApiErroresAltos()=pending, BaseConErrores(redis)=pending
+  alertas: ApiLatenciaP95Alta()=pending, BaseLatenciaP95Alta(redis)=pending, ApiErroresAltos()=pending, BaseConErrores(redis)=firing
 
 == 6. Serie observada en Prometheus (cada 15 s)
   hora        database_up    5xx/s
-  21:53:31              1     0.00
-  21:53:46              1     0.00
-  21:54:01              1     0.00
-  21:54:16              1     0.00
-  21:54:31              1     0.00
-  21:54:46              0     0.00
-  21:55:01              0     0.47
-  21:55:16              0     0.69
-  21:55:31              0     1.01
-  21:55:46              0     1.02
-  21:56:01              0     1.13
-  21:56:16              1     0.98
-  21:56:31              1     0.69
-  21:56:46              1     0.27
-  21:57:01              1     0.00
+  22:19:39              1     0.00
+  22:19:54              1     0.00
+  22:20:09              1     0.00
+  22:20:24              1     0.00
+  22:20:39              1     0.00
+  22:20:54              0     0.00
+  22:21:09              0     0.39
+  22:21:24              0     0.72
+  22:21:39              0     1.01
+  22:21:54              0     1.09
+  22:22:09              0     1.07
+  22:22:24              0     1.11
+  22:22:39              0     1.18
+  22:22:54              0     1.18
+  22:23:09              0     1.11
+  22:23:24              1     0.82
+  22:23:39              1     0.44
+  22:23:54              1     0.09
 
-Para la captura en Grafana: http://127.0.0.1:3000/d/fixture2030?from=1793926411695&to=1793926624199
+Para la captura en Grafana: http://127.0.0.1:3000/d/fixture2030?from=1793927979215&to=1793928241488

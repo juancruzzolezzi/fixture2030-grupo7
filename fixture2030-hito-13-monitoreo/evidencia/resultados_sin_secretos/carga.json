@@ -1,8 +1,11 @@
 {
-  "run_id": "h13-d2caca",
-  "inicio": 1793926201.811192,
-  "fin": 1793926383.050091,
+  "run_id": "h13-2671c8",
+  "inicio": 1793927769.3464842,
+  "fin": 1793927950.6075206,
   "usuarios": 30,
   "ops_por_usuario": 2,
-  "operaciones": 10187
+  "operaciones": 10179,
+  "exitosas": 10179,
+  "p95_ms": 37.2,
+  "timeouts": 0
 }

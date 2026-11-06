@@ -1,8 +1,11 @@
 {
-  "run_id": "h13-331893",
-  "inicio": 1793926411.6954043,
-  "fin": 1793926624.19938,
+  "run_id": "h13-d4a6bf",
+  "inicio": 1793927979.215397,
+  "fin": 1793928241.4881277,
   "usuarios": 10,
   "ops_por_usuario": 1,
-  "operaciones": 1777
+  "operaciones": 2120,
+  "exitosas": 1967,
+  "p95_ms": 36.6,
+  "timeouts": 0
 }
