@@ -26,5 +26,5 @@ intentamos reproducirlo.
 - **Inferido, no comprobado**: el Super Server, que atiende el puerto 1972, habría quedado abajo. Los registros son
   compatibles con eso, pero no llegamos a la causa de fondo.
 
-**Mejora propuesta**: un healthcheck de IRIS que pruebe una conexión al puerto 1972. `scripts/correr_todo.sh`
-ya comprueba las seis bases a través de la API antes de generar evidencia, y reinicia IRIS una vez si hace falta.
+**Mejora propuesta**: un healthcheck de IRIS que pruebe una conexión al puerto 1972. Mientras tanto,
+`scripts/generar_evidencia.py` no da por completa una corrida si alguna de las seis bases no está arriba.

@@ -1,16 +1,16 @@
 # Guion de la defensa (máximo 20 minutos)
 
-Hay que ensayarlo con cronómetro y repartir los bloques (completar "Quién"). Todos tienen que poder
+Hay que ensayarlo con cronómetro. Cada uno habla unos 5 minutos, pero todos tienen que poder
 responder sobre cualquier módulo. Dejar 20 s de margen en cada cambio de orador.
 
 | Tiempo | Bloque | Quién | Qué decir | Con qué |
 |---|---|---|---|---|
-| 0:00-2:00 | **Inicio** | ___ | El problema de la FIFA: 127 partidos, seis tipos de dato con accesos incompatibles. La decisión: un modelo por patrón de acceso, unidos por código. Y el aviso: mostramos lo medido y separamos lo que es diseño. | Diapositivas 1-2 |
-| 2:00-5:00 | **Arquitectura** | ___ | Recorrido: qué guarda cada base y por qué no una sola. Cada ruta termina en un adaptador. | Diapositivas 3-4 |
-| 5:00-11:00 | **Decisiones** | ___ y ___ | Tres casos a fondo: partición de Cassandra, consistencia fuerte en IRIS, TTL e invalidación en Redis. Después distribución y CAP: qué es laboratorio y qué es diseño. | Diapositivas 5-8 |
-| 11:00-14:00 | **Operación** | ___ | Dos flujos: comentarios (partición) contra eventos (recorrido). Decir qué base responde y por qué el patrón es distinto. | Diapositiva 9 y `defensa/demo.md`, flujos 1 y 2 |
-| 14:00-18:00 | **Evidencia** | ___ | Leer el panel: qué significa cada fila. Mostrar la falla de Redis, antes preparada: qué se cayó y qué siguió. Contar el hallazgo del Hito 12 con números y el caso de IRIS "healthy" que `database_up` marcó caída. | Grafana y diapositivas 10-12 |
-| 18:00-20:00 | **Cierre** | ___ | Por qué es adecuada, qué trade-offs aceptamos, qué no medimos y qué haríamos después. Responder la pregunta central. | Diapositivas 13-14 |
+| 0:00-2:00 | **Inicio** | Bernardo | El problema de la FIFA: 127 partidos, seis tipos de dato con accesos incompatibles. La decisión: un modelo por patrón de acceso, unidos por código. Y el aviso: mostramos lo medido y separamos lo que es diseño. | Diapositivas 1-2 |
+| 2:00-5:00 | **Arquitectura** | Bernardo | Recorrido: qué guarda cada base y por qué no una sola. Cada ruta termina en un adaptador. | Diapositivas 3-4 |
+| 5:00-11:00 | **Decisiones** | Sebastián (Cassandra e IRIS) y Mailén (Redis, distribución y CAP) | Tres casos a fondo: partición de Cassandra, consistencia fuerte en IRIS, TTL e invalidación en Redis. Después distribución y CAP: qué es laboratorio y qué es diseño. | Diapositivas 5-8 |
+| 11:00-14:00 | **Operación** | Sebastián | Dos flujos: comentarios (partición) contra eventos (recorrido). Decir qué base responde y por qué el patrón es distinto. | Diapositiva 9 y `defensa/demo.md`, flujos 1 y 2 |
+| 14:00-18:00 | **Evidencia** | Juan Cruz | Leer el panel: qué significa cada fila. Mostrar la falla de Redis, antes preparada: qué se cayó y qué siguió. Contar el hallazgo del Hito 12 con números y el caso de IRIS "healthy" que `database_up` marcó caída. | Grafana y diapositivas 10-12 |
+| 18:00-20:00 | **Cierre** | Mailén | Por qué es adecuada, qué trade-offs aceptamos, qué no medimos y qué haríamos después. Responder la pregunta central. | Diapositivas 13-14 |
 
 ## Qué decir en cada diapositiva
 

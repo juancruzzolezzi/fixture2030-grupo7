@@ -25,12 +25,6 @@ notebook
 Lo mismo que el Hito 10 (Docker Desktop o Docker Engine, Python 3.10+) y los puertos
 9090, 3000, 9100, 9121 y 9216 libres. En Windows, los `.sh` se corren con Git Bash.
 
-## Todo de una vez (Windows)
-
-`correr_hito13.bat`, en la raíz del repo, hace los pasos de abajo y el commit, genera la evidencia con
-sus capturas y pregunta antes de subir a GitHub. Por dentro corre `scripts/correr_todo.sh`, que genera
-las passwords del laboratorio si no hay `.env`.
-
 ## Cómo levantarlo, paso a paso
 
 **1. Bases y datos** (si ya están levantadas y sembradas, alcanza con el `up -d`, que
